@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lonax - Protótipo Requisição de Pessoal</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="lx-app">
+    <section class="lx-title-card">
+      <div class="lx-title-brand">
+        <img src="https://lonax.com.br/wp-content/uploads/2024/08/Logomarca_Lonax-01.webp" alt="Lonax" />
+      </div>
+      <div class="lx-title-content">
+        <h1>Requisição de Pessoal</h1>
+        <p>Selecione uma etapa para abrir a página correspondente do protótipo.</p>
+      </div>
+      <div class="lx-title-status">
+        <small>Status simulado</small>
+        <strong id="statusLabel">Em preenchimento</strong>
+      </div>
+    </section>
+
+    <section class="lx-stage-shell">
+      <div class="lx-section-head">
+        <div>
+          <span class="lx-section-icon"><i class="fa-solid fa-route"></i></span>
+          <h2>Etapas do Processo</h2>
+        </div>
+      </div>
+      <div class="lx-stage-grid" id="stageNav"></div>
+    </section>
+  </main>
+
+  <div class="lx-modal-backdrop lx-hidden" id="modalBackdrop">
+    <div class="lx-modal" role="dialog" aria-modal="true">
+      <div class="lx-modal-head">
+        <span id="modalIcon"><i class="fa-solid fa-circle-question"></i></span>
+        <h3 id="modalTitle">Confirmação</h3>
+      </div>
+      <p id="modalMessage"></p>
+      <div class="lx-modal-actions">
+        <button class="lx-btn lx-btn-secondary" type="button" id="modalCancel">Cancelar</button>
+        <button class="lx-btn lx-btn-primary" type="button" id="modalConfirm">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
