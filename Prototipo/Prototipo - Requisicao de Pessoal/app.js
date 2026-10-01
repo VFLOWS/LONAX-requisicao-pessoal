@@ -586,11 +586,11 @@
     return previousComponents +
       viewComponent(title, getStage(key).desc, state.status,
         '<div class="lx-current-decision" data-approval="' + key + '">' +
+          (key === "rh" ? renderAttachmentsEditor("anexosRh", "Upload de Arquivos - RH", "paperclip") : "") +
           decisionOption("approve", "Aprovar solicitação", approveText, decision.value) +
           decisionOption("return", "Devolver para correção", "A solicitação retornará ao solicitante para ajustes.", decision.value) +
           decisionOption("reject", "Reprovar solicitação", "A requisição será encerrada como reprovada.", decision.value) +
           '<label class="lx-field' + (decision.value === "approve" ? " lx-hidden" : "") + '" data-approval-justification><span>Justificativa <b>*</b></span><textarea data-decision-field="justification" placeholder="Informe o motivo da devolução ou reprovação...">' + escapeHtml(decision.justification) + '</textarea></label>' +
-          (key === "rh" ? renderAttachmentsEditor("anexosRh", "Upload de Arquivos - RH", "paperclip") : "") +
           '<div class="lx-actions">' +
             '<button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar rascunho</button>' +
             '<button class="lx-btn lx-btn-primary" type="button" data-action="send-approval" data-approval-key="' + key + '"><i class="fa-solid fa-paper-plane"></i> Enviar decisão</button>' +
