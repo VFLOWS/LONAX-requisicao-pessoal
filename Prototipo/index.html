@@ -35,12 +35,12 @@
   </main>
 
   <div class="lx-modal-backdrop lx-hidden" id="modalBackdrop">
-    <div class="lx-modal" role="dialog" aria-modal="true">
+    <div class="lx-modal" id="modalDialog" role="dialog" aria-modal="true">
       <div class="lx-modal-head">
         <span id="modalIcon"><i class="fa-solid fa-circle-question"></i></span>
         <h3 id="modalTitle">Confirmação</h3>
       </div>
-      <p id="modalMessage"></p>
+      <div class="lx-modal-message" id="modalMessage"></div>
       <div class="lx-modal-actions">
         <button class="lx-btn lx-btn-secondary" type="button" id="modalCancel">Cancelar</button>
         <button class="lx-btn lx-btn-primary" type="button" id="modalConfirm">Confirmar</button>

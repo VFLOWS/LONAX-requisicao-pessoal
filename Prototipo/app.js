@@ -92,6 +92,14 @@
       equipamentos: [
         { equipamento: "Notebook", quantidade: "1", observacao: "Perfil administrativo" },
         { equipamento: "Monitor", quantidade: "1", observacao: "24 polegadas" }
+      ],
+      anexos: [
+        { nome: "teste 1.pdf", tamanho: "26 KB", origem: "Solicitação", url: "anexos/teste 1.pdf" },
+        { nome: "teste 2.pdf", tamanho: "26 KB", origem: "Solicitação", url: "anexos/teste 2.pdf" },
+        { nome: "teste 3.pdf", tamanho: "26 KB", origem: "Solicitação", url: "anexos/teste 3.pdf" }
+      ],
+      anexosRh: [
+        { nome: "teste 4.pdf", tamanho: "26 KB", origem: "Gestor do RH", url: "anexos/teste 4.pdf" }
       ]
     },
     decisions: {},
@@ -108,6 +116,7 @@
   var correctionReason = "Necessário revisar o Centro de Custo e complementar a justificativa da vaga antes da análise do RH.";
   var modal = {
     wrap: document.getElementById("modalBackdrop"),
+    dialog: document.getElementById("modalDialog"),
     title: document.getElementById("modalTitle"),
     message: document.getElementById("modalMessage"),
     icon: document.getElementById("modalIcon"),
@@ -208,16 +217,29 @@
 
   function showModal(config) {
     modal.title.textContent = config.title || "Confirmação";
-    modal.message.textContent = config.message || "";
+    if (config.html) {
+      modal.message.innerHTML = config.html;
+    } else {
+      modal.message.textContent = config.message || "";
+    }
     modal.icon.innerHTML = '<i class="fa-solid ' + (config.icon || "fa-circle-question") + '"></i>';
     modal.confirm.textContent = config.confirmText || "Confirmar";
     modal.cancel.textContent = config.cancelText || "Cancelar";
+    modal.cancel.classList.toggle("lx-hidden", !!config.hideCancel);
     modal.action = config.onConfirm || null;
+    modal.dialog.classList.toggle("lx-modal-wide", !!config.wide);
     modal.wrap.classList.remove("lx-hidden");
+
+    modal.message.querySelectorAll("[data-action]").forEach(function (button) {
+      button.addEventListener("click", handleAction);
+    });
   }
 
   function hideModal() {
     modal.wrap.classList.add("lx-hidden");
+    modal.dialog.classList.remove("lx-modal-wide");
+    modal.cancel.classList.remove("lx-hidden");
+    modal.message.innerHTML = "";
     modal.action = null;
   }
 
@@ -331,6 +353,7 @@
             '</div>' +
             (f.precisaEquipamento === "Sim" ? renderEquipmentsEditor() : "")
           ) +
+          renderAttachmentsEditor("anexos", "Upload de Arquivos", "paperclip") +
           formFieldset("Justificativa", "comment-dots", textarea("Justificativa", "justificativa", f.justificativa, true)) +
           '<div class="lx-actions">' +
             '<button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar rascunho</button>' +
@@ -518,6 +541,35 @@
     '</div>';
   }
 
+  function renderAttachmentsEditor(fieldName, title, icon) {
+    var files = state.form[fieldName] || [];
+    return formFieldset(title, icon, '' +
+      '<div class="lx-dropzone" data-dropzone="' + fieldName + '">' +
+        '<i class="fa-solid fa-cloud-arrow-up"></i>' +
+        '<p>Arraste e solte seus arquivos aqui</p>' +
+        '<span>ou</span>' +
+        '<button type="button" class="lx-btn-outline" data-upload-trigger="' + fieldName + '">Escolher arquivo</button>' +
+        '<input type="file" class="lx-file-input" data-file-upload="' + fieldName + '" multiple />' +
+      '</div>' +
+      renderAttachmentsList(files, fieldName, true)
+    );
+  }
+
+  function renderAttachmentsList(files, fieldName, editable) {
+    if (!files.length) return '<div class="lx-empty-list">Nenhum arquivo anexado.</div>';
+
+    return '<div class="lx-attachment-list">' + files.map(function (file, index) {
+      return '<div class="lx-attachment-row">' +
+        '<div class="lx-attachment-info"><i class="fa-solid fa-file-lines"></i><div><strong>' + escapeHtml(file.nome) + '</strong><span>' + escapeHtml(file.tamanho || "-") + ' - ' + escapeHtml(file.origem || "Anexo") + '</span></div></div>' +
+        '<div class="lx-attachment-actions">' +
+          '<button class="lx-btn-icon lx-btn-secondary" type="button" data-action="view-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Visualizar anexo"><i class="fa-solid fa-eye"></i></button>' +
+          '<button class="lx-btn-icon lx-btn-secondary" type="button" data-action="download-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Baixar anexo"><i class="fa-solid fa-download"></i></button>' +
+          (editable ? '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Excluir anexo"><i class="fa-solid fa-trash"></i></button>' : "") +
+        '</div>' +
+      '</div>';
+    }).join("") + '</div>';
+  }
+
   function renderApproval(key, title, approveText) {
     var decision = state.decisions[key] || { value: "approve", justification: "" };
     var previousComponents = renderReadOnlySummaryComponent();
@@ -538,6 +590,7 @@
           decisionOption("return", "Devolver para correção", "A solicitação retornará ao solicitante para ajustes.", decision.value) +
           decisionOption("reject", "Reprovar solicitação", "A requisição será encerrada como reprovada.", decision.value) +
           '<label class="lx-field' + (decision.value === "approve" ? " lx-hidden" : "") + '" data-approval-justification><span>Justificativa <b>*</b></span><textarea data-decision-field="justification" placeholder="Informe o motivo da devolução ou reprovação...">' + escapeHtml(decision.justification) + '</textarea></label>' +
+          (key === "rh" ? renderAttachmentsEditor("anexosRh", "Upload de Arquivos - RH", "paperclip") : "") +
           '<div class="lx-actions">' +
             '<button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar rascunho</button>' +
             '<button class="lx-btn lx-btn-primary" type="button" data-action="send-approval" data-approval-key="' + key + '"><i class="fa-solid fa-paper-plane"></i> Enviar decisão</button>' +
@@ -558,16 +611,17 @@
         ? "Solicitação reprovada"
         : "Solicitação aprovada";
     var tone = decision.value === "return" ? "orange" : decision.value === "reject" ? "red" : "green";
+    var body = historySection("Decisão sobre a Solicitação", "list-check", tone, [
+      ["Decisão", label],
+      ["Responsável", responsaveis[key] || "-"],
+      ["Observação", decision.justification || "Etapa aprovada sem ressalvas."]
+    ]) + (key === "rh" ? renderRhAttachmentsReadOnly() : "");
 
     return viewComponent(
       '<button type="button" class="lx-collapse-title" data-collapse="' + collapseKey + '" aria-expanded="' + open + '"><span>' + stage.title + '</span><i class="fa-solid fa-chevron-down lx-collapse-chevron' + (open ? " lx-collapse-chevron-open" : "") + '"></i></button>',
       movementDescription(key),
       "",
-      (open ? historySection("Decisão sobre a Solicitação", "list-check", tone, [
-        ["Decisão", label],
-        ["Responsável", responsaveis[key] || "-"],
-        ["Observação", decision.justification || "Etapa aprovada sem ressalvas."]
-      ]) : ""),
+      (open ? body : ""),
       open ? "" : "lx-view-shell-collapsed",
       stage.icon,
       stage.tone
@@ -637,6 +691,7 @@
         '<div class="lx-history-stage-grid"><div class="lx-history-stage-item"><span>Necessita Equipamento?</span><strong>' + escapeHtml(f.precisaEquipamento) + '</strong></div></div>' +
         renderEquipmentsReadTable()
       ) +
+      historyCustomSection("Upload de Arquivos", "paperclip", "purple", renderAttachmentsList(f.anexos || [], "anexos", false)) +
       historyCustomSection("Justificativa", "comment-dots", "teal", escapeHtml(snapshot.justificativa || "-"));
   }
 
@@ -675,6 +730,7 @@
           '<div class="lx-history-stage-grid"><div class="lx-history-stage-item"><span>Necessita Equipamento?</span><strong>' + escapeHtml(f.precisaEquipamento) + '</strong></div></div>' +
           renderEquipmentsReadTable()
         ) +
+        historyCustomSection("Upload de Arquivos", "paperclip", "purple", renderAttachmentsList(f.anexos || [], "anexos", false)) +
         historyCustomSection("Justificativa", "comment-dots", "teal", escapeHtml(f.justificativa || "-"))
       : ""),
       open ? "" : "lx-view-shell-collapsed",
@@ -695,6 +751,10 @@
       ["Centro de Custo", f.centroAtual],
       ["Data Prevista de Saída", formatDate(f.saidaPrevista)]
     ]);
+  }
+
+  function renderRhAttachmentsReadOnly() {
+    return historyCustomSection("Upload de Arquivos - RH", "paperclip", "purple", renderAttachmentsList(state.form.anexosRh || [], "anexosRh", false));
   }
 
   function renderTi() {
@@ -910,6 +970,61 @@
     document.querySelectorAll("[data-action]").forEach(function (button) {
       button.addEventListener("click", handleAction);
     });
+
+    document.querySelectorAll("[data-file-upload]").forEach(function (input) {
+      input.addEventListener("change", handleFileUpload);
+    });
+
+    document.querySelectorAll("[data-dropzone]").forEach(function (dropzone) {
+      var input = dropzone.querySelector("[data-file-upload]");
+      if (!input) return;
+
+      dropzone.addEventListener("click", function () {
+        input.click();
+      });
+
+      dropzone.addEventListener("dragover", function (event) {
+        event.preventDefault();
+        dropzone.classList.add("lx-drag-over");
+      });
+
+      dropzone.addEventListener("dragleave", function () {
+        dropzone.classList.remove("lx-drag-over");
+      });
+
+      dropzone.addEventListener("drop", function (event) {
+        event.preventDefault();
+        dropzone.classList.remove("lx-drag-over");
+        addFilesToAttachmentList(dropzone.getAttribute("data-dropzone"), event.dataTransfer && event.dataTransfer.files);
+      });
+    });
+  }
+
+  function handleFileUpload(event) {
+    var input = event.target;
+    addFilesToAttachmentList(input.getAttribute("data-file-upload"), input.files);
+    render();
+  }
+
+  function addFilesToAttachmentList(fieldName, files) {
+    if (!files || !files.length) return;
+
+    state.form[fieldName] = state.form[fieldName] || [];
+
+    for (var i = 0; i < files.length; i++) {
+      state.form[fieldName].push({
+        nome: files[i].name,
+        tamanho: formatFileSize(files[i].size),
+        origem: fieldName === "anexosRh" ? "Gestor do RH" : "Solicitação",
+        url: URL.createObjectURL(files[i])
+      });
+    }
+  }
+
+  function formatFileSize(size) {
+    if (!size) return "0 KB";
+    if (size < 1024 * 1024) return Math.max(1, Math.round(size / 1024)) + " KB";
+    return (size / 1024 / 1024).toFixed(1).replace(".", ",") + " MB";
   }
 
   function updateFieldFromEvent(event) {
@@ -1092,6 +1207,52 @@
       });
     }
 
+    if (action === "view-attachment") {
+      var attachment = getAttachmentFromButton(event.currentTarget);
+      showModal({
+        title: attachment ? attachment.nome : "Visualizar anexo",
+        html: renderAttachmentPreview(attachment),
+        icon: "fa-eye",
+        confirmText: "Fechar",
+        hideCancel: true,
+        wide: true,
+        onConfirm: hideModal
+      });
+    }
+
+    if (action === "download-attachment") {
+      var downloadAttachment = getAttachmentFromButton(event.currentTarget);
+      if (downloadAttachment && downloadAttachment.url) {
+        window.open(downloadAttachment.url, "_blank");
+        return;
+      }
+      showModal({
+        title: "Baixar anexo",
+        message: downloadAttachment ? downloadAttachment.nome + " - " + downloadAttachment.tamanho : "Anexo não encontrado.",
+        icon: "fa-download",
+        confirmText: "Ok",
+        cancelText: "Fechar",
+        onConfirm: hideModal
+      });
+    }
+
+    if (action === "delete-attachment") {
+      var button = event.currentTarget;
+      var fieldName = button.getAttribute("data-attachment-field");
+      var attachmentIndex = Number(button.getAttribute("data-index"));
+      showModal({
+        title: "Excluir anexo",
+        message: "Deseja remover este arquivo anexado?",
+        icon: "fa-trash",
+        confirmText: "Excluir",
+        onConfirm: function () {
+          state.form[fieldName].splice(attachmentIndex, 1);
+          hideModal();
+          render();
+        }
+      });
+    }
+
     if (action === "send-approval") {
       var key = event.currentTarget.getAttribute("data-approval-key");
       if (!validateApproval(key)) return render();
@@ -1108,6 +1269,35 @@
       });
     }
 
+  }
+
+  function getAttachmentFromButton(button) {
+    var fieldName = button.getAttribute("data-attachment-field");
+    var index = Number(button.getAttribute("data-index"));
+    return (state.form[fieldName] || [])[index];
+  }
+
+  function renderAttachmentPreview(attachment) {
+    if (!attachment) {
+      return '<div class="lx-attachment-preview-empty">Anexo não encontrado.</div>';
+    }
+
+    if (!attachment.url) {
+      return '<div class="lx-attachment-preview-empty">Este anexo não possui arquivo disponível para visualização.</div>';
+    }
+
+    return '<div class="lx-attachment-preview">' +
+      '<iframe class="lx-attachment-frame" src="' + escapeHtml(encodeURI(attachment.url)) + '" title="' + escapeHtml(attachment.nome) + '"></iframe>' +
+    '</div>';
+  }
+
+  function resolveAttachmentField(attachment) {
+    return state.form.anexosRh.indexOf(attachment) > -1 ? "anexosRh" : "anexos";
+  }
+
+  function resolveAttachmentIndex(attachment) {
+    var fieldName = resolveAttachmentField(attachment);
+    return state.form[fieldName].indexOf(attachment);
   }
 
   function validateSolicitacao() {
