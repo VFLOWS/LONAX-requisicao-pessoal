@@ -1,0 +1,362 @@
+@import url("../Prototipo - Movimentacao de Pessoal/style.css");
+
+.lx-career-alert {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 11px 12px;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--lx-radius);
+  background: #eff6ff;
+  color: var(--lx-blue-dark);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.lx-career-alert i {
+  color: #386bc5;
+  font-size: 15px;
+  margin-top: 1px;
+}
+
+.lx-career-comparison .lx-read-head,
+.lx-career-comparison .lx-read-row {
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.lx-fieldset + .lx-career-alert,
+.lx-career-alert + .lx-fieldset {
+  margin-top: 12px;
+}
+
+.lx-career-salary-range {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--lx-radius);
+  background: #f8fbff;
+}
+
+.lx-career-salary-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  color: var(--lx-blue-dark);
+}
+
+.lx-career-salary-title i {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: var(--lx-blue);
+  color: #fff;
+}
+
+.lx-career-salary-title strong {
+  display: block;
+  font-size: 12px;
+}
+
+.lx-career-salary-title span {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.lx-salary-range-table .lx-read-head,
+.lx-salary-range-table .lx-read-row {
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr) minmax(0, 1.4fr);
+}
+
+.lx-salary-range-table .lx-read-row.lx-salary-range-active {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.lx-salary-range-table .lx-read-row.lx-salary-range-active strong {
+  color: #15803d;
+}
+
+.lx-career-current-grid {
+  display: grid;
+  grid-template-columns: repeat(15, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.lx-career-proposed-grid {
+  display: grid;
+  grid-template-columns: repeat(15, minmax(0, 1fr));
+  gap: 12px;
+  grid-auto-flow: row dense;
+}
+
+.lx-career-proposed-grid .lx-field {
+  grid-column: span 3;
+}
+
+.lx-field-name-observacoes {
+  display: block;
+  margin-top: 14px;
+}
+
+.lx-career-proposed-grid .lx-tag,
+.lx-career-equipment-row .lx-tag {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.2;
+}
+
+.lx-career-promotion-grid .lx-field-name-novoCargo,
+.lx-career-progression-grid .lx-field-name-cargoAtual {
+  grid-column: 1 / span 4;
+}
+
+.lx-career-promotion-grid .lx-field-name-novaFuncao,
+.lx-career-progression-grid .lx-field-name-funcaoAtual {
+  grid-column: 5 / span 6;
+}
+
+.lx-career-promotion-grid .lx-field-name-novoNivel,
+.lx-career-progression-grid .lx-field-name-novoNivel {
+  grid-column: 11 / span 5;
+}
+
+.lx-career-current-grid .lx-field-name-descricaoCargoAtual,
+.lx-career-promotion-grid .lx-field-name-descricaoCargoProposto,
+.lx-career-progression-grid .lx-field-name-descricaoCargoProposto {
+  grid-column: 1 / -1;
+}
+
+.lx-career-promotion-grid .lx-field-name-novaFaixa {
+  grid-column: 1 / span 3;
+}
+
+.lx-career-promotion-grid .lx-field-name-novoSalario {
+  grid-column: 4 / span 3;
+}
+
+.lx-career-promotion-grid .lx-field-name-novaEscala {
+  grid-column: 7 / span 3;
+}
+
+.lx-career-promotion-grid .lx-field-name-novoHorario {
+  grid-column: 10 / span 3;
+}
+
+.lx-career-promotion-grid .lx-field-name-dataVigencia {
+  grid-column: 13 / span 3;
+}
+
+.lx-career-progression-grid .lx-field-name-novaFaixa {
+  grid-column: 1 / span 5;
+}
+
+.lx-career-progression-grid .lx-field-name-novoSalario {
+  grid-column: 6 / span 5;
+}
+
+.lx-career-progression-grid .lx-field-name-dataVigencia {
+  grid-column: 11 / span 5;
+}
+
+.lx-career-enquadramento-grid .lx-field-name-stepSugerido {
+  grid-column: 1 / span 3;
+}
+
+.lx-career-enquadramento-grid .lx-field-name-salarioSugerido {
+  grid-column: 4 / span 4;
+}
+
+.lx-career-enquadramento-grid .lx-field-name-diferencaValor {
+  grid-column: 8 / span 4;
+}
+
+.lx-career-enquadramento-grid .lx-field-name-diferencaPercentual {
+  grid-column: 12 / span 4;
+}
+
+.lx-career-enquadramento-grid .lx-field-name-novoStep {
+  grid-column: 1 / span 3;
+}
+
+.lx-career-enquadramento-grid .lx-field-name-novoNivel {
+  grid-column: 4 / span 3;
+}
+
+.lx-career-enquadramento-grid .lx-field-name-novaFaixa {
+  grid-column: 7 / span 3;
+}
+
+.lx-career-enquadramento-grid .lx-field-name-novoSalario {
+  grid-column: 10 / span 3;
+}
+
+.lx-career-enquadramento-grid .lx-field-name-dataVigencia {
+  grid-column: 13 / span 3;
+}
+
+.lx-career-type-grid {
+  display: grid;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.lx-career-type-grid .lx-field-name-tipoMovimentacao .lx-radio-options {
+  grid-template-columns: repeat(3, max-content);
+  column-gap: 28px;
+}
+
+.lx-career-current-grid .lx-field {
+  grid-column: span 3;
+}
+
+.lx-career-current-grid .lx-field-name-colaborador {
+  grid-column: span 9;
+}
+
+.lx-career-current-grid .lx-field-name-chapa,
+.lx-career-current-grid .lx-field-name-admissao {
+  grid-column: span 3;
+}
+
+.lx-career-current-grid .lx-field-name-escalaAtual,
+.lx-career-current-grid .lx-field-name-horarioAtual {
+  grid-column: span 3;
+}
+
+.lx-career-current-grid .lx-field-name-cargoAtual { grid-column: 1 / span 3; }
+.lx-career-current-grid .lx-field-name-funcaoAtual { grid-column: 4 / span 3; }
+.lx-career-current-grid .lx-field-name-nivelAtual { grid-column: 7 / span 3; }
+.lx-career-current-grid .lx-field-name-secaoAtual { grid-column: 10 / span 3; }
+.lx-career-current-grid .lx-field-name-centroAtual { grid-column: 13 / span 3; }
+.lx-career-current-grid .lx-field-name-escalaAtual { grid-column: 1 / span 3; }
+.lx-career-current-grid .lx-field-name-horarioAtual { grid-column: 4 / span 3; }
+.lx-career-current-grid .lx-field-name-stepAtual { grid-column: 7 / span 3; }
+.lx-career-current-grid .lx-field-name-faixaAtual { grid-column: 10 / span 3; }
+.lx-career-current-grid .lx-field-name-salarioAtual { grid-column: 13 / span 3; }
+
+.lx-career-current-grid .lx-field.lx-field-name-descricaoCargoAtual {
+  grid-column: 1 / -1;
+}
+
+.lx-career-equipment-row {
+  grid-template-columns: repeat(12, minmax(0, 1fr)) 42px;
+  align-items: start;
+}
+
+.lx-career-equipment-row .lx-field {
+  min-width: 0;
+}
+
+.lx-career-current-equipment-row .lx-field-name-currentEquipment-equipamento {
+  grid-column: 1 / span 10;
+}
+
+.lx-career-current-equipment-row .lx-field-name-currentEquipment-quantidade {
+  grid-column: 11 / span 2;
+}
+
+.lx-career-current-equipment-row .lx-field-name-currentEquipment-destino {
+  grid-column: 1 / span 12;
+}
+
+.lx-career-required-equipment-row .lx-field-name-requiredEquipment-equipamento {
+  grid-column: 1 / span 10;
+}
+
+.lx-career-required-equipment-row .lx-field-name-requiredEquipment-quantidade {
+  grid-column: 11 / span 2;
+}
+
+.lx-career-required-equipment-row .lx-field-name-requiredEquipment-observacao {
+  grid-column: 1 / span 12;
+}
+
+.lx-career-equipment-row > .lx-btn-icon {
+  grid-column: 13;
+  margin-top: 24px;
+}
+
+@media (max-width: 920px) {
+  .lx-career-current-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lx-career-proposed-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lx-career-current-grid .lx-field,
+  .lx-career-proposed-grid .lx-field,
+  .lx-career-promotion-grid .lx-field-name-novoCargo,
+  .lx-career-progression-grid .lx-field-name-cargoAtual,
+  .lx-career-promotion-grid .lx-field-name-novaFuncao,
+  .lx-career-progression-grid .lx-field-name-funcaoAtual,
+  .lx-career-promotion-grid .lx-field-name-novoNivel,
+  .lx-career-progression-grid .lx-field-name-novoNivel,
+  .lx-career-current-grid .lx-field-name-descricaoCargoAtual,
+  .lx-career-promotion-grid .lx-field-name-descricaoCargoProposto,
+  .lx-career-progression-grid .lx-field-name-descricaoCargoProposto,
+  .lx-career-promotion-grid .lx-field-name-novaFaixa,
+  .lx-career-progression-grid .lx-field-name-novaFaixa,
+  .lx-career-promotion-grid .lx-field-name-novoSalario,
+  .lx-career-progression-grid .lx-field-name-novoSalario,
+  .lx-career-promotion-grid .lx-field-name-novaEscala,
+  .lx-career-promotion-grid .lx-field-name-novoHorario,
+  .lx-career-promotion-grid .lx-field-name-dataVigencia,
+  .lx-career-progression-grid .lx-field-name-dataVigencia,
+  .lx-career-enquadramento-grid .lx-field-name-stepSugerido,
+  .lx-career-enquadramento-grid .lx-field-name-salarioSugerido,
+  .lx-career-enquadramento-grid .lx-field-name-diferencaValor,
+  .lx-career-enquadramento-grid .lx-field-name-diferencaPercentual,
+  .lx-career-enquadramento-grid .lx-field-name-novoStep,
+  .lx-career-enquadramento-grid .lx-field-name-novoNivel,
+  .lx-career-enquadramento-grid .lx-field-name-novaFaixa,
+  .lx-career-enquadramento-grid .lx-field-name-novoSalario,
+  .lx-career-enquadramento-grid .lx-field-name-dataVigencia,
+  .lx-career-current-grid .lx-field-name-colaborador,
+  .lx-career-current-grid .lx-field-name-chapa,
+  .lx-career-current-grid .lx-field-name-admissao,
+  .lx-career-current-grid .lx-field-name-escalaAtual,
+  .lx-career-current-grid .lx-field-name-horarioAtual,
+  .lx-career-current-grid .lx-field-name-cargoAtual,
+  .lx-career-current-grid .lx-field-name-funcaoAtual,
+  .lx-career-current-grid .lx-field-name-nivelAtual,
+  .lx-career-current-grid .lx-field-name-secaoAtual,
+  .lx-career-current-grid .lx-field-name-centroAtual,
+  .lx-career-current-grid .lx-field-name-stepAtual,
+  .lx-career-current-grid .lx-field-name-faixaAtual,
+  .lx-career-current-grid .lx-field-name-salarioAtual {
+    grid-column: span 1;
+  }
+
+  .lx-career-equipment-row {
+    grid-template-columns: 1fr 42px;
+  }
+
+  .lx-career-current-equipment-row .lx-field-name-currentEquipment-equipamento,
+  .lx-career-current-equipment-row .lx-field-name-currentEquipment-quantidade,
+  .lx-career-current-equipment-row .lx-field-name-currentEquipment-destino,
+  .lx-career-required-equipment-row .lx-field-name-requiredEquipment-equipamento,
+  .lx-career-required-equipment-row .lx-field-name-requiredEquipment-quantidade,
+  .lx-career-required-equipment-row .lx-field-name-requiredEquipment-observacao {
+    grid-column: 1;
+  }
+
+  .lx-career-equipment-row > .lx-btn-icon {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .lx-career-current-grid,
+  .lx-career-proposed-grid {
+    grid-template-columns: 1fr;
+  }
+}

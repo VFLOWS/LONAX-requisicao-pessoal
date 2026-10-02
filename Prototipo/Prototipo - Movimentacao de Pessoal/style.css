@@ -378,8 +378,14 @@ button.lx-section-head {
 }
 
 .lx-section + .lx-section,
-.lx-history-section + .lx-history-section {
+.lx-history-section + .lx-history-section,
+.lx-history-fieldset + .lx-section,
+.lx-section + .lx-history-fieldset {
   margin-top: 12px;
+}
+
+.lx-recebedor-approval {
+  margin-top: 18px;
 }
 
 .lx-form-subtitle {
@@ -408,6 +414,9 @@ button.lx-section-head {
 .lx-grid-4,
 .lx-grid-3,
 .lx-grid-2,
+.lx-movement-current-grid,
+.lx-movement-destination-grid,
+.lx-destination-type-grid,
 .lx-requisition-grid {
   display: grid;
   gap: 12px;
@@ -416,7 +425,88 @@ button.lx-section-head {
 .lx-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .lx-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .lx-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.lx-movement-current-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+.lx-movement-destination-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+.lx-destination-type-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
 .lx-requisition-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+
+.lx-destination-type-grid .lx-field-name-tipoMovimentacao {
+  grid-column: 1 / -1;
+}
+
+.lx-field-name-tipoMovimentacao .lx-radio-options {
+  grid-template-columns: repeat(3, max-content);
+  column-gap: 28px;
+}
+
+.lx-movement-current-grid .lx-field {
+  grid-column: span 3;
+}
+
+.lx-movement-current-grid .lx-field-name-colaborador {
+  grid-column: span 6;
+}
+
+.lx-movement-current-grid .lx-field-name-chapa,
+.lx-movement-current-grid .lx-field-name-admissao {
+  grid-column: span 3;
+}
+
+.lx-movement-current-grid .lx-field-name-cargoAtual,
+.lx-movement-current-grid .lx-field-name-funcaoAtual {
+  grid-column: span 3;
+}
+
+.lx-movement-current-grid .lx-field-name-nivelAtual,
+.lx-movement-current-grid .lx-field-name-secaoAtual,
+.lx-movement-current-grid .lx-field-name-centroAtual {
+  grid-column: span 2;
+}
+
+.lx-movement-current-grid .lx-field-name-descricaoCargoAtual {
+  grid-column: 1 / -1;
+}
+
+.lx-movement-destination-grid .lx-field {
+  grid-column: span 3;
+}
+
+.lx-movement-destination-grid .lx-field-name-cargoDestino,
+.lx-movement-destination-grid .lx-field-name-funcaoDestino {
+  grid-column: span 3;
+}
+
+.lx-movement-destination-grid .lx-field-name-nivelDestino,
+.lx-movement-destination-grid .lx-field-name-secaoDestino,
+.lx-movement-destination-grid .lx-field-name-centroDestino {
+  grid-column: span 2;
+}
+
+.lx-movement-destination-grid .lx-field-name-descricaoCargoDestino {
+  grid-column: 1 / -1;
+}
+
+.lx-movement-destination-grid .lx-field-name-vigencia {
+  grid-column: 1 / span 3;
+}
+
+.lx-movement-destination-grid .lx-field-name-duracao {
+  grid-column: span 4;
+}
+
+.lx-movement-destination-grid .lx-field-name-duracao .lx-radio-options {
+  grid-template-columns: repeat(2, max-content);
+  column-gap: 24px;
+  row-gap: 4px;
+}
+
+.lx-movement-destination-grid .lx-field-name-fimProvisorio {
+  grid-column: span 4;
+}
+
+.lx-movement-destination-grid .lx-field-name-observacoesMovimentacao {
+  grid-column: 1 / -1;
+}
 
 .lx-requisition-grid .lx-field {
   grid-column: span 4;
@@ -510,9 +600,53 @@ button.lx-section-head {
 }
 
 .lx-field-name-tipo .lx-radio-options,
-.lx-field-name-precisaEquipamento .lx-radio-options {
+.lx-field-name-precisaEquipamento .lx-radio-options,
+.lx-field-name-usaEquipamentoAtual .lx-radio-options {
   grid-template-columns: repeat(2, max-content);
   column-gap: 28px;
+}
+
+.lx-destination-equipment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.lx-destination-equipment-grid .lx-radio-field {
+  min-width: 0;
+}
+
+.lx-destination-equipment-grid .lx-radio-options {
+  grid-template-columns: 1fr;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.lx-destination-equipment-grid .lx-radio-option {
+  min-height: 22px;
+  padding: 0;
+}
+
+.lx-destination-description-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.lx-info-note {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid #fde68a;
+  border-radius: var(--lx-radius);
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .lx-compact-requisition-grid .lx-field-name-contrato {
@@ -757,7 +891,7 @@ button.lx-section-head {
 
 .lx-child-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) 120px minmax(0, 1.2fr) 42px;
+  grid-template-columns: minmax(0, 1fr) 120px 42px;
   gap: 10px;
   align-items: start;
   padding: 10px;
@@ -769,6 +903,24 @@ button.lx-section-head {
 .lx-child-row > .lx-btn-icon {
   align-self: start;
   margin-top: 22px;
+}
+
+.lx-origin-equipment-row {
+  grid-template-columns: minmax(0, 1fr) 110px 42px;
+}
+
+.lx-child-row .lx-field-name-equipment-observacao,
+.lx-origin-equipment-row .lx-field-name-originEquipment-observacao {
+  grid-column: 1 / -2;
+}
+
+.lx-origin-equipment-table + .lx-field-name-observacoesOrigem {
+  margin-top: 14px;
+}
+
+.lx-child-table + .lx-field-name-observacoesDestino,
+.lx-destination-equipment-grid + .lx-field-name-observacoesDestino {
+  margin-top: 14px;
 }
 
 .lx-attachment-list {
@@ -946,6 +1098,77 @@ button.lx-section-head {
   grid-column: span 12;
 }
 
+.lx-readonly-request-grid .lx-readonly-item-cargo-atual,
+.lx-readonly-request-grid .lx-readonly-item-funcao-atual {
+  grid-column: span 3;
+}
+
+.lx-readonly-request-grid .lx-readonly-item-nivel-atual,
+.lx-readonly-request-grid .lx-readonly-item-setor-secao-atual,
+.lx-readonly-request-grid .lx-readonly-item-centro-de-custo-origem {
+  grid-column: span 2;
+}
+
+.lx-readonly-request-grid .lx-readonly-item-descricao-do-cargo-atual {
+  grid-column: 1 / -1;
+}
+
+.lx-readonly-request-grid .lx-readonly-item-cargo-de-destino,
+.lx-readonly-request-grid .lx-readonly-item-funcao-de-destino {
+  grid-column: span 3;
+}
+
+.lx-readonly-request-grid .lx-readonly-item-nivel-de-destino,
+.lx-readonly-request-grid .lx-readonly-item-setor,
+.lx-readonly-request-grid .lx-readonly-item-setor-secao-destino,
+.lx-readonly-request-grid .lx-readonly-item-centro-de-custo,
+.lx-readonly-request-grid .lx-readonly-item-centro-de-custo-destino {
+  grid-column: span 2;
+}
+
+.lx-readonly-request-grid .lx-readonly-item-descricao-do-cargo-de-destino {
+  grid-column: 1 / -1;
+}
+
+.lx-readonly-request-grid .lx-readonly-item-data-prevista-de-vigencia,
+.lx-readonly-request-grid .lx-readonly-item-data-prevista-de-inicio {
+  grid-column: span 4;
+}
+
+.lx-readonly-request-grid .lx-readonly-item-duracao-da-movimentacao,
+.lx-readonly-request-grid .lx-readonly-item-data-final-da-movimentacao-provisoria,
+.lx-readonly-request-grid .lx-readonly-item-data-prevista-de-termino {
+  grid-column: span 4;
+}
+
+.lx-readonly-request-grid .lx-readonly-item-observacoes-adicionais-da-movimentacao {
+  grid-column: 1 / -1;
+}
+
+.lx-destination-history-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.lx-destination-history-grid .lx-history-stage-item {
+  grid-column: span 1;
+}
+
+.lx-destination-history-grid .lx-readonly-item-escala,
+.lx-destination-history-grid .lx-readonly-item-horario {
+  grid-column: span 1;
+}
+
+.lx-destination-history-grid .lx-readonly-item-data-prevista-de-inicio,
+.lx-destination-history-grid .lx-readonly-item-duracao-da-movimentacao,
+.lx-destination-history-grid .lx-readonly-item-data-prevista-de-termino {
+  grid-column: span 1;
+}
+
+.lx-destination-history-grid .lx-readonly-item-descricao-do-cargo-de-destino,
+.lx-destination-history-grid .lx-readonly-item-observacoes-adicionais-da-movimentacao {
+  grid-column: 1 / -1;
+}
+
 .lx-readonly-request-grid .lx-readonly-item-cargo,
 .lx-readonly-request-grid .lx-readonly-item-nivel-do-cargo,
 .lx-readonly-request-grid .lx-readonly-item-setor-secao,
@@ -969,6 +1192,24 @@ button.lx-section-head {
 .lx-readonly-request-grid .lx-readonly-item-escala,
 .lx-readonly-request-grid .lx-readonly-item-horario {
   grid-column: span 3;
+}
+
+.lx-destination-history-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.lx-destination-history-grid .lx-history-stage-item,
+.lx-destination-history-grid .lx-readonly-item-escala,
+.lx-destination-history-grid .lx-readonly-item-horario,
+.lx-destination-history-grid .lx-readonly-item-data-prevista-de-inicio,
+.lx-destination-history-grid .lx-readonly-item-duracao-da-movimentacao,
+.lx-destination-history-grid .lx-readonly-item-data-prevista-de-termino {
+  grid-column: span 1;
+}
+
+.lx-destination-history-grid .lx-readonly-item-descricao-do-cargo-de-destino,
+.lx-destination-history-grid .lx-readonly-item-observacoes-adicionais-da-movimentacao {
+  grid-column: 1 / -1;
 }
 
 .lx-history-fieldset {
@@ -1038,6 +1279,41 @@ button.lx-section-head {
   gap: 10px;
   align-items: center;
   padding: 9px 11px;
+}
+
+.lx-comparison-table .lx-read-head,
+.lx-comparison-table .lx-read-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.lx-read-table-origin .lx-read-head,
+.lx-read-table-origin .lx-read-row,
+.lx-read-table-destination-equipment .lx-read-head,
+.lx-read-table-destination-equipment .lx-read-row {
+  grid-template-columns: minmax(0, 1.2fr) 92px minmax(0, 1.6fr);
+}
+
+.lx-history-stage-grid + .lx-read-table-destination-equipment {
+  margin-top: 12px;
+}
+
+.lx-history-note {
+  display: grid;
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.lx-history-note span {
+  color: var(--lx-muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.lx-history-note strong {
+  color: #0b63ce;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 .lx-read-head {
@@ -1324,10 +1600,18 @@ button.lx-section-head {
   .lx-grid-4,
   .lx-grid-3,
   .lx-grid-2,
+  .lx-movement-current-grid,
+  .lx-movement-destination-grid,
+  .lx-destination-type-grid,
+  .lx-destination-equipment-grid,
+  .lx-destination-description-grid,
   .lx-requisition-grid {
     grid-template-columns: 1fr;
   }
 
+  .lx-movement-current-grid .lx-field,
+  .lx-movement-destination-grid .lx-field,
+  .lx-destination-type-grid .lx-field,
   .lx-requisition-grid .lx-field {
     grid-column: auto;
   }

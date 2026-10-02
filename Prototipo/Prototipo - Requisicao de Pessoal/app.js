@@ -20,10 +20,9 @@
       { nome: "Logística", centro: "LOG.EXP.003" }
     ],
     escalas: [
-      { nome: "Administrativa", horario: "08:00 às 17:48" },
-      { nome: "Turno 1", horario: "06:00 às 14:00" },
-      { nome: "Turno 2", horario: "14:00 às 22:00" },
-      { nome: "Turno 3", horario: "22:00 às 06:00" }
+      { nome: "5x1", horario: "08:00 às 17:48" },
+      { nome: "6x1", horario: "06:00 às 14:00" },
+      { nome: "12x36", horario: "19:00 às 07:00" }
     ],
     centros: ["IND.QUA.004", "IND.PRO.001", "ADM.GER.002", "LOG.EXP.003"],
     colaboradores: [
@@ -78,7 +77,7 @@
       dataDesejada: "2026-10-20",
       centro: "IND.QUA.004",
       secao: "Controle de Qualidade",
-      escala: "Administrativa",
+      escala: "5x1",
       horario: "08:00 às 17:48",
       precisaEquipamento: "Sim",
       observacoesVaga: "Priorizar profissional com experiência em inspeção de processos industriais e rotina de análise de não conformidades.",
@@ -586,11 +585,11 @@
     return previousComponents +
       viewComponent(title, getStage(key).desc, state.status,
         '<div class="lx-current-decision" data-approval="' + key + '">' +
-          (key === "rh" ? renderAttachmentsEditor("anexosRh", "Upload de Arquivos - RH", "paperclip") : "") +
           decisionOption("approve", "Aprovar solicitação", approveText, decision.value) +
           decisionOption("return", "Devolver para correção", "A solicitação retornará ao solicitante para ajustes.", decision.value) +
           decisionOption("reject", "Reprovar solicitação", "A requisição será encerrada como reprovada.", decision.value) +
           '<label class="lx-field' + (decision.value === "approve" ? " lx-hidden" : "") + '" data-approval-justification><span>Justificativa <b>*</b></span><textarea data-decision-field="justification" placeholder="Informe o motivo da devolução ou reprovação...">' + escapeHtml(decision.justification) + '</textarea></label>' +
+          (key === "rh" ? renderAttachmentsEditor("anexosRh", "Upload de Arquivos - RH", "paperclip") : "") +
           '<div class="lx-actions">' +
             '<button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar rascunho</button>' +
             '<button class="lx-btn lx-btn-primary" type="button" data-action="send-approval" data-approval-key="' + key + '"><i class="fa-solid fa-paper-plane"></i> Enviar decisão</button>' +
@@ -622,9 +621,9 @@
       movementDescription(key),
       "",
       (open ? body : ""),
-      open ? "" : "lx-view-shell-collapsed",
+      "lx-view-shell-history" + (open ? "" : " lx-view-shell-collapsed"),
       stage.icon,
-      stage.tone
+      "green"
     );
   }
 
@@ -637,9 +636,9 @@
       movementDescription("correcao"),
       "",
       (open ? renderCorrectionSnapshot(changes) : ""),
-      open ? "" : "lx-view-shell-collapsed",
+      "lx-view-shell-history" + (open ? "" : " lx-view-shell-collapsed"),
       stage.icon,
-      stage.tone
+      "green"
     );
   }
 
@@ -733,9 +732,9 @@
         historyCustomSection("Upload de Arquivos", "paperclip", "purple", renderAttachmentsList(f.anexos || [], "anexos", false)) +
         historyCustomSection("Justificativa", "comment-dots", "teal", escapeHtml(f.justificativa || "-"))
       : ""),
-      open ? "" : "lx-view-shell-collapsed",
+      "lx-view-shell-history" + (open ? "" : " lx-view-shell-collapsed"),
       "fa-pen-to-square",
-      "blue"
+      "green"
     );
   }
 
