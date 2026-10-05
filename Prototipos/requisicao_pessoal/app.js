@@ -36,7 +36,7 @@
     { key: "solicitacao", title: "Solicitar Requisição de Pessoal", icon: "fa-pen-to-square", tone: "blue", desc: "Abertura da necessidade, dados da posição e equipamentos." },
     { key: "gestor", title: "Aprovação Gestor Imediato", icon: "fa-user-check", tone: "green", desc: "Análise inicial da área solicitante." },
     { key: "diretoria", title: "Aprovação Diretoria", icon: "fa-building-user", tone: "purple", desc: "Validação conforme gerência e estrutura organizacional." },
-    { key: "rh", title: "Aprovação Gestor do RH", icon: "fa-users-gear", tone: "orange", desc: "Validação final de cargo, nível e abertura da vaga." },
+    { key: "rh", title: "Aprovação Gestor do RH", icon: "fa-users-gear", tone: "orange", desc: "Validação final de cargo, nível / step e abertura da vaga." },
     { key: "correcao", title: "Correção da Solicitação", icon: "fa-rotate-left", tone: "slate", desc: "Ajuste dos dados após devolução por alguma alçada." },
     { key: "cancelada", title: "Solicitação Reprovada", icon: "fa-ban", tone: "red", desc: "Visualização da requisição reprovada." },
     { key: "finalizada", title: "Solicitação Finalizada", icon: "fa-circle-check", tone: "green", desc: "Visualização da requisição aprovada e concluída." },
@@ -487,7 +487,7 @@
   function renderVacancyFields(f) {
     return [
       singleSelect("Cargo", "cargo", f.cargo, rm.cargos, true),
-      singleSelect("Nível do Cargo", "nivel", f.nivel, rm.niveis, true),
+      singleSelect("Nível / Step do Cargo", "nivel", f.nivel, rm.niveis, true),
       singleSelect("Setor / Seção", "secao", f.secao, rm.setores.map(function (item) { return item.nome; }), true),
       textarea("Descrição do Cargo", "descricaoCargo", f.descricaoCargo, true, true),
       singleSelect("Centro de Custo", "centro", f.centro, rm.centros, true),
@@ -670,7 +670,7 @@
       historySection("Solicitação Preenchida", "briefcase", "green", [
         ["Tipo de Necessidade", snapshot.tipo],
         ["Cargo", snapshot.cargo],
-        ["Nível do Cargo", snapshot.nivel],
+        ["Nível / Step do Cargo", snapshot.nivel],
         ["Setor / Seção", snapshot.secao],
         ["Centro de Custo", snapshot.centro],
         ["Salário Proposto", snapshot.salario],
@@ -709,7 +709,7 @@
         historySection("Solicitação Preenchida", "briefcase", "green", [
           ["Tipo de Necessidade", f.tipo],
           ["Cargo", f.cargo],
-          ["Nível do Cargo", f.nivel],
+          ["Nível / Step do Cargo", f.nivel],
           ["Setor / Seção", f.secao],
           ["Centro de Custo", f.centro],
           ["Salário Proposto", f.salario],

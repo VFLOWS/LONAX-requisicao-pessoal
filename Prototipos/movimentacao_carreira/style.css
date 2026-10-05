@@ -19,6 +19,117 @@
   margin-top: 1px;
 }
 
+.lx-career-type-hero {
+  margin: 14px 0;
+  padding: 16px;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--lx-radius);
+  background: linear-gradient(135deg, #f8fbff, #eef5ff);
+}
+
+.lx-career-type-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.lx-career-type-head h2 {
+  margin: 0;
+  color: var(--lx-blue);
+  font-size: 16px;
+  letter-spacing: 0;
+}
+
+.lx-career-type-head p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.lx-career-type-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.lx-career-type-button {
+  --career-type-color: var(--lx-blue);
+  --career-type-soft: #e8f0ff;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  grid-template-areas:
+    "icon title"
+    "icon desc";
+  align-items: center;
+  gap: 2px 11px;
+  min-height: 86px;
+  padding: 14px;
+  border: 1px solid #d8e4f4;
+  border-radius: var(--lx-radius);
+  background: #fff;
+  color: var(--lx-blue-dark);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease, background 0.18s ease;
+}
+
+.lx-career-type-button:hover,
+.lx-career-type-button-selected {
+  border-color: var(--career-type-color);
+  background: var(--career-type-soft);
+  box-shadow: 0 10px 24px rgba(31, 42, 68, 0.12);
+  transform: translateY(-1px);
+}
+
+.lx-career-type-button span {
+  grid-area: icon;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: var(--career-type-soft);
+  color: var(--career-type-color);
+  font-size: 16px;
+}
+
+.lx-career-type-button-selected span {
+  background: var(--career-type-color);
+  color: #fff;
+}
+
+.lx-career-type-button strong {
+  grid-area: title;
+  display: block;
+  color: var(--career-type-color);
+  font-size: 13px;
+}
+
+.lx-career-type-button small {
+  grid-area: desc;
+  display: block;
+  color: #64748b;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.lx-career-type-promotion {
+  --career-type-color: #7c3aed;
+  --career-type-soft: #f5f3ff;
+}
+
+.lx-career-type-progression {
+  --career-type-color: #16a34a;
+  --career-type-soft: #f0fdf4;
+}
+
+.lx-career-type-framing {
+  --career-type-color: #f59e0b;
+  --career-type-soft: #fffbeb;
+}
+
 .lx-career-comparison .lx-read-head,
 .lx-career-comparison .lx-read-row {
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 1fr);
@@ -181,19 +292,15 @@
 }
 
 .lx-career-enquadramento-grid .lx-field-name-novoStep {
-  grid-column: 1 / span 3;
-}
-
-.lx-career-enquadramento-grid .lx-field-name-novoNivel {
-  grid-column: 4 / span 3;
+  grid-column: 1 / span 4;
 }
 
 .lx-career-enquadramento-grid .lx-field-name-novaFaixa {
-  grid-column: 7 / span 3;
+  grid-column: 5 / span 4;
 }
 
 .lx-career-enquadramento-grid .lx-field-name-novoSalario {
-  grid-column: 10 / span 3;
+  grid-column: 9 / span 4;
 }
 
 .lx-career-enquadramento-grid .lx-field-name-dataVigencia {
@@ -234,11 +341,10 @@
   grid-column: span 3;
 }
 
-.lx-career-current-grid .lx-field-name-cargoAtual { grid-column: 1 / span 3; }
-.lx-career-current-grid .lx-field-name-funcaoAtual { grid-column: 4 / span 3; }
-.lx-career-current-grid .lx-field-name-nivelAtual { grid-column: 7 / span 3; }
-.lx-career-current-grid .lx-field-name-secaoAtual { grid-column: 10 / span 3; }
-.lx-career-current-grid .lx-field-name-centroAtual { grid-column: 13 / span 3; }
+.lx-career-current-grid .lx-field-name-cargoAtual { grid-column: 1 / span 4; }
+.lx-career-current-grid .lx-field-name-funcaoAtual { grid-column: 5 / span 4; }
+.lx-career-current-grid .lx-field-name-secaoAtual { grid-column: 9 / span 3; }
+.lx-career-current-grid .lx-field-name-centroAtual { grid-column: 12 / span 4; }
 .lx-career-current-grid .lx-field-name-escalaAtual { grid-column: 1 / span 3; }
 .lx-career-current-grid .lx-field-name-horarioAtual { grid-column: 4 / span 3; }
 .lx-career-current-grid .lx-field-name-stepAtual { grid-column: 7 / span 3; }
@@ -261,16 +367,47 @@
   grid-column: 4 / span 3;
 }
 
-.lx-career-current-history-grid .lx-readonly-item-nivel-atual {
+.lx-career-current-history-grid .lx-readonly-item-setor-secao-atual {
   grid-column: 7 / span 3;
 }
 
-.lx-career-current-history-grid .lx-readonly-item-setor-secao-atual {
+.lx-career-current-history-grid .lx-readonly-item-centro-de-custo-atual {
   grid-column: 10 / span 3;
 }
 
-.lx-career-current-history-grid .lx-readonly-item-centro-de-custo-atual {
-  grid-column: 13 / span 3;
+.lx-career-approval-summary-grid .lx-readonly-item-colaborador,
+.lx-career-approval-summary-grid .lx-readonly-item-matricula,
+.lx-career-approval-summary-grid .lx-readonly-item-data-de-admissao {
+  grid-column: span 4;
+}
+
+.lx-career-approval-summary-grid .lx-readonly-item-cargo-atual,
+.lx-career-approval-summary-grid .lx-readonly-item-funcao-atual,
+.lx-career-approval-summary-grid .lx-readonly-item-setor-secao-atual,
+.lx-career-approval-summary-grid .lx-readonly-item-centro-de-custo-atual {
+  grid-column: span 3;
+}
+
+.lx-career-approval-summary-grid .lx-readonly-item-descricao-do-cargo-atual {
+  grid-column: 1 / -1;
+}
+
+.lx-career-approval-comparison {
+  margin-top: 14px;
+}
+
+.lx-approval-decision-fieldset {
+  margin-top: 14px;
+}
+
+.lx-history-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: var(--lx-blue-dark);
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .lx-career-proposed-history-grid .lx-readonly-item-tipo-da-movimentacao {
@@ -279,6 +416,19 @@
 
 .lx-career-proposed-history-grid .lx-readonly-item-descricao-do-cargo {
   grid-column: 1 / -1;
+}
+
+.lx-career-proposed-history-grid .lx-readonly-item-cargo,
+.lx-career-proposed-history-grid .lx-readonly-item-funcao,
+.lx-career-proposed-history-grid .lx-readonly-item-nivel-step-proposto {
+  grid-column: span 4;
+}
+
+.lx-career-proposed-history-grid .lx-readonly-item-novo-nivel-step,
+.lx-career-proposed-history-grid .lx-readonly-item-faixa-salarial,
+.lx-career-proposed-history-grid .lx-readonly-item-novo-salario-enquadrado,
+.lx-career-proposed-history-grid .lx-readonly-item-data-de-inicio-da-vigencia {
+  grid-column: span 3;
 }
 
 .lx-career-salary-range-history {
@@ -328,6 +478,10 @@
 }
 
 @media (max-width: 920px) {
+  .lx-career-type-buttons {
+    grid-template-columns: 1fr;
+  }
+
   .lx-career-current-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

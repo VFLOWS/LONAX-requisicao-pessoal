@@ -1103,7 +1103,7 @@ button.lx-section-head {
   grid-column: span 3;
 }
 
-.lx-readonly-request-grid .lx-readonly-item-nivel-atual,
+.lx-readonly-request-grid .lx-readonly-item-nivel-step-atual,
 .lx-readonly-request-grid .lx-readonly-item-setor-secao-atual,
 .lx-readonly-request-grid .lx-readonly-item-centro-de-custo-origem {
   grid-column: span 2;
@@ -1118,7 +1118,7 @@ button.lx-section-head {
   grid-column: span 3;
 }
 
-.lx-readonly-request-grid .lx-readonly-item-nivel-de-destino,
+.lx-readonly-request-grid .lx-readonly-item-nivel-step-de-destino,
 .lx-readonly-request-grid .lx-readonly-item-setor,
 .lx-readonly-request-grid .lx-readonly-item-setor-secao-destino,
 .lx-readonly-request-grid .lx-readonly-item-centro-de-custo,
@@ -1170,7 +1170,7 @@ button.lx-section-head {
 }
 
 .lx-readonly-request-grid .lx-readonly-item-cargo,
-.lx-readonly-request-grid .lx-readonly-item-nivel-do-cargo,
+.lx-readonly-request-grid .lx-readonly-item-nivel-step-do-cargo,
 .lx-readonly-request-grid .lx-readonly-item-setor-secao,
 .lx-readonly-request-grid .lx-readonly-item-centro-de-custo,
 .lx-readonly-request-grid .lx-readonly-item-salario-proposto,

@@ -273,7 +273,7 @@
           field("Data de Admissão", "admissao", f.admissao, true, true),
           field("Cargo Atual", "cargoAtual", f.cargoAtual, true, true),
           field("Função Atual", "funcaoAtual", f.funcaoAtual, true, true),
-          field("Nível Atual", "nivelAtual", f.nivelAtual, true, true),
+          field("Nível / Step Atual", "nivelAtual", f.nivelAtual, true, true),
           field("Setor / Seção Atual", "secaoAtual", f.secaoAtual, true, true),
           field("Centro de Custo Origem", "centroAtual", f.centroAtual, true, true),
           readonlyTextarea("Descrição do Cargo Atual", "descricaoCargoAtual", f.descricaoCargoAtual, true),
@@ -338,7 +338,7 @@
   function renderRecebedorDecision() {
     var decision = state.decisions.recebedor || { value: "", justification: "" };
     var hideReturnRecebedor = state.stage === "correcao" && state.status.indexOf("Gestor Cedente") === -1;
-    return '<div class="lx-recebedor-approval">' + section("Aprovação Gestor Recebedor", "list-check",
+    return '<div class="lx-recebedor-approval">' + formFieldset("Decisão de Aprovação", "list-check",
       '<div class="lx-current-decision" data-approval="recebedor">' +
         decisionOption("approve", "Aprovar movimentação", "A movimentação seguirá para aprovação da Diretoria.", decision.value) +
         decisionOption("returnCedente", "Devolver ao Gestor Cedente", "A movimentação retornará para ajuste dos dados de origem.", decision.value) +
@@ -470,7 +470,7 @@
     };
 
     return historySection("Dados do Solicitante", "user", "blue", [["Data/Hora", f.data], ["Número Solicitação", f.numero], ["Solicitante", f.solicitante], ["Gerência", f.gerenciaOrigem], ["Filial", f.filial], ["Gestor Imediato", f.gestorCedente], ["Área Diretoria", f.areaDiretoria]]) +
-      historySection("Dados da Movimentação de Pessoal", "people-arrows", "green", [["Colaborador", f.colaborador], ["Matrícula", f.chapa], ["Data de Admissão", f.admissao], ["Cargo Atual", f.cargoAtual], ["Função Atual", f.funcaoAtual], ["Nível Atual", f.nivelAtual], ["Setor / Seção Atual", f.secaoAtual], ["Centro de Custo Origem", f.centroAtual], ["Descrição do Cargo Atual", f.descricaoCargoAtual], ["Escala", f.escalaAtual], ["Horário", f.horarioAtual]], "lx-readonly-request-grid") +
+      historySection("Dados da Movimentação de Pessoal", "people-arrows", "green", [["Colaborador", f.colaborador], ["Matrícula", f.chapa], ["Data de Admissão", f.admissao], ["Cargo Atual", f.cargoAtual], ["Função Atual", f.funcaoAtual], ["Nível / Step Atual", f.nivelAtual], ["Setor / Seção Atual", f.secaoAtual], ["Centro de Custo Origem", f.centroAtual], ["Descrição do Cargo Atual", f.descricaoCargoAtual], ["Escala", f.escalaAtual], ["Horário", f.horarioAtual]], "lx-readonly-request-grid") +
       historyCustomSection("Equipamentos da Origem", "laptop", "purple", renderOriginEquipmentsSnapshot()) +
       historySection("Dados de Destino", "people-arrows", "blue", [["Tipo de Movimentação", f.tipoMovimentacao]]) +
       historySection("Situação Destino", "briefcase", "green", [["Cargo de Destino", f.cargoDestino], ["Função de Destino", f.funcaoDestino], ["Nível / Step de Destino", f.nivelDestino], ["Setor / Seção Destino", f.secaoDestino], ["Centro de Custo Destino", snapshot.centroDestino], ["Descrição do Cargo de Destino", f.descricaoCargoDestino], ["Escala", f.escalaDestino], ["Horário", f.horarioDestino], ["Data Prevista de Início", formatDate(f.vigencia)], ["Duração da movimentação", f.duracao], ["Data Prevista de Término", f.duracao === "Provisória" ? formatDate(f.fimProvisorio) : "-"], ["Observações adicionais da movimentação", snapshot.observacoesMovimentacao || "-"]], "lx-readonly-request-grid lx-destination-history-grid") +
@@ -512,7 +512,7 @@
     var f = state.form;
     var requester = showRequester === false ? "" : historySection("Dados do Solicitante", "user", "blue", [["Data/Hora", f.data], ["Número Solicitação", f.numero], ["Solicitante", f.solicitante], ["Gerência", f.gerenciaOrigem], ["Filial", f.filial], ["Gestor Imediato", f.gestorCedente], ["Área Diretoria", f.areaDiretoria]]);
     return requester +
-      historySection("Dados da Movimentação de Pessoal", "people-arrows", "green", [["Colaborador", f.colaborador], ["Matrícula", f.chapa], ["Data de Admissão", f.admissao], ["Cargo Atual", f.cargoAtual], ["Função Atual", f.funcaoAtual], ["Nível Atual", f.nivelAtual], ["Setor / Seção Atual", f.secaoAtual], ["Centro de Custo Origem", f.centroAtual], ["Descrição do Cargo Atual", f.descricaoCargoAtual], ["Escala", f.escalaAtual], ["Horário", f.horarioAtual]], "lx-readonly-request-grid") +
+      historySection("Dados da Movimentação de Pessoal", "people-arrows", "green", [["Colaborador", f.colaborador], ["Matrícula", f.chapa], ["Data de Admissão", f.admissao], ["Cargo Atual", f.cargoAtual], ["Função Atual", f.funcaoAtual], ["Nível / Step Atual", f.nivelAtual], ["Setor / Seção Atual", f.secaoAtual], ["Centro de Custo Origem", f.centroAtual], ["Descrição do Cargo Atual", f.descricaoCargoAtual], ["Escala", f.escalaAtual], ["Horário", f.horarioAtual]], "lx-readonly-request-grid") +
       historyCustomSection("Equipamentos da Origem", "laptop", "purple", renderOriginEquipmentsSnapshot()) +
       historyCustomSection("Upload de Arquivos", "paperclip", "purple", renderAttachmentsList(f.anexos, "anexos", false)) +
       historyCustomSection("Justificativa", "comment-dots", "teal", escapeHtml(f.justificativa || "-"));

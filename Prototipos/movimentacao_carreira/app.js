@@ -122,9 +122,9 @@
   ];
 
   var flows = [
-    { key: "promocao", title: "Promoção", icon: "fa-arrow-trend-up", tone: "blue", desc: "Mudança de cargo, função, nível ou estrutura salarial com possível análise de segurança." },
+    { key: "promocao", title: "Promoção", icon: "fa-arrow-trend-up", tone: "blue", desc: "Mudança de cargo, função, nível / step ou estrutura salarial com possível análise de segurança." },
     { key: "progressao", title: "Progressão", icon: "fa-chart-line", tone: "green", desc: "Evolução na carreira sem alteração de cargo ou função." },
-    { key: "enquadramento", title: "Enquadramento", icon: "fa-scale-balanced", tone: "teal", desc: "Ajuste de step ou salário conforme faixa salarial do cargo." }
+    { key: "enquadramento", title: "Enquadramento", icon: "fa-sliders", tone: "teal", desc: "Ajuste de step ou salário conforme faixa salarial do cargo." }
   ];
 
   var state = {
@@ -133,6 +133,7 @@
     errors: {},
     collapses: {},
     decisions: {},
+    movementTypePicked: true,
     form: {
       numero: "",
       data: rm.usuario.data,
@@ -249,6 +250,7 @@
     var flow = getRequestedFlow();
     if (state.stage !== "solicitacao") return;
     applyFlowType(flow);
+    state.movementTypePicked = true;
   }
   function applyFlowType(flow) {
     if (flow === "promocao") state.form.tipoMovimentacao = "Promoção";
@@ -320,12 +322,11 @@
     if (f.tipoMovimentacao !== "Enquadramento") return;
     var selectedStep = f.novoStep || f.stepAtual;
     var cargo = f.cargoAtual;
-    var stepSalary = getStepSalary(selectedStep, cargo);
     var currentSalary = parseMoney(f.salarioAtual);
     var newSalary = parseMoney(f.novoSalario);
     var salaryForRule = newSalary < currentSalary ? currentSalary : newSalary;
     var suggestedStep = getSuggestedStepBySalary(selectedStep, salaryForRule, cargo);
-    var suggestedSalary = salaryForRule > stepSalary ? salaryForRule : stepSalary;
+    var suggestedSalary = Math.max(getStepSalary(suggestedStep, cargo), salaryForRule);
     var diff = suggestedSalary - currentSalary;
     f.stepSugerido = suggestedStep;
     f.salarioSugerido = formatCurrency(suggestedSalary);
@@ -407,20 +408,26 @@
   }
 
   function renderSolicitacao() {
-    return renderSolicitacaoFields() +
-      '<div class="lx-actions"><button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar rascunho</button><button class="lx-btn lx-btn-primary" type="button" data-action="submit"><i class="fa-solid fa-paper-plane"></i> Enviar para aprovação</button></div>';
+    var waitingMovementType = isMovementTypeSelectorLayout() && !state.movementTypePicked;
+    var actions = '<div class="lx-actions"><button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar rascunho</button><button class="lx-btn lx-btn-primary" type="button" data-action="submit"><i class="fa-solid fa-paper-plane"></i> Enviar para aprovação</button></div>';
+    return renderSolicitacaoFields() + (waitingMovementType ? "" : actions);
   }
 
   function renderSolicitacaoFields() {
     var f = state.form;
-    return section("Dados do Solicitante", "user", grid([
+    var destaqueTipo = isMovementTypeSelectorLayout();
+    var waitingMovementType = destaqueTipo && !state.movementTypePicked;
+    var headerSolicitante = section("Dados do Solicitante", "user", grid([
       field("Data/Hora", "data", f.data, true, true),
       field("Solicitante", "solicitante", f.solicitante, true, true),
       field("Filial", "filial", f.filial, true, true),
       field("Gerência", "gerencia", f.gerencia, true, true),
       field("Gestor Imediato", "gestor", f.gestor, true, true),
       field("Área Diretoria", "areaDiretoria", f.areaDiretoria, true, true)
-    ], "lx-grid-4")) +
+    ], "lx-grid-4"));
+    if (waitingMovementType) return headerSolicitante + renderMovementTypeSelector();
+    return headerSolicitante +
+    (destaqueTipo ? renderMovementTypeSelector() : "") +
     section("Dados da Movimentação de Carreira", "id-badge",
       formFieldset("Dados do Colaborador", "user-tie", grid([
         singleSelect("Colaborador", "colaborador", f.colaborador, rm.colaboradores.map(function (item) { return item.nome; }), true),
@@ -428,19 +435,18 @@
         field("Data de Admissão", "admissao", f.admissao, true, true),
         field("Cargo Atual", "cargoAtual", f.cargoAtual, true, true),
         field("Função Atual", "funcaoAtual", f.funcaoAtual, true, true),
-        field("Nível Atual", "nivelAtual", f.nivelAtual, true, true),
         field("Setor / Seção Atual", "secaoAtual", f.secaoAtual, true, true),
         field("Centro de Custo Atual", "centroAtual", f.centroAtual, true, true),
         readonlyTextarea("Descrição do Cargo Atual", "descricaoCargoAtual", f.descricaoCargoAtual, true),
         field("Escala Atual", "escalaAtual", f.escalaAtual, true, true),
         field("Horário Atual", "horarioAtual", f.horarioAtual, true, true),
-        field("Step Atual", "stepAtual", f.stepAtual, true, true),
+        field("Nível/Step Atual", "stepAtual", f.nivelAtual, true, true),
         field("Faixa Salarial Atual", "faixaAtual", f.faixaAtual, true, true),
         field("Salário Atual", "salarioAtual", f.salarioAtual, true, true)
       ], "lx-career-current-grid")) +
-      grid([
+      (destaqueTipo ? "" : grid([
         radioGroup("Tipo da Movimentação", "tipoMovimentacao", f.tipoMovimentacao, ["Promoção", "Progressão", "Enquadramento"], true)
-      ], "lx-career-type-grid") +
+      ], "lx-career-type-grid")) +
       formFieldset("Movimentação Proposta", "chart-line",
         renderMovementTypeFields() +
         renderSalaryRangeComponent() +
@@ -451,6 +457,25 @@
     section("Comparação Atual x Proposto", "table-columns", renderComparison()) +
     renderAttachmentsEditor("anexos", "Upload de Arquivos", "paperclip") +
     formFieldset("Justificativa", "comment-dots", textarea("Justificativa da " + f.tipoMovimentacao, "justificativa", f.justificativa, true));
+  }
+
+  function isMovementTypeSelectorLayout() {
+    return state.stage === "solicitacao";
+  }
+
+  function renderMovementTypeSelector() {
+    var f = state.form;
+    var options = [
+      { label: "Promoção", icon: "fa-arrow-trend-up", tone: "promotion", desc: "Mudança de cargo, função, nível / step ou estrutura salarial." },
+      { label: "Progressão", icon: "fa-chart-line", tone: "progression", desc: "Evolução de nível / step sem troca de cargo ou função." },
+      { label: "Enquadramento", icon: "fa-sliders", tone: "framing", desc: "Ajuste de step ou salário conforme faixa salarial." }
+    ];
+    return '<section class="lx-career-type-hero"><div class="lx-career-type-head"><span class="lx-section-icon"><i class="fa-solid fa-route"></i></span><div><h2>Tipo de Movimentação</h2><p>Selecione primeiro o tipo para carregar os campos específicos da movimentação.</p></div></div>' +
+      '<div class="lx-career-type-buttons">' + options.map(function (option) {
+        var selected = state.movementTypePicked && option.label === f.tipoMovimentacao ? " lx-career-type-button-selected" : "";
+        return '<button type="button" class="lx-career-type-button lx-career-type-' + option.tone + selected + '" data-action="select-movement-type" data-movement-type="' + option.label + '">' +
+          '<span><i class="fa-solid ' + option.icon + '"></i></span><strong>' + option.label + '</strong><small>' + option.desc + '</small></button>';
+      }).join("") + '</div></section>';
   }
 
   function getFlowStage(key) {
@@ -488,14 +513,15 @@
     var decision = state.decisions[state.stage] || { value: "approve", justification: "" };
     return renderPreviousFlow(type, phase) +
       viewComponent(approvalTitle(phase), stage.desc, state.status,
-        '<div class="lx-current-decision" data-approval="' + state.stage + '">' +
+        renderCareerApprovalSnapshot(type) +
+        '<fieldset class="lx-history-fieldset lx-history-fieldset-blue lx-approval-decision-fieldset"><legend><i class="fa-solid fa-list-check"></i> Decisão de Aprovação</legend><div class="lx-current-decision" data-approval="' + state.stage + '">' +
           decisionOption("approve", "Aprovar movimentação", approvalDescription(type, phase), decision.value) +
           decisionOption("return", "Devolver para correção", "A solicitação retornará ao solicitante para ajustes.", decision.value) +
           decisionOption("reject", "Cancelar movimentação", "A movimentação será encerrada como cancelada.", decision.value) +
           '<label class="lx-field' + (decision.value === "approve" ? " lx-hidden" : "") + '" data-approval-justification><span>Justificativa <b>*</b></span><textarea data-decision-field="justification" placeholder="Informe o motivo da correção ou cancelamento...">' + escapeHtml(decision.justification) + '</textarea></label>' +
           (phase === "seguranca" ? renderAttachmentsEditor("anexosSeguranca", "Upload de Arquivos - Segurança do Trabalho", "paperclip") : "") +
           (phase === "rh" ? renderAttachmentsEditor("anexosRh", "Upload de Arquivos - RH", "paperclip") : "") +
-          '<div class="lx-actions"><button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar rascunho</button><button class="lx-btn lx-btn-primary" type="button" data-action="send-approval" data-approval-key="' + state.stage + '"><i class="fa-solid fa-paper-plane"></i> Enviar decisão</button></div></div>'
+          '<div class="lx-actions"><button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar rascunho</button><button class="lx-btn lx-btn-primary" type="button" data-action="send-approval" data-approval-key="' + state.stage + '"><i class="fa-solid fa-paper-plane"></i> Enviar decisão</button></div></div></fieldset>'
         , "", stage.icon, stage.tone);
   }
   function approvalDescription(type, phase) {
@@ -536,17 +562,40 @@
       renderPreviousApprovalComponent(type, getFlowApprovals(type)[0], { value: "reject", justification: "Movimentação cancelada por inconsistência nas informações apresentadas." }, true) +
       viewComponent("Movimentação Cancelada", "Visualização da movimentação encerrada.", "Cancelada", '<div class="lx-history-stage lx-history-stage-red">Movimentação encerrada como cancelada após decisão da etapa de aprovação.</div>', "", "fa-ban", "red");
   }
-  function renderCareerSummaryComponent(type) {
+  function renderCareerSummaryComponent(type, compact) {
     var key = "dados_" + type;
     var open = !!state.collapses[key];
     return viewComponent('<button type="button" class="lx-collapse-title" data-collapse="' + key + '" aria-expanded="' + open + '"><span>Dados da Movimentação de Carreira</span><i class="fa-solid fa-chevron-down lx-collapse-chevron' + (open ? " lx-collapse-chevron-open" : "") + '"></i></button>',
       state.form.data + " - " + state.form.solicitante + " - " + state.form.gerencia,
-      "", open ? renderCareerSnapshot(type) : "", "lx-view-shell-history" + (open ? "" : " lx-view-shell-collapsed"), "fa-user-tie", "green");
+      "", open ? (compact ? renderCareerApprovalSnapshot(type) : renderCareerSnapshot(type)) : "", "lx-view-shell-history" + (open ? "" : " lx-view-shell-collapsed"), "fa-user-tie", "green");
+  }
+  function renderCareerApprovalSnapshot(type) {
+    var data = getMovementSnapshot(type);
+    return historyCustomSection("Dados de Origem", "id-badge", "green",
+      '<div class="lx-history-stage-grid lx-readonly-request-grid lx-career-approval-summary-grid">' +
+        [
+          ["Colaborador", data.colaborador],
+          ["Matrícula", data.chapa],
+          ["Data de Admissão", data.admissao],
+          ["Cargo Atual", data.cargoAtual],
+          ["Função Atual", data.funcaoAtual],
+          ["Setor / Seção Atual", data.secaoAtual],
+          ["Centro de Custo Atual", data.centroAtual],
+          ["Descrição do Cargo Atual", data.descricaoCargoAtual]
+        ].map(function (row) {
+          return '<div class="lx-history-stage-item ' + readonlyItemClass(row[0]) + '"><span>' + escapeHtml(row[0]) + '</span><strong>' + escapeHtml(row[1] || "-") + '</strong></div>';
+        }).join("") +
+      '</div>' +
+      '<div class="lx-career-approval-comparison">' +
+        '<div class="lx-history-subtitle"><i class="fa-solid fa-table-columns"></i> Comparação Atual x Proposto</div>' +
+        renderComparisonSnapshot(type, data) +
+      '</div>'
+    );
   }
   function renderCareerSnapshot(type) {
     var data = getMovementSnapshot(type);
     return historySection("Dados do Solicitante", "user", "blue", [["Data/Hora", data.data], ["Solicitante", data.solicitante], ["Gerência", data.gerencia], ["Filial", data.filial], ["Gestor Imediato", data.gestor], ["Área Diretoria", data.areaDiretoria]], "lx-readonly-request-grid") +
-      historySection("Dados da Movimentação de Carreira", "id-badge", "green", [["Colaborador", data.colaborador], ["Matrícula", data.chapa], ["Data de Admissão", data.admissao], ["Cargo Atual", data.cargoAtual], ["Função Atual", data.funcaoAtual], ["Nível Atual", data.nivelAtual], ["Setor / Seção Atual", data.secaoAtual], ["Centro de Custo Atual", data.centroAtual], ["Descrição do Cargo Atual", data.descricaoCargoAtual]], "lx-readonly-request-grid lx-career-current-history-grid") +
+      historySection("Dados da Movimentação de Carreira", "id-badge", "green", [["Colaborador", data.colaborador], ["Matrícula", data.chapa], ["Data de Admissão", data.admissao], ["Cargo Atual", data.cargoAtual], ["Função Atual", data.funcaoAtual], ["Setor / Seção Atual", data.secaoAtual], ["Centro de Custo Atual", data.centroAtual], ["Descrição do Cargo Atual", data.descricaoCargoAtual]], "lx-readonly-request-grid lx-career-current-history-grid") +
       renderProposedCareerHistory(type, data) +
       (type === "promocao" ? historyCustomSection("Infraestrutura e Equipamentos", "laptop", "purple", renderCareerEquipmentSnapshot(data)) : "") +
       historyCustomSection("Comparação Atual x Proposto", "table-columns", "blue", renderComparisonSnapshot(type, data)) +
@@ -563,9 +612,8 @@
     }
     if (type === "enquadramento") {
       var currentSalary = parseMoney(f.salarioAtual);
-      var stepSalary = getStepSalary(f.stepAtual, f.cargoAtual);
       var suggestedStep = getSuggestedStepBySalary(f.stepAtual, currentSalary, f.cargoAtual);
-      var suggestedSalary = currentSalary > stepSalary ? currentSalary : stepSalary;
+      var suggestedSalary = Math.max(getStepSalary(suggestedStep, f.cargoAtual), currentSalary);
       data.novoCargo = f.cargoAtual; data.novaFuncao = f.funcaoAtual; data.descricaoCargoProposto = f.descricaoCargoAtual; data.novoNivel = getNivelBase(f.nivelAtual) + " - " + suggestedStep; data.novoStep = suggestedStep; data.novaFaixa = getFaixaSalarialByStep(suggestedStep, f.cargoAtual); data.novoSalario = formatCurrency(suggestedSalary); data.novaEscala = f.escalaAtual; data.novoHorario = f.horarioAtual; data.novoCargoPrecisaEquipamento = "Não";
     }
     return data;
@@ -573,13 +621,13 @@
   function renderProposedCareerHistory(type, data) {
     var rows = [["Tipo da Movimentação", movementTypeLabel(type)]];
     if (type === "promocao") {
-      rows = rows.concat([["Cargo Proposto", data.novoCargo], ["Função Proposta", data.novaFuncao], ["Nível Proposto", data.novoNivel], ["Descrição do Cargo", data.descricaoCargoProposto], ["Faixa Salarial", data.novaFaixa], ["Novo Salário", data.novoSalario], ["Escala", data.novaEscala], ["Horário", data.novoHorario], ["Data de Início da Vigência", formatDate(data.dataVigencia)]]);
+      rows = rows.concat([["Cargo Proposto", data.novoCargo], ["Função Proposta", data.novaFuncao], ["Nível / Step Proposto", data.novoNivel], ["Descrição do Cargo", data.descricaoCargoProposto], ["Faixa Salarial", data.novaFaixa], ["Novo Salário", data.novoSalario], ["Escala", data.novaEscala], ["Horário", data.novoHorario], ["Data de Início da Vigência", formatDate(data.dataVigencia)]]);
     }
     if (type === "progressao") {
-      rows = rows.concat([["Cargo após movimentação", data.novoCargo], ["Função após movimentação", data.novaFuncao], ["Nível Proposto", data.novoNivel], ["Descrição do Cargo", data.descricaoCargoProposto], ["Faixa Salarial", data.novaFaixa], ["Novo Salário", data.novoSalario], ["Data de Início da Vigência", formatDate(data.dataVigencia)]]);
+      rows = rows.concat([["Cargo após movimentação", data.novoCargo], ["Função após movimentação", data.novaFuncao], ["Nível / Step Proposto", data.novoNivel], ["Descrição do Cargo", data.descricaoCargoProposto], ["Faixa Salarial", data.novaFaixa], ["Novo Salário", data.novoSalario], ["Data de Início da Vigência", formatDate(data.dataVigencia)]]);
     }
     if (type === "enquadramento") {
-      rows = rows.concat([["Cargo", data.novoCargo], ["Função", data.novaFuncao], ["Nível Proposto", data.novoNivel], ["Nova Step", data.novoStep], ["Faixa Salarial", data.novaFaixa], ["Novo Salário Enquadrado", data.novoSalario], ["Data de Início da Vigência", formatDate(data.dataVigencia)]]);
+      rows = rows.concat([["Cargo", data.novoCargo], ["Função", data.novaFuncao], ["Nível / Step Proposto", data.novoNivel], ["Novo Nível/Step", data.novoStep], ["Faixa Salarial", data.novaFaixa], ["Novo Salário Enquadrado", data.novoSalario], ["Data de Início da Vigência", formatDate(data.dataVigencia)]]);
     }
     return historyCustomSection("Movimentação Proposta", "chart-line", "green",
       '<div class="lx-history-stage-grid lx-readonly-request-grid lx-career-proposed-history-grid">' +
@@ -613,9 +661,9 @@
   }
   function renderComparisonSnapshot(type, data) {
     var rows = [];
-    if (type === "promocao") rows = [["Cargo", data.cargoAtual, data.novoCargo], ["Função", data.funcaoAtual, data.novaFuncao], ["Nível", data.nivelAtual, data.novoNivel], ["Step", data.stepAtual, data.novoStep], ["Faixa Salarial", data.faixaAtual, data.novaFaixa], ["Salário", data.salarioAtual, data.novoSalario], ["Escala", data.escalaAtual, data.novaEscala], ["Horário", data.horarioAtual, data.novoHorario]];
-    if (type === "progressao") rows = [["Cargo", data.cargoAtual, data.novoCargo], ["Função", data.funcaoAtual, data.novaFuncao], ["Nível", data.nivelAtual, data.novoNivel], ["Faixa Salarial", data.faixaAtual, data.novaFaixa], ["Salário", data.salarioAtual, data.novoSalario]];
-    if (type === "enquadramento") rows = [["Step", data.stepAtual, data.novoStep], ["Faixa Salarial", data.faixaAtual, data.novaFaixa], ["Salário", data.salarioAtual, data.novoSalario]];
+    if (type === "promocao") rows = [["Cargo", data.cargoAtual, data.novoCargo], ["Função", data.funcaoAtual, data.novaFuncao], ["Step", data.stepAtual, data.novoStep], ["Faixa Salarial", data.faixaAtual, data.novaFaixa], ["Salário", data.salarioAtual, data.novoSalario], ["Escala", data.escalaAtual, data.novaEscala], ["Horário", data.horarioAtual, data.novoHorario]];
+    if (type === "progressao") rows = [["Cargo", data.cargoAtual, data.novoCargo], ["Função", data.funcaoAtual, data.novaFuncao], ["Step", data.stepAtual, data.novoStep], ["Faixa Salarial", data.faixaAtual, data.novaFaixa], ["Salário", data.salarioAtual, data.novoSalario]];
+    if (type === "enquadramento") rows = [["Cargo", data.cargoAtual, data.novoCargo], ["Função", data.funcaoAtual, data.novaFuncao], ["Step", data.stepAtual, data.novoStep], ["Faixa Salarial", data.faixaAtual, data.novaFaixa], ["Salário", data.salarioAtual, data.novoSalario], ["Escala", data.escalaAtual, data.novaEscala], ["Horário", data.horarioAtual, data.novoHorario]];
     return '<div class="lx-read-table lx-career-comparison"><div class="lx-read-head"><span>Campo</span><span>Atual</span><span>Proposto</span></div>' +
       rows.map(function (row) { return '<div class="lx-read-row"><strong>' + escapeHtml(row[0]) + '</strong><strong>' + escapeHtml(row[1]) + '</strong><strong>' + escapeHtml(row[2]) + '</strong></div>'; }).join("") +
       '</div>';
@@ -664,7 +712,7 @@
       return grid([
         singleSelect("Novo Cargo", "novoCargo", f.novoCargo, rm.cargos, true),
         singleSelect("Nova Função", "novaFuncao", f.novaFuncao, rm.funcoes, true),
-        singleSelect("Novo Nível", "novoNivel", f.novoNivel, rm.niveis, true),
+        singleSelect("Novo Nível / Step", "novoNivel", f.novoNivel, rm.niveis, true),
         readonlyTextarea("Descrição do Cargo", "descricaoCargoProposto", f.descricaoCargoProposto, true),
         field("Nova Faixa Salarial", "novaFaixa", f.novaFaixa, true, true),
         field("Novo Salário", "novoSalario", f.novoSalario, true),
@@ -677,7 +725,7 @@
       return grid([
         field("Cargo após movimentação", "cargoAtual", f.cargoAtual, true, true),
         field("Função após movimentação", "funcaoAtual", f.funcaoAtual, true, true),
-        singleSelect("Novo Nível", "novoNivel", f.novoNivel, rm.niveis, true),
+        singleSelect("Novo Nível / Step", "novoNivel", f.novoNivel, rm.niveis, true),
         readonlyTextarea("Descrição do Cargo", "descricaoCargoProposto", f.descricaoCargoProposto, true),
         field("Nova Faixa Salarial", "novaFaixa", f.novaFaixa, true, true),
         field("Novo Salário", "novoSalario", f.novoSalario, true),
@@ -689,8 +737,7 @@
         field("Salário correspondente ao Step sugerido", "salarioSugerido", f.salarioSugerido, true, true),
         field("Diferença salarial em valor", "diferencaValor", f.diferencaValor, true, true),
         field("Diferença salarial em percentual", "diferencaPercentual", f.diferencaPercentual, true, true),
-        singleSelect("Nova Step", "novoStep", f.novoStep, rm.steps, true),
-        field("Novo Nível", "novoNivel", f.novoNivel, true, true),
+        singleSelect("Novo Nível/Step", "novoStep", f.novoStep, rm.steps, true),
         field("Nova Faixa Salarial", "novaFaixa", f.novaFaixa, true, true),
         field("Novo Salário Enquadrado", "novoSalario", f.novoSalario, true),
         field("Data de Início da Vigência", "dataVigencia", f.dataVigencia, true, false, "date")
@@ -716,7 +763,6 @@
     var rows = [
       ["Cargo", f.cargoAtual, f.tipoMovimentacao === "Promoção" ? f.novoCargo : f.cargoAtual],
       ["Função", f.funcaoAtual, f.tipoMovimentacao === "Promoção" ? f.novaFuncao : f.funcaoAtual],
-      ["Nível", f.nivelAtual, f.novoNivel],
       ["Step", f.stepAtual, f.novoStep],
       ["Faixa Salarial", f.faixaAtual, f.novaFaixa],
       ["Salário", f.salarioAtual, f.novoSalario],
@@ -931,11 +977,25 @@
     if (type === "Enquadramento") {
       f.novoCargo = f.cargoAtual; f.novaFuncao = f.funcaoAtual; f.descricaoCargoProposto = f.descricaoCargoAtual; f.novoNivel = f.nivelAtual; f.novoStep = f.stepAtual; f.novaFaixa = getFaixaSalarialByStep(f.novoStep, f.cargoAtual); f.novoSalario = f.salarioAtual; f.novaEscala = f.escalaAtual; f.novoHorario = f.horarioAtual;
       updateEnquadramentoCalculations();
+      f.novoStep = f.stepSugerido;
+      f.novoNivel = getNivelByStep(f.novoStep);
+      f.novaFaixa = getFaixaSalarialByStep(f.novoStep, f.cargoAtual);
+      f.novoSalario = f.salarioSugerido;
+      updateEnquadramentoCalculations();
+      f.novoSalario = f.salarioSugerido;
     }
   }
 
   function handleAction(event) {
     var action = event.currentTarget.getAttribute("data-action");
+    if (action === "select-movement-type") {
+      state.movementTypePicked = true;
+      state.form.tipoMovimentacao = event.currentTarget.getAttribute("data-movement-type") || "Promoção";
+      applyMovementDefaults(state.form.tipoMovimentacao);
+      state.errors = {};
+      render();
+      return;
+    }
     if (action === "draft") showModal({ title: "Salvar rascunho", message: "Deseja salvar os dados preenchidos até o momento?", icon: "fa-save", confirmText: "Salvar", onConfirm: function () { state.status = "Rascunho salvo"; hideModal(); render(); } });
     if (action === "submit") { if (!validateSolicitacao()) return renderAndScroll(); showModal({ title: "Enviar solicitação", message: "Deseja enviar a movimentação de carreira para aprovação?", icon: "fa-paper-plane", confirmText: "Enviar", onConfirm: function () { state.status = "Enviado para aprovação"; hideModal(); render(); } }); }
     if (action === "send-approval") { var approvalKey = event.currentTarget.getAttribute("data-approval-key"); if (!validateApproval(approvalKey)) return; showModal({ title: "Enviar decisão", message: "Deseja registrar a decisão desta etapa?", icon: "fa-paper-plane", confirmText: "Enviar", onConfirm: function () { applyDecision(approvalKey); hideModal(); } }); }
