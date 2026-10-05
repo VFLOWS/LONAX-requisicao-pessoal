@@ -69,7 +69,7 @@
 
 .lx-salary-range-table .lx-read-head,
 .lx-salary-range-table .lx-read-row {
-  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr) minmax(0, 1.4fr);
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr);
 }
 
 .lx-salary-range-table .lx-read-row.lx-salary-range-active {
@@ -211,6 +211,11 @@
   column-gap: 28px;
 }
 
+.lx-field-name-novoCargoPrecisaEquipamento .lx-radio-options {
+  grid-template-columns: repeat(2, max-content);
+  column-gap: 28px;
+}
+
 .lx-career-current-grid .lx-field {
   grid-column: span 3;
 }
@@ -242,6 +247,46 @@
 
 .lx-career-current-grid .lx-field.lx-field-name-descricaoCargoAtual {
   grid-column: 1 / -1;
+}
+
+.lx-readonly-request-grid .lx-readonly-item-observacoes-adicionais {
+  grid-column: 1 / -1;
+}
+
+.lx-career-current-history-grid .lx-readonly-item-cargo-atual {
+  grid-column: 1 / span 3;
+}
+
+.lx-career-current-history-grid .lx-readonly-item-funcao-atual {
+  grid-column: 4 / span 3;
+}
+
+.lx-career-current-history-grid .lx-readonly-item-nivel-atual {
+  grid-column: 7 / span 3;
+}
+
+.lx-career-current-history-grid .lx-readonly-item-setor-secao-atual {
+  grid-column: 10 / span 3;
+}
+
+.lx-career-current-history-grid .lx-readonly-item-centro-de-custo-atual {
+  grid-column: 13 / span 3;
+}
+
+.lx-career-proposed-history-grid .lx-readonly-item-tipo-da-movimentacao {
+  grid-column: 1 / -1;
+}
+
+.lx-career-proposed-history-grid .lx-readonly-item-descricao-do-cargo {
+  grid-column: 1 / -1;
+}
+
+.lx-career-salary-range-history {
+  margin-top: 12px;
+}
+
+.lx-career-observation-note {
+  margin-top: 12px;
 }
 
 .lx-career-equipment-row {

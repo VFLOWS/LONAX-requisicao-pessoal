@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Protótipos Lonax</title>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <style>
+    :root {
+      --lx-blue: #16438f;
+      --lx-blue-dark: #0f2f73;
+      --lx-green: #16a36b;
+      --lx-bg: #f3f6fb;
+      --lx-border: #d8e4f4;
+      --lx-text: #1f2a44;
+      --lx-muted: #6b778c;
+      --lx-card: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--lx-bg);
+      color: var(--lx-text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .lx-shell {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    .lx-hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 24px;
+      padding: 22px 24px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #386bc5, var(--lx-blue-dark));
+      color: #fff;
+      box-shadow: 0 18px 40px rgba(15, 47, 115, 0.16);
+    }
+
+    .lx-brand {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .lx-logo {
+      width: 132px;
+      height: 58px;
+      object-fit: contain;
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: #fff;
+      flex: 0 0 auto;
+    }
+
+    .lx-hero h1 {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.18;
+      letter-spacing: 0;
+    }
+
+    .lx-hero p {
+      margin: 7px 0 0;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 13px;
+    }
+
+    .lx-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 999px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .lx-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .lx-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 240px;
+      padding: 20px;
+      border: 1px solid var(--lx-border);
+      border-radius: 8px;
+      background: var(--lx-card);
+      box-shadow: 0 14px 34px rgba(31, 42, 68, 0.08);
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .lx-card:hover {
+      transform: translateY(-3px);
+      border-color: #9bbbec;
+      box-shadow: 0 18px 44px rgba(31, 42, 68, 0.12);
+    }
+
+    .lx-card-icon {
+      width: 44px;
+      height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      border-radius: 8px;
+      background: #e8f0ff;
+      color: var(--lx-blue);
+      font-size: 18px;
+    }
+
+    .lx-card h2 {
+      margin: 0 0 8px;
+      color: var(--lx-blue);
+      font-size: 18px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .lx-card p {
+      margin: 0;
+      color: var(--lx-muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .lx-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: auto;
+      padding-top: 20px;
+      color: var(--lx-blue);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .lx-note {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border: 1px solid var(--lx-border);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--lx-muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 860px) {
+      .lx-hero {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .lx-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 540px) {
+      .lx-shell {
+        padding: 24px 14px;
+      }
+
+      .lx-brand {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .lx-hero h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="lx-shell">
+    <section class="lx-hero">
+      <div class="lx-brand">
+        <img class="lx-logo" src="https://lonax.com.br/wp-content/uploads/2024/08/Logomarca_Lonax-01.webp" alt="Lonax">
+        <div>
+          <h1>Protótipos de Processos Lonax</h1>
+          <p>Central de navegação dos protótipos HTML para validação visual e funcional.</p>
+        </div>
+      </div>
+      <span class="lx-pill"><i class="fa-solid fa-code-branch"></i> Navegação dinâmica</span>
+    </section>
+
+    <section class="lx-grid" aria-label="Lista de protótipos">
+      <a class="lx-card" href="./Prototipo - Requisicao de Pessoal/index.html">
+        <span class="lx-card-icon"><i class="fa-solid fa-user-plus"></i></span>
+        <h2>Requisição de Pessoal</h2>
+        <p>Solicitação, aprovações, correções, finalização, notificação de TI e visualização de anexos.</p>
+        <span class="lx-card-footer">
+          Acessar protótipo
+          <i class="fa-solid fa-arrow-right"></i>
+        </span>
+      </a>
+
+      <a class="lx-card" href="./Prototipo - Movimentacao de Pessoal/index.html">
+        <span class="lx-card-icon"><i class="fa-solid fa-people-arrows"></i></span>
+        <h2>Movimentação de Pessoal</h2>
+        <p>Fluxo de movimentação entre origem e destino, aprovações, infraestrutura, correção e conclusão.</p>
+        <span class="lx-card-footer">
+          Acessar protótipo
+          <i class="fa-solid fa-arrow-right"></i>
+        </span>
+      </a>
+
+      <a class="lx-card" href="./Prototipo - Movimentacao de Carreira/index.html">
+        <span class="lx-card-icon"><i class="fa-solid fa-chart-line"></i></span>
+        <h2>Movimentação de Carreira</h2>
+        <p>Fluxos separados por promoção, progressão e enquadramento, com etapas de aprovação e histórico.</p>
+        <span class="lx-card-footer">
+          Acessar protótipo
+          <i class="fa-solid fa-arrow-right"></i>
+        </span>
+      </a>
+    </section>
+
+  </main>
+</body>
+</html>

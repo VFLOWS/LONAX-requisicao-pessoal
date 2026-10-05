@@ -104,10 +104,27 @@
 
   var stages = [
     { key: "solicitacao", title: "Solicitar Movimentação de Carreira", icon: "fa-user-tie", tone: "blue", desc: "Abertura da solicitação pelo Gestor." },
-    { key: "diretoria", title: "Aprovação Diretoria", icon: "fa-building-user", tone: "purple", desc: "Será detalhada na próxima fase do protótipo." },
-    { key: "seguranca", title: "Segurança do Trabalho", icon: "fa-helmet-safety", tone: "orange", desc: "Aplicável somente para Promoção." },
-    { key: "rh", title: "Aprovação RH", icon: "fa-users-gear", tone: "teal", desc: "Será detalhada na próxima fase do protótipo." },
-    { key: "finalizada", title: "Movimentação Finalizada", icon: "fa-circle-check", tone: "green", desc: "Encerramento simulado do processo." }
+    { key: "promocao-diretoria", title: "Promoção - Aprovação Diretoria", icon: "fa-building-user", tone: "purple", desc: "Aprovação da promoção pela Diretoria." },
+    { key: "promocao-seguranca", title: "Promoção - Segurança do Trabalho", icon: "fa-helmet-safety", tone: "orange", desc: "Etapa aplicada por mudança de função e equipamentos." },
+    { key: "promocao-rh", title: "Promoção - Aprovação RH", icon: "fa-users-gear", tone: "teal", desc: "Conferência final da promoção." },
+    { key: "promocao-correcao", title: "Promoção - Correção", icon: "fa-rotate-left", tone: "slate", desc: "Correção da solicitação de promoção." },
+    { key: "promocao-finalizada", title: "Promoção - Finalizada", icon: "fa-circle-check", tone: "green", desc: "Promoção aprovada e concluída." },
+    { key: "promocao-cancelada", title: "Promoção - Cancelada", icon: "fa-ban", tone: "red", desc: "Promoção encerrada como cancelada." },
+    { key: "progressao-diretoria", title: "Progressão - Aprovação Diretoria", icon: "fa-building-user", tone: "purple", desc: "Aprovação da progressão pela Diretoria." },
+    { key: "progressao-rh", title: "Progressão - Aprovação RH", icon: "fa-users-gear", tone: "teal", desc: "Conferência final da progressão." },
+    { key: "progressao-correcao", title: "Progressão - Correção", icon: "fa-rotate-left", tone: "slate", desc: "Correção da solicitação de progressão." },
+    { key: "progressao-finalizada", title: "Progressão - Finalizada", icon: "fa-circle-check", tone: "green", desc: "Progressão aprovada e concluída." },
+    { key: "progressao-cancelada", title: "Progressão - Cancelada", icon: "fa-ban", tone: "red", desc: "Progressão encerrada como cancelada." },
+    { key: "enquadramento-rh", title: "Enquadramento - Aprovação RH", icon: "fa-users-gear", tone: "teal", desc: "Validação do enquadramento salarial." },
+    { key: "enquadramento-correcao", title: "Enquadramento - Correção", icon: "fa-rotate-left", tone: "slate", desc: "Correção da solicitação de enquadramento." },
+    { key: "enquadramento-finalizada", title: "Enquadramento - Finalizado", icon: "fa-circle-check", tone: "green", desc: "Enquadramento aprovado e concluído." },
+    { key: "enquadramento-cancelada", title: "Enquadramento - Cancelado", icon: "fa-ban", tone: "red", desc: "Enquadramento encerrado como cancelado." }
+  ];
+
+  var flows = [
+    { key: "promocao", title: "Promoção", icon: "fa-arrow-trend-up", tone: "blue", desc: "Mudança de cargo, função, nível ou estrutura salarial com possível análise de segurança." },
+    { key: "progressao", title: "Progressão", icon: "fa-chart-line", tone: "green", desc: "Evolução na carreira sem alteração de cargo ou função." },
+    { key: "enquadramento", title: "Enquadramento", icon: "fa-scale-balanced", tone: "teal", desc: "Ajuste de step ou salário conforme faixa salarial do cargo." }
   ];
 
   var state = {
@@ -115,6 +132,7 @@
     status: "Em preenchimento",
     errors: {},
     collapses: {},
+    decisions: {},
     form: {
       numero: "",
       data: rm.usuario.data,
@@ -122,6 +140,9 @@
       gestor: rm.usuario.gestor,
       gerencia: rm.usuario.gerencia,
       areaDiretoria: rm.usuario.areaDiretoria,
+      diretor: rm.usuario.diretor,
+      seguranca: rm.usuario.seguranca,
+      gestorRh: rm.usuario.gestorRh,
       filial: rm.usuario.filial,
       colaborador: "Carlos Pereira",
       chapa: "000731",
@@ -164,14 +185,26 @@
       ],
       justificativa: "Movimentação proposta para reconhecer evolução técnica e aderência do colaborador à nova responsabilidade na área.",
       observacoes: "Colaborador apresenta evolução consistente nas entregas da área e aderência às responsabilidades previstas para a movimentação proposta.",
-      anexos: []
+      anexos: [
+        { nome: "descricao-cargo-atual.pdf", tamanho: "26 KB", origem: "Solicitação", url: "anexos/descricao-cargo-atual.pdf" },
+        { nome: "avaliacao-desempenho.pdf", tamanho: "34 KB", origem: "Solicitação", url: "anexos/avaliacao-desempenho.pdf" }
+      ],
+      anexosSeguranca: [
+        { nome: "parecer-seguranca.pdf", tamanho: "22 KB", origem: "Segurança do Trabalho", url: "anexos/parecer-seguranca.pdf" }
+      ],
+      anexosRh: [
+        { nome: "validacao-rh.pdf", tamanho: "30 KB", origem: "RH", url: "anexos/validacao-rh.pdf" }
+      ]
     }
   };
 
   var stageNav = document.getElementById("stageNav");
   var appView = document.getElementById("appView");
   var statusLabel = document.getElementById("statusLabel");
+  var flowTitle = document.getElementById("flowTitle");
+  var flowDescription = document.getElementById("flowDescription");
   var isStagePage = !!appView;
+  var isFlowPage = /fluxo\.html$/.test(window.location.pathname);
   var radioCounter = 0;
   var modal = {
     wrap: document.getElementById("modalBackdrop"),
@@ -185,6 +218,7 @@
   };
 
   if (isStagePage) state.stage = getRequestedStage();
+  applyRequestedFlow();
 
   function escapeHtml(value) {
     return String(value == null ? "" : value)
@@ -195,8 +229,33 @@
       .replace(/'/g, "&#39;");
   }
   function getStage(key) { return stages.filter(function (item) { return item.key === key; })[0] || stages[0]; }
+  function getFlow(key) { return flows.filter(function (item) { return item.key === key; })[0] || flows[0]; }
   function getRequestedStage() { return getStage(new URLSearchParams(window.location.search).get("etapa") || "solicitacao").key; }
-  function getStageUrl(key) { return "etapa.html?etapa=" + encodeURIComponent(key); }
+  function getRequestedFlow() {
+    var queryFlow = new URLSearchParams(window.location.search).get("fluxo");
+    if (queryFlow) return getFlow(queryFlow).key;
+    var flow = getFlowStage(state.stage);
+    return flow && flow.type && flow.type !== "solicitacao" ? flow.type : "promocao";
+  }
+  function getFlowUrl(key) { return "fluxo.html?fluxo=" + encodeURIComponent(key); }
+  function getStageUrl(key, flow) { return "etapa.html?etapa=" + encodeURIComponent(key) + "&fluxo=" + encodeURIComponent(flow || getRequestedFlow()); }
+  function setStage(key) {
+    if (!isStagePage) { window.location.href = getStageUrl(key); return; }
+    state.stage = getStage(key).key;
+    window.history.replaceState(null, "", getStageUrl(state.stage, getRequestedFlow()));
+    render();
+  }
+  function applyRequestedFlow() {
+    var flow = getRequestedFlow();
+    if (state.stage !== "solicitacao") return;
+    applyFlowType(flow);
+  }
+  function applyFlowType(flow) {
+    if (flow === "promocao") state.form.tipoMovimentacao = "Promoção";
+    if (flow === "progressao") state.form.tipoMovimentacao = "Progressão";
+    if (flow === "enquadramento") state.form.tipoMovimentacao = "Enquadramento";
+    applyMovementDefaults(state.form.tipoMovimentacao);
+  }
   function formatDate(value) {
     var parts = String(value || "").split("-");
     if (parts.length !== 3) return value || "-";
@@ -264,8 +323,9 @@
     var stepSalary = getStepSalary(selectedStep, cargo);
     var currentSalary = parseMoney(f.salarioAtual);
     var newSalary = parseMoney(f.novoSalario);
-    var suggestedStep = getSuggestedStepBySalary(selectedStep, newSalary, cargo);
-    var suggestedSalary = newSalary > stepSalary ? newSalary : stepSalary;
+    var salaryForRule = newSalary < currentSalary ? currentSalary : newSalary;
+    var suggestedStep = getSuggestedStepBySalary(selectedStep, salaryForRule, cargo);
+    var suggestedSalary = salaryForRule > stepSalary ? salaryForRule : stepSalary;
     var diff = suggestedSalary - currentSalary;
     f.stepSugerido = suggestedStep;
     f.salarioSugerido = formatCurrency(suggestedSalary);
@@ -282,24 +342,60 @@
   render();
 
   function render() {
-    if (statusLabel) statusLabel.textContent = state.status;
-    if (stageNav) stageNav.innerHTML = stages.map(renderStageCard).join("");
+    if (statusLabel) statusLabel.textContent = isFlowPage ? "Seleção de etapas" : state.status;
+    updateBackLink();
+    renderNavigation();
     if (appView) renderView();
     bindEvents();
   }
 
-  function renderStageCard(stage) {
+  function updateBackLink() {
+    var backLink = document.querySelector(".lx-back-link");
+    if (!backLink || !isStagePage) return;
+    backLink.href = getFlowUrl(getRequestedFlow());
+    backLink.innerHTML = '<i class="fa-solid fa-arrow-left"></i> Voltar para etapas do fluxo';
+  }
+
+  function renderNavigation() {
+    if (!stageNav) return;
+    if (isFlowPage) {
+      var flow = getFlow(getRequestedFlow());
+      if (flowTitle) flowTitle.textContent = "Movimentação de Carreira - " + flow.title;
+      if (flowDescription) flowDescription.textContent = flow.desc;
+      stageNav.innerHTML = getStagesForFlow(flow.key).map(function (stage) { return renderStageCard(stage, flow.key); }).join("");
+      return;
+    }
+    stageNav.innerHTML = flows.map(renderFlowCard).join("");
+  }
+
+  function getStagesForFlow(flowKey) {
+    var first = {
+      key: "solicitacao",
+      title: "Solicitar Movimentação de Carreira",
+      icon: "fa-user-tie",
+      tone: "blue",
+      desc: "Abertura da solicitação de " + movementTypeLabel(flowKey) + "."
+    };
+    return [first].concat(stages.filter(function (stage) { return stage.key.indexOf(flowKey + "-") === 0; }));
+  }
+
+  function renderFlowCard(flow) {
+    return '<a class="lx-stage-card lx-flow-card" href="' + getFlowUrl(flow.key) + '" data-flow="' + flow.key + '">' +
+      '<span class="lx-stage-icon lx-dot-' + flow.tone + '"><i class="fa-solid ' + flow.icon + '"></i></span>' +
+      '<div><h3>' + flow.title + '</h3><p>' + flow.desc + '</p></div></a>';
+  }
+
+  function renderStageCard(stage, flowKey) {
     var active = stage.key === state.stage ? " lx-stage-current" : "";
-    return '<a class="lx-stage-card' + active + '" href="' + getStageUrl(stage.key) + '" data-stage="' + stage.key + '">' +
+    return '<a class="lx-stage-card' + active + '" href="' + getStageUrl(stage.key, flowKey) + '" data-stage="' + stage.key + '">' +
       '<span class="lx-stage-icon lx-dot-' + stage.tone + '"><i class="fa-solid ' + stage.icon + '"></i></span>' +
       '<div><h3>' + stage.title + '</h3><p>' + stage.desc + '</p></div></a>';
   }
 
   function renderView() {
     var stage = getStage(state.stage);
-    var body = state.stage === "solicitacao"
-      ? renderSolicitacao()
-      : viewComponent(stage.title, stage.desc, "Em desenho", '<div class="lx-career-alert"><i class="fa-solid fa-circle-info"></i><div>Esta etapa será construída depois da tela inicial de solicitação estar validada.</div></div>', "", stage.icon, stage.tone);
+    var flow = getFlowStage(state.stage);
+    var body = state.stage === "solicitacao" ? renderSolicitacao() : renderFlowStage(flow);
     appView.innerHTML = state.stage === "solicitacao" ? viewComponent(stage.title, stage.desc, state.status, body, "", stage.icon, stage.tone) : body;
   }
 
@@ -311,6 +407,11 @@
   }
 
   function renderSolicitacao() {
+    return renderSolicitacaoFields() +
+      '<div class="lx-actions"><button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar rascunho</button><button class="lx-btn lx-btn-primary" type="button" data-action="submit"><i class="fa-solid fa-paper-plane"></i> Enviar para aprovação</button></div>';
+  }
+
+  function renderSolicitacaoFields() {
     var f = state.form;
     return section("Dados do Solicitante", "user", grid([
       field("Data/Hora", "data", f.data, true, true),
@@ -346,11 +447,215 @@
         textarea("Observações adicionais", "observacoes", f.observacoes, false)
       )
     ) +
-    (f.tipoMovimentacao === "Promoção" ? formFieldset("Infraestrutura e Equipamentos", "laptop", renderInfrastructure()) : "") +
+    (f.tipoMovimentacao === "Promoção" ? section("Infraestrutura e Equipamentos", "laptop", renderInfrastructure()) : "") +
     section("Comparação Atual x Proposto", "table-columns", renderComparison()) +
     renderAttachmentsEditor("anexos", "Upload de Arquivos", "paperclip") +
-    formFieldset("Justificativa", "comment-dots", textarea("Justificativa da " + f.tipoMovimentacao, "justificativa", f.justificativa, true)) +
-    '<div class="lx-actions"><button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar rascunho</button><button class="lx-btn lx-btn-primary" type="button" data-action="submit"><i class="fa-solid fa-paper-plane"></i> Enviar para aprovação</button></div>';
+    formFieldset("Justificativa", "comment-dots", textarea("Justificativa da " + f.tipoMovimentacao, "justificativa", f.justificativa, true));
+  }
+
+  function getFlowStage(key) {
+    var parts = String(key || "").split("-");
+    return { type: parts[0] || "promocao", phase: parts[1] || "diretoria" };
+  }
+  function movementTypeLabel(type) {
+    return type === "promocao" ? "Promoção" : type === "progressao" ? "Progressão" : "Enquadramento";
+  }
+  function getFlowApprovals(type) {
+    if (type === "promocao") return requiresCareerSafety(type) ? ["diretoria", "seguranca", "rh"] : ["diretoria", "rh"];
+    if (type === "progressao") return ["diretoria", "rh"];
+    return ["rh"];
+  }
+  function requiresCareerSafety(type) {
+    return type === "promocao" && (state.form.novoCargoPrecisaEquipamento === "Sim" || state.form.novaFuncao !== state.form.funcaoAtual);
+  }
+  function flowStageKey(type, phase) {
+    return type + "-" + phase;
+  }
+  function getNextApproval(type, phase) {
+    var approvals = getFlowApprovals(type);
+    var index = approvals.indexOf(phase);
+    return index >= 0 && approvals[index + 1] ? approvals[index + 1] : "";
+  }
+  function renderFlowStage(flow) {
+    if (!flow || !flow.type) return "";
+    if (flow.phase === "correcao") return renderCorrectionFlow(flow.type);
+    if (flow.phase === "finalizada") return renderFinishedFlow(flow.type);
+    if (flow.phase === "cancelada") return renderCanceledFlow(flow.type);
+    return renderApprovalFlow(flow.type, flow.phase);
+  }
+  function renderApprovalFlow(type, phase) {
+    var stage = getStage(flowStageKey(type, phase));
+    var decision = state.decisions[state.stage] || { value: "approve", justification: "" };
+    return renderPreviousFlow(type, phase) +
+      viewComponent(approvalTitle(phase), stage.desc, state.status,
+        '<div class="lx-current-decision" data-approval="' + state.stage + '">' +
+          decisionOption("approve", "Aprovar movimentação", approvalDescription(type, phase), decision.value) +
+          decisionOption("return", "Devolver para correção", "A solicitação retornará ao solicitante para ajustes.", decision.value) +
+          decisionOption("reject", "Cancelar movimentação", "A movimentação será encerrada como cancelada.", decision.value) +
+          '<label class="lx-field' + (decision.value === "approve" ? " lx-hidden" : "") + '" data-approval-justification><span>Justificativa <b>*</b></span><textarea data-decision-field="justification" placeholder="Informe o motivo da correção ou cancelamento...">' + escapeHtml(decision.justification) + '</textarea></label>' +
+          (phase === "seguranca" ? renderAttachmentsEditor("anexosSeguranca", "Upload de Arquivos - Segurança do Trabalho", "paperclip") : "") +
+          (phase === "rh" ? renderAttachmentsEditor("anexosRh", "Upload de Arquivos - RH", "paperclip") : "") +
+          '<div class="lx-actions"><button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar rascunho</button><button class="lx-btn lx-btn-primary" type="button" data-action="send-approval" data-approval-key="' + state.stage + '"><i class="fa-solid fa-paper-plane"></i> Enviar decisão</button></div></div>'
+        , "", stage.icon, stage.tone);
+  }
+  function approvalDescription(type, phase) {
+    if (phase === "diretoria") return "A movimentação seguirá para a próxima etapa definida pelo fluxo de " + movementTypeLabel(type) + ".";
+    if (phase === "seguranca") return "A movimentação seguirá para aprovação final do RH.";
+    return "A movimentação será aprovada e seguirá para conclusão.";
+  }
+  function approvalTitle(phase) {
+    if (phase === "diretoria") return "Aprovação Diretoria";
+    if (phase === "seguranca") return "Segurança do Trabalho";
+    if (phase === "rh") return "Aprovação RH";
+    return "Aprovação";
+  }
+  function renderPreviousFlow(type, phase) {
+    var html = renderCareerSummaryComponent(type);
+    var approvals = getFlowApprovals(type);
+    var index = approvals.indexOf(phase);
+    for (var i = 0; i < index; i++) html += renderPreviousApprovalComponent(type, approvals[i]);
+    return html;
+  }
+  function renderCorrectionFlow(type) {
+    applyFlowType(type);
+    return renderCareerSummaryComponent(type) +
+      renderPreviousApprovalComponent(type, getFlowApprovals(type)[0], { value: "return", justification: "Solicitação devolvida para revisão das informações da movimentação de " + movementTypeLabel(type) + "." }, true) +
+      viewComponent("Correção da Movimentação de Carreira", "Ajuste das informações antes de reenviar o fluxo.", state.status,
+        renderSolicitacaoFields() +
+        '<div class="lx-actions"><button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar rascunho</button><button class="lx-btn lx-btn-primary" type="button" data-action="resend-correction" data-flow-type="' + type + '"><i class="fa-solid fa-paper-plane"></i> Reenviar solicitação</button></div>',
+        "", "fa-rotate-left", "slate");
+  }
+  function renderFinishedFlow(type) {
+    var approvals = getFlowApprovals(type);
+    var html = renderCareerSummaryComponent(type);
+    for (var i = 0; i < approvals.length; i++) html += renderPreviousApprovalComponent(type, approvals[i]);
+    return html + viewComponent("Movimentação Finalizada", "Movimentação aprovada e concluída.", "Finalizada", '<div class="lx-history-stage lx-history-stage-green">Movimentação de carreira finalizada após aprovação do RH.</div>', "", "fa-circle-check", "green");
+  }
+  function renderCanceledFlow(type) {
+    return renderCareerSummaryComponent(type) +
+      renderPreviousApprovalComponent(type, getFlowApprovals(type)[0], { value: "reject", justification: "Movimentação cancelada por inconsistência nas informações apresentadas." }, true) +
+      viewComponent("Movimentação Cancelada", "Visualização da movimentação encerrada.", "Cancelada", '<div class="lx-history-stage lx-history-stage-red">Movimentação encerrada como cancelada após decisão da etapa de aprovação.</div>', "", "fa-ban", "red");
+  }
+  function renderCareerSummaryComponent(type) {
+    var key = "dados_" + type;
+    var open = !!state.collapses[key];
+    return viewComponent('<button type="button" class="lx-collapse-title" data-collapse="' + key + '" aria-expanded="' + open + '"><span>Dados da Movimentação de Carreira</span><i class="fa-solid fa-chevron-down lx-collapse-chevron' + (open ? " lx-collapse-chevron-open" : "") + '"></i></button>',
+      state.form.data + " - " + state.form.solicitante + " - " + state.form.gerencia,
+      "", open ? renderCareerSnapshot(type) : "", "lx-view-shell-history" + (open ? "" : " lx-view-shell-collapsed"), "fa-user-tie", "green");
+  }
+  function renderCareerSnapshot(type) {
+    var data = getMovementSnapshot(type);
+    return historySection("Dados do Solicitante", "user", "blue", [["Data/Hora", data.data], ["Solicitante", data.solicitante], ["Gerência", data.gerencia], ["Filial", data.filial], ["Gestor Imediato", data.gestor], ["Área Diretoria", data.areaDiretoria]], "lx-readonly-request-grid") +
+      historySection("Dados da Movimentação de Carreira", "id-badge", "green", [["Colaborador", data.colaborador], ["Matrícula", data.chapa], ["Data de Admissão", data.admissao], ["Cargo Atual", data.cargoAtual], ["Função Atual", data.funcaoAtual], ["Nível Atual", data.nivelAtual], ["Setor / Seção Atual", data.secaoAtual], ["Centro de Custo Atual", data.centroAtual], ["Descrição do Cargo Atual", data.descricaoCargoAtual]], "lx-readonly-request-grid lx-career-current-history-grid") +
+      renderProposedCareerHistory(type, data) +
+      (type === "promocao" ? historyCustomSection("Infraestrutura e Equipamentos", "laptop", "purple", renderCareerEquipmentSnapshot(data)) : "") +
+      historyCustomSection("Comparação Atual x Proposto", "table-columns", "blue", renderComparisonSnapshot(type, data)) +
+      historyCustomSection("Upload de Arquivos", "paperclip", "purple", renderAttachmentsList(data.anexos, "anexos", false)) +
+      historyCustomSection("Justificativa", "comment-dots", "teal", escapeHtml(data.justificativa || "-"));
+  }
+  function getMovementSnapshot(type) {
+    var f = state.form;
+    var data = {};
+    for (var key in f) data[key] = f[key];
+    data.tipoMovimentacao = movementTypeLabel(type);
+    if (type === "progressao") {
+      data.novoCargo = f.cargoAtual; data.novaFuncao = f.funcaoAtual; data.descricaoCargoProposto = f.descricaoCargoAtual; data.novoNivel = "Operacional - Step 3"; data.novoStep = "Step 3"; data.novaFaixa = getFaixaSalarialByStep("Step 3", f.cargoAtual); data.novoSalario = "R$ 3.750,00"; data.novaEscala = f.escalaAtual; data.novoHorario = f.horarioAtual; data.novoCargoPrecisaEquipamento = "Não";
+    }
+    if (type === "enquadramento") {
+      var currentSalary = parseMoney(f.salarioAtual);
+      var stepSalary = getStepSalary(f.stepAtual, f.cargoAtual);
+      var suggestedStep = getSuggestedStepBySalary(f.stepAtual, currentSalary, f.cargoAtual);
+      var suggestedSalary = currentSalary > stepSalary ? currentSalary : stepSalary;
+      data.novoCargo = f.cargoAtual; data.novaFuncao = f.funcaoAtual; data.descricaoCargoProposto = f.descricaoCargoAtual; data.novoNivel = getNivelBase(f.nivelAtual) + " - " + suggestedStep; data.novoStep = suggestedStep; data.novaFaixa = getFaixaSalarialByStep(suggestedStep, f.cargoAtual); data.novoSalario = formatCurrency(suggestedSalary); data.novaEscala = f.escalaAtual; data.novoHorario = f.horarioAtual; data.novoCargoPrecisaEquipamento = "Não";
+    }
+    return data;
+  }
+  function renderProposedCareerHistory(type, data) {
+    var rows = [["Tipo da Movimentação", movementTypeLabel(type)]];
+    if (type === "promocao") {
+      rows = rows.concat([["Cargo Proposto", data.novoCargo], ["Função Proposta", data.novaFuncao], ["Nível Proposto", data.novoNivel], ["Descrição do Cargo", data.descricaoCargoProposto], ["Faixa Salarial", data.novaFaixa], ["Novo Salário", data.novoSalario], ["Escala", data.novaEscala], ["Horário", data.novoHorario], ["Data de Início da Vigência", formatDate(data.dataVigencia)]]);
+    }
+    if (type === "progressao") {
+      rows = rows.concat([["Cargo após movimentação", data.novoCargo], ["Função após movimentação", data.novaFuncao], ["Nível Proposto", data.novoNivel], ["Descrição do Cargo", data.descricaoCargoProposto], ["Faixa Salarial", data.novaFaixa], ["Novo Salário", data.novoSalario], ["Data de Início da Vigência", formatDate(data.dataVigencia)]]);
+    }
+    if (type === "enquadramento") {
+      rows = rows.concat([["Cargo", data.novoCargo], ["Função", data.novaFuncao], ["Nível Proposto", data.novoNivel], ["Nova Step", data.novoStep], ["Faixa Salarial", data.novaFaixa], ["Novo Salário Enquadrado", data.novoSalario], ["Data de Início da Vigência", formatDate(data.dataVigencia)]]);
+    }
+    return historyCustomSection("Movimentação Proposta", "chart-line", "green",
+      '<div class="lx-history-stage-grid lx-readonly-request-grid lx-career-proposed-history-grid">' +
+      rows.map(function (row) { return '<div class="lx-history-stage-item ' + readonlyItemClass(row[0]) + '"><span>' + escapeHtml(row[0]) + '</span><strong>' + escapeHtml(row[1] || "-") + '</strong></div>'; }).join("") +
+      '</div>' +
+      renderSalaryRangeHistory(data) +
+      '<div class="lx-history-note lx-career-observation-note"><span>Observações adicionais</span><strong>' + escapeHtml(data.observacoes || "-") + '</strong></div>'
+    );
+  }
+  function renderSalaryRangeHistory(data) {
+    var cargo = data.novoCargo || data.cargoAtual;
+    var highlightStep = data.novoStep || data.stepAtual;
+    return '<div class="lx-career-salary-range lx-career-salary-range-history"><div class="lx-career-salary-title"><i class="fa-solid fa-layer-group"></i><div><strong>Faixa Salarial do Cargo</strong><span>' + escapeHtml(cargo) + '</span></div></div>' +
+      '<div class="lx-read-table lx-salary-range-table"><div class="lx-read-head"><span>Step</span><span>Faixa Salarial</span></div>' +
+      getSalaryRangeForCargo(cargo).map(function (row) {
+        var active = row.step === highlightStep ? " lx-salary-range-active" : "";
+        return '<div class="lx-read-row' + active + '"><strong>' + escapeHtml(row.step) + '</strong><strong>' + escapeHtml(row.faixa) + '</strong></div>';
+      }).join("") + '</div></div>';
+  }
+  function renderCareerEquipmentSnapshot(data) {
+    var currentRows = '<div class="lx-history-note"><span>O colaborador utiliza equipamentos atualmente?</span><strong>' + escapeHtml(data.usaEquipamentoAtual) + '</strong></div>' +
+      (data.usaEquipamentoAtual === "Sim" ? renderEquipmentRows(data.equipamentosOrigem, "destino") : "");
+    var requiredRows = '<div class="lx-history-note"><span>O novo cargo / função necessita equipamentos?</span><strong>' + escapeHtml(data.novoCargoPrecisaEquipamento) + '</strong></div>' +
+      (data.novoCargoPrecisaEquipamento === "Sim" ? renderEquipmentRows(data.equipamentosNecessarios, "observacao") : "");
+    return currentRows + requiredRows;
+  }
+  function renderEquipmentRows(items, detailField) {
+    if (!items || !items.length) return '<div class="lx-empty-list">Nenhum equipamento informado.</div>';
+    return '<div class="lx-read-table lx-career-equipment-history"><div class="lx-read-head"><span>Equipamento</span><span>Quantidade</span><span>Observação</span></div>' +
+      items.map(function (item) { return '<div class="lx-read-row"><strong>' + escapeHtml(item.equipamento) + '</strong><strong>' + escapeHtml(item.quantidade) + '</strong><strong>' + escapeHtml(item[detailField] || "-") + '</strong></div>'; }).join("") + '</div>';
+  }
+  function renderComparisonSnapshot(type, data) {
+    var rows = [];
+    if (type === "promocao") rows = [["Cargo", data.cargoAtual, data.novoCargo], ["Função", data.funcaoAtual, data.novaFuncao], ["Nível", data.nivelAtual, data.novoNivel], ["Step", data.stepAtual, data.novoStep], ["Faixa Salarial", data.faixaAtual, data.novaFaixa], ["Salário", data.salarioAtual, data.novoSalario], ["Escala", data.escalaAtual, data.novaEscala], ["Horário", data.horarioAtual, data.novoHorario]];
+    if (type === "progressao") rows = [["Cargo", data.cargoAtual, data.novoCargo], ["Função", data.funcaoAtual, data.novaFuncao], ["Nível", data.nivelAtual, data.novoNivel], ["Faixa Salarial", data.faixaAtual, data.novaFaixa], ["Salário", data.salarioAtual, data.novoSalario]];
+    if (type === "enquadramento") rows = [["Step", data.stepAtual, data.novoStep], ["Faixa Salarial", data.faixaAtual, data.novaFaixa], ["Salário", data.salarioAtual, data.novoSalario]];
+    return '<div class="lx-read-table lx-career-comparison"><div class="lx-read-head"><span>Campo</span><span>Atual</span><span>Proposto</span></div>' +
+      rows.map(function (row) { return '<div class="lx-read-row"><strong>' + escapeHtml(row[0]) + '</strong><strong>' + escapeHtml(row[1]) + '</strong><strong>' + escapeHtml(row[2]) + '</strong></div>'; }).join("") +
+      '</div>';
+  }
+  function renderPreviousApprovalComponent(type, phase, snapshot, forceOpen) {
+    var stage = getStage(flowStageKey(type, phase));
+    var key = "aprovacao_" + type + "_" + phase;
+    var open = forceOpen || !!state.collapses[key];
+    var decision = snapshot || state.decisions[flowStageKey(type, phase)] || { value: "approve", justification: "Etapa aprovada sem ressalvas." };
+    var label = decision.value === "return" ? "Solicitação devolvida para correção" : decision.value === "reject" ? "Movimentação cancelada" : "Movimentação aprovada";
+    var tone = decision.value === "return" ? "orange" : decision.value === "reject" ? "red" : "green";
+    var body = historySection("Decisão sobre a Movimentação", "list-check", tone, [["Decisão", label], ["Responsável", responsibleName(phase)], ["Observação", decision.justification || "Etapa aprovada sem ressalvas."]]) +
+      (phase === "seguranca" ? historyCustomSection("Upload de Arquivos - Segurança do Trabalho", "paperclip", "purple", renderAttachmentsList(state.form.anexosSeguranca, "anexosSeguranca", false)) : "") +
+      (phase === "rh" ? historyCustomSection("Upload de Arquivos - RH", "paperclip", "purple", renderAttachmentsList(state.form.anexosRh, "anexosRh", false)) : "");
+    return viewComponent('<button type="button" class="lx-collapse-title" data-collapse="' + key + '" aria-expanded="' + open + '"><span>' + approvalTitle(phase) + '</span><i class="fa-solid fa-chevron-down lx-collapse-chevron' + (open ? " lx-collapse-chevron-open" : "") + '"></i></button>', movementDescription(phase), "", open ? body : "", "lx-view-shell-history" + (open ? "" : " lx-view-shell-collapsed"), stage.icon, "green");
+  }
+  function movementDescription(phase) {
+    if (phase === "diretoria") return "02/10/2026 10:05 - " + state.form.diretor + " - Diretoria Industrial";
+    if (phase === "seguranca") return "02/10/2026 11:20 - " + state.form.seguranca + " - Segurança do Trabalho";
+    if (phase === "rh") return "02/10/2026 14:10 - " + state.form.gestorRh + " - Recursos Humanos";
+    return state.form.data + " - " + state.form.solicitante + " - " + state.form.gerencia;
+  }
+  function responsibleName(phase) {
+    if (phase === "diretoria") return state.form.diretor;
+    if (phase === "seguranca") return state.form.seguranca;
+    if (phase === "rh") return state.form.gestorRh;
+    return state.form.solicitante;
+  }
+  function historySection(title, icon, tone, rows, gridClass) {
+    return historyCustomSection(title, icon, tone, '<div class="lx-history-stage-grid ' + (gridClass || "") + '">' + rows.map(function (row) { return '<div class="lx-history-stage-item ' + readonlyItemClass(row[0]) + '"><span>' + escapeHtml(row[0]) + '</span><strong>' + escapeHtml(row[1] || "-") + '</strong></div>'; }).join("") + '</div>');
+  }
+  function historyCustomSection(title, icon, tone, content) {
+    return '<fieldset class="lx-history-fieldset lx-history-fieldset-' + tone + '"><legend><i class="fa-solid fa-' + icon + '"></i> ' + title + '</legend><div class="lx-history-stage lx-history-stage-' + tone + '">' + content + '</div></fieldset>';
+  }
+  function readonlyItemClass(label) {
+    return "lx-readonly-item-" + String(label || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase();
+  }
+  function decisionOption(value, title, description, selected) {
+    var tone = value === "approve" ? "approve" : value === "return" ? "return" : "reject";
+    return '<label class="lx-decision-option lx-decision-' + tone + (selected === value ? " lx-decision-option-selected" : "") + '" data-decision="' + value + '"><input type="radio" name="decision"' + (selected === value ? " checked" : "") + ' /><div><span>' + title + '</span><p>' + description + '</p></div></label>';
   }
 
   function renderMovementTypeFields() {
@@ -399,10 +704,10 @@
     if (!cargo) return "";
     var highlightStep = f.tipoMovimentacao === "Enquadramento" ? f.stepSugerido : f.novoStep;
     return '<div class="lx-career-salary-range"><div class="lx-career-salary-title"><i class="fa-solid fa-layer-group"></i><div><strong>Faixa Salarial do Cargo</strong><span>' + escapeHtml(cargo) + '</span></div></div>' +
-      '<div class="lx-read-table lx-salary-range-table"><div class="lx-read-head"><span>Step</span><span>Faixa Salarial</span><span>Referência</span></div>' +
+      '<div class="lx-read-table lx-salary-range-table"><div class="lx-read-head"><span>Step</span><span>Faixa Salarial</span></div>' +
       getSalaryRangeForCargo(cargo).map(function (row) {
         var active = row.step === highlightStep ? " lx-salary-range-active" : "";
-        return '<div class="lx-read-row' + active + '"><strong>' + escapeHtml(row.step) + '</strong><strong>' + escapeHtml(row.faixa) + '</strong><span>' + escapeHtml(row.referencia || "-") + '</span></div>';
+        return '<div class="lx-read-row' + active + '"><strong>' + escapeHtml(row.step) + '</strong><strong>' + escapeHtml(row.faixa) + '</strong></div>';
       }).join("") + '</div></div>';
   }
 
@@ -427,9 +732,12 @@
     var f = state.form;
     return formFieldset("Equipamentos Atuais", "laptop",
       radioGroup("O colaborador utiliza equipamentos atualmente?", "usaEquipamentoAtual", f.usaEquipamentoAtual, ["Sim", "Não"], true) +
-      (f.usaEquipamentoAtual === "Sim" ? renderCurrentEquipments() : radioGroup("O novo cargo / função necessita equipamentos?", "novoCargoPrecisaEquipamento", f.novoCargoPrecisaEquipamento, ["Sim", "Não"], true))
+      (f.usaEquipamentoAtual === "Sim" ? renderCurrentEquipments() : "")
     ) +
-    (needsNewEquipmentBlock() ? formFieldset("Equipamentos Necessários", "desktop", renderRequiredEquipments()) : "");
+    formFieldset("Equipamentos Necessários", "desktop",
+      radioGroup("O novo cargo / função necessita equipamentos?", "novoCargoPrecisaEquipamento", f.novoCargoPrecisaEquipamento, ["Sim", "Não"], true) +
+      (needsNewEquipmentBlock() ? renderRequiredEquipments() : "")
+    );
   }
 
   function renderCurrentEquipments() {
@@ -457,7 +765,7 @@
   }
 
   function needsNewEquipmentBlock() {
-    return state.form.usaEquipamentoAtual === "Sim" || state.form.novoCargoPrecisaEquipamento === "Sim";
+    return state.form.novoCargoPrecisaEquipamento === "Sim";
   }
 
   function section(title, icon, content) {
@@ -509,14 +817,17 @@
   function renderAttachmentsList(files, fieldName, editable) {
     if (!files.length) return '<div class="lx-empty-list">Nenhum arquivo anexado.</div>';
     return '<div class="lx-attachment-list">' + files.map(function (file, index) {
-      return '<div class="lx-attachment-row"><div class="lx-attachment-info"><i class="fa-solid fa-file-lines"></i><div><strong>' + escapeHtml(file.nome) + '</strong><span>' + escapeHtml(file.tamanho || "-") + ' - ' + escapeHtml(file.origem || "Anexo") + '</span></div></div><div class="lx-attachment-actions"><button class="lx-btn-icon lx-btn-secondary" type="button" data-action="view-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Visualizar anexo"><i class="fa-solid fa-eye"></i></button>' + (editable ? '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Excluir anexo"><i class="fa-solid fa-trash"></i></button>' : "") + '</div></div>';
+      return '<div class="lx-attachment-row"><div class="lx-attachment-info"><i class="fa-solid fa-file-lines"></i><div><strong>' + escapeHtml(file.nome) + '</strong><span>' + escapeHtml(file.tamanho || "-") + ' - ' + escapeHtml(file.origem || "Anexo") + '</span></div></div><div class="lx-attachment-actions"><button class="lx-btn-icon lx-btn-secondary" type="button" data-action="view-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Visualizar anexo"><i class="fa-solid fa-eye"></i></button><button class="lx-btn-icon lx-btn-secondary" type="button" data-action="download-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Baixar anexo"><i class="fa-solid fa-download"></i></button>' + (editable ? '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Excluir anexo"><i class="fa-solid fa-trash"></i></button>' : "") + '</div></div>';
     }).join("") + '</div>';
   }
 
   function bindEvents() {
-    document.querySelectorAll("[data-stage]").forEach(function (card) { card.addEventListener("click", function (event) { event.preventDefault(); window.location.href = card.getAttribute("href"); }); });
+    document.querySelectorAll("[data-stage]").forEach(function (card) { card.addEventListener("click", function (event) { event.preventDefault(); setStage(card.getAttribute("data-stage")); }); });
+    document.querySelectorAll("[data-collapse]").forEach(function (button) { button.addEventListener("click", function () { var key = button.getAttribute("data-collapse"); state.collapses[key] = !state.collapses[key]; render(); }); });
     document.querySelectorAll("[data-field]").forEach(function (node) { if (node.hasAttribute("data-single-select")) return; node.addEventListener("input", updateFieldFromEvent); node.addEventListener("change", updateFieldFromEvent); });
     bindSingleSelects();
+    document.querySelectorAll("[data-decision]").forEach(function (node) { node.addEventListener("click", function () { var key = node.closest("[data-approval]").getAttribute("data-approval"); state.decisions[key] = state.decisions[key] || {}; state.decisions[key].value = node.getAttribute("data-decision"); render(); }); });
+    document.querySelectorAll("[data-decision-field]").forEach(function (node) { node.addEventListener("input", function () { var key = node.closest("[data-approval]").getAttribute("data-approval"); state.decisions[key] = state.decisions[key] || {}; state.decisions[key].justification = node.value; }); });
     document.querySelectorAll("[data-action]").forEach(function (button) { button.addEventListener("click", handleAction); });
     document.querySelectorAll("[data-file-upload]").forEach(function (input) { input.addEventListener("change", handleFileUpload); });
     document.querySelectorAll("[data-dropzone]").forEach(function (dropzone) {
@@ -563,6 +874,12 @@
       node.value = value;
       syncEnquadramentoFields();
       return;
+    }
+    if (name === "novoSalario" && state.form.tipoMovimentacao === "Enquadramento" && parseMoney(state.form.novoSalario) < parseMoney(state.form.salarioAtual)) {
+      updateEnquadramentoCalculations();
+      state.form.novoSalario = state.form.salarioSugerido;
+      updateEnquadramentoCalculations();
+      showModal({ title: "Salário inválido", message: "O Novo Salário Enquadrado não pode ser menor que o Salário Atual. O campo foi ajustado para o salário correspondente à regra do enquadramento.", icon: "fa-triangle-exclamation", confirmText: "Entendi", cancelText: "Fechar", onConfirm: hideModal });
     }
     if (name === "dataVigencia" && value && value < todayValue()) {
       state.errors.dataVigencia = "A data de início da vigência não pode ser menor que a data atual.";
@@ -621,12 +938,32 @@
     var action = event.currentTarget.getAttribute("data-action");
     if (action === "draft") showModal({ title: "Salvar rascunho", message: "Deseja salvar os dados preenchidos até o momento?", icon: "fa-save", confirmText: "Salvar", onConfirm: function () { state.status = "Rascunho salvo"; hideModal(); render(); } });
     if (action === "submit") { if (!validateSolicitacao()) return renderAndScroll(); showModal({ title: "Enviar solicitação", message: "Deseja enviar a movimentação de carreira para aprovação?", icon: "fa-paper-plane", confirmText: "Enviar", onConfirm: function () { state.status = "Enviado para aprovação"; hideModal(); render(); } }); }
+    if (action === "send-approval") { var approvalKey = event.currentTarget.getAttribute("data-approval-key"); if (!validateApproval(approvalKey)) return; showModal({ title: "Enviar decisão", message: "Deseja registrar a decisão desta etapa?", icon: "fa-paper-plane", confirmText: "Enviar", onConfirm: function () { applyDecision(approvalKey); hideModal(); } }); }
+    if (action === "resend-correction") { var type = event.currentTarget.getAttribute("data-flow-type"); showModal({ title: "Reenviar solicitação", message: "Deseja reenviar a movimentação para aprovação?", icon: "fa-paper-plane", confirmText: "Reenviar", onConfirm: function () { hideModal(); setStage(flowStageKey(type, getFlowApprovals(type)[0])); } }); }
     if (action === "add-current-equipment") { state.form.equipamentosOrigem.push({ equipamento: "", quantidade: "1", destino: "" }); render(); }
     if (action === "delete-current-equipment") { var currentIndex = Number(event.currentTarget.getAttribute("data-index")); showDelete("Deseja remover este equipamento atual?", function () { state.form.equipamentosOrigem.splice(currentIndex, 1); }); }
     if (action === "add-required-equipment") { state.form.equipamentosNecessarios.push({ equipamento: "", quantidade: "1", observacao: "" }); render(); }
     if (action === "delete-required-equipment") { var requiredIndex = Number(event.currentTarget.getAttribute("data-index")); showDelete("Deseja remover este equipamento necessário?", function () { state.form.equipamentosNecessarios.splice(requiredIndex, 1); }); }
-    if (action === "delete-attachment") { var attachmentIndex = Number(event.currentTarget.getAttribute("data-index")); showDelete("Deseja remover este arquivo anexado?", function () { state.form.anexos.splice(attachmentIndex, 1); }); }
-    if (action === "view-attachment") { var file = state.form.anexos[Number(event.currentTarget.getAttribute("data-index"))]; showModal({ title: file ? file.nome : "Visualizar anexo", message: file ? "Prévia simulada do anexo selecionado." : "Anexo não encontrado.", icon: "fa-eye", confirmText: "Fechar", hideCancel: true, onConfirm: hideModal }); }
+    if (action === "delete-attachment") { var attachmentIndex = Number(event.currentTarget.getAttribute("data-index")); var attachmentField = event.currentTarget.getAttribute("data-attachment-field") || "anexos"; showDelete("Deseja remover este arquivo anexado?", function () { state.form[attachmentField].splice(attachmentIndex, 1); }); }
+    if (action === "view-attachment") { var viewField = event.currentTarget.getAttribute("data-attachment-field") || "anexos"; var file = (state.form[viewField] || [])[Number(event.currentTarget.getAttribute("data-index"))]; showModal({ title: file ? file.nome : "Visualizar anexo", html: renderAttachmentPreview(file), icon: "fa-eye", confirmText: "Fechar", hideCancel: true, wide: true, onConfirm: hideModal }); }
+    if (action === "download-attachment") { var downloadField = event.currentTarget.getAttribute("data-attachment-field") || "anexos"; var downloadFile = (state.form[downloadField] || [])[Number(event.currentTarget.getAttribute("data-index"))]; if (downloadFile && downloadFile.url) { window.open(downloadFile.url, "_blank"); return; } showModal({ title: "Baixar anexo", message: downloadFile ? downloadFile.nome : "Anexo não encontrado.", icon: "fa-download", confirmText: "Ok", cancelText: "Fechar", onConfirm: hideModal }); }
+  }
+  function validateApproval(key) {
+    var decision = state.decisions[key] || { value: "approve", justification: "" };
+    if (decision.value !== "approve" && !String(decision.justification || "").trim()) {
+      showModal({ title: "Justificativa obrigatória", message: "Informe a justificativa para devolver ou cancelar a movimentação.", icon: "fa-triangle-exclamation", confirmText: "Entendi", cancelText: "Fechar", onConfirm: hideModal });
+      return false;
+    }
+    return true;
+  }
+  function applyDecision(key) {
+    var flow = getFlowStage(key);
+    var decision = state.decisions[key] || { value: "approve", justification: "" };
+    if (decision.value === "return") { state.status = "Em correção"; setStage(flowStageKey(flow.type, "correcao")); return; }
+    if (decision.value === "reject") { state.status = "Cancelada"; setStage(flowStageKey(flow.type, "cancelada")); return; }
+    var next = getNextApproval(flow.type, flow.phase);
+    state.status = next ? "Em aprovação - " + next.toUpperCase() : "Finalizada";
+    setStage(next ? flowStageKey(flow.type, next) : flowStageKey(flow.type, "finalizada"));
   }
   function showDelete(message, onConfirm) {
     showModal({ title: "Excluir item", message: message, icon: "fa-trash", confirmText: "Excluir", onConfirm: function () { onConfirm(); hideModal(); render(); } });
@@ -650,6 +987,7 @@
     if (f.tipoMovimentacao === "Enquadramento") {
       ["novoStep", "novoNivel", "novaFaixa", "novoSalario"].forEach(function (name) { if (!String(f[name] || "").trim()) errors[name] = "Campo obrigatório."; });
       if (f.novoCargo !== f.cargoAtual || f.novaFuncao !== f.funcaoAtual) errors.tipoMovimentacao = "Enquadramento não pode alterar cargo ou função. Utilize Promoção.";
+      if (parseMoney(f.novoSalario) < parseMoney(f.salarioAtual)) errors.novoSalario = "Novo Salário Enquadrado não pode ser menor que o Salário Atual.";
     }
     f.equipamentosOrigem.forEach(function (item, index) {
       if (!String(item.equipamento || "").trim()) errors["currentEquipment." + index + ".equipamento"] = "Campo obrigatório.";
@@ -673,12 +1011,20 @@
       if (focusable) focusable.focus({ preventScroll: true });
     });
   }
-  function handleFileUpload(event) { addFilesToAttachmentList(event.target.files); render(); }
-  function addFilesToAttachmentList(files) {
+  function handleFileUpload(event) { addFilesToAttachmentList(event.target.getAttribute("data-file-upload"), event.target.files); render(); }
+  function addFilesToAttachmentList(fieldName, files) {
     if (!files || !files.length) return;
-    for (var i = 0; i < files.length; i++) state.form.anexos.push({ nome: files[i].name, tamanho: formatFileSize(files[i].size), origem: "Solicitação" });
+    fieldName = fieldName || "anexos";
+    state.form[fieldName] = state.form[fieldName] || [];
+    for (var i = 0; i < files.length; i++) state.form[fieldName].push({ nome: files[i].name, tamanho: formatFileSize(files[i].size), origem: attachmentOrigin(fieldName) });
   }
   function formatFileSize(size) { if (!size) return "0 KB"; if (size < 1024 * 1024) return Math.max(1, Math.round(size / 1024)) + " KB"; return (size / 1024 / 1024).toFixed(1).replace(".", ",") + " MB"; }
+  function attachmentOrigin(fieldName) { return fieldName === "anexosRh" ? "RH" : fieldName === "anexosSeguranca" ? "Segurança do Trabalho" : "Solicitação"; }
+  function renderAttachmentPreview(attachment) {
+    if (!attachment) return '<div class="lx-attachment-preview-empty">Anexo não encontrado.</div>';
+    if (!attachment.url) return '<div class="lx-attachment-preview-empty">Este anexo não possui arquivo disponível para visualização.</div>';
+    return '<div class="lx-attachment-preview"><iframe class="lx-attachment-frame" src="' + escapeHtml(encodeURI(attachment.url)) + '" title="' + escapeHtml(attachment.nome) + '"></iframe></div>';
+  }
   function showModal(options) {
     modal.title.textContent = options.title || "Confirmação";
     modal.message.innerHTML = options.html || escapeHtml(options.message || "");
@@ -686,6 +1032,7 @@
     modal.confirm.textContent = options.confirmText || "Confirmar";
     modal.cancel.textContent = options.cancelText || "Cancelar";
     modal.cancel.classList.toggle("lx-hidden", !!options.hideCancel);
+    modal.dialog.classList.toggle("lx-modal-wide", !!options.wide);
     modal.action = options.onConfirm || hideModal;
     modal.wrap.classList.remove("lx-hidden");
   }
