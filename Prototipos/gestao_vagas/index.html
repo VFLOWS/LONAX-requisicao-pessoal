@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestão de Vagas - Processo seletivo</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <aside class="sl-sidebar" aria-label="Menu da widget">
+    <div class="sl-sidebar-brand">
+      <img src="https://www.lonax.com.br/wp-content/uploads/2024/08/Logomarca_Lonax-02.webp" alt="Lonax" />
+    </div>
+    <div class="sl-sidebar-group">Gestão de Vagas</div>
+    <a class="sl-sidebar-item" href="dashboard.html" aria-label="Dashboard">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Dashboard</span>
+    </a>
+    <a class="sl-sidebar-item sl-sidebar-item-active" href="index.html" aria-label="Processo seletivo">
+      <i class="fa-solid fa-users"></i>
+      <span>Processo seletivo</span>
+    </a>
+  </aside>
+
+  <main class="sl-page">
+    <header class="sl-page-head">
+      <div class="sl-title-content">
+        <nav aria-label="Caminho da página">
+          <a href="#">Gestão de Vagas</a>
+          <i class="fa-solid fa-chevron-right"></i>
+          <strong>Processo seletivo</strong>
+        </nav>
+      </div>
+      <a class="sl-back-button" href="#">
+        <i class="fa-solid fa-arrow-left"></i>
+        Voltar para o Fluig
+      </a>
+    </header>
+
+    <section class="sl-page-title">
+      <div>
+        <h1>Processo seletivo</h1>
+        <p>Importação de candidatos selecionados na Sólides e acompanhamento das solicitações individuais no Fluig.</p>
+      </div>
+    </section>
+
+    <section class="sl-job-card">
+      <div class="sl-job-main">
+        <div class="sl-job-content">
+          <div class="sl-job-title-row">
+            <div>
+              <h2>Operador de Máquinas - Linha Industrial</h2>
+              <p>Publicação 31/07/2026 - Fechamento 14/08/2026</p>
+            </div>
+
+            <div class="sl-card-actions">
+              <span class="sl-status-pill sl-status-danger">Atrasado</span>
+            </div>
+          </div>
+
+          <div class="sl-job-meta">
+            <span><i class="fa-solid fa-location-dot"></i> Av. das Indústrias, 1450 - Sarzedo/MG</span>
+            <span><i class="fa-solid fa-building"></i> Presencial</span>
+            <span><i class="fa-solid fa-medal"></i> Operacional</span>
+            <span><i class="fa-solid fa-dollar-sign"></i> R$ 2.450,00</span>
+          </div>
+
+          <div class="sl-job-grid">
+            <div>
+              <span class="sl-kpi-icon sl-kpi-blue"><i class="fa-solid fa-file-signature"></i></span>
+              <small>Requisição de origem</small>
+              <strong>REQ-2026-0184</strong>
+            </div>
+            <div>
+              <span class="sl-kpi-icon sl-kpi-green"><i class="fa-solid fa-id-badge"></i></span>
+              <small>Tipo de contratação</small>
+              <strong>Efetivo</strong>
+            </div>
+            <div>
+              <span class="sl-kpi-icon sl-kpi-purple"><i class="fa-solid fa-users-gear"></i></span>
+              <small>Quantidade de posições</small>
+              <strong>1</strong>
+            </div>
+            <div>
+              <span class="sl-kpi-icon sl-kpi-orange"><i class="fa-solid fa-link"></i></span>
+              <small>Referência Sólides</small>
+              <strong>895022</strong>
+            </div>
+          </div>
+
+          <div class="sl-responsibles">
+            <h3>Responsáveis:</h3>
+            <div>
+              <span class="sl-person-pill"><strong>CM</strong> Carla Mendes</span>
+              <span class="sl-person-pill"><strong>RS</strong> Renato Silva</span>
+            </div>
+          </div>
+
+          <p class="sl-job-link">
+            <span><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+            <strong>Link da vaga</strong>
+            <a href="https://lonax.vagas.solides.com.br/vaga/895022">lonax.vagas.solides.com.br/vaga/895022</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="sl-panel">
+      <div class="sl-panel-head">
+        <div>
+          <span class="sl-section-icon sl-section-icon-candidates"><i class="fa-solid fa-users"></i></span>
+          <div>
+            <h2>Candidatos da vaga</h2>
+            <p>Candidatos inscritos e selecionados para acompanhamento desta vaga.</p>
+          </div>
+        </div>
+        <div class="sl-panel-actions">
+          <input id="candidateFile" type="file" accept=".csv,.xls,.xlsx" hidden />
+          <button class="sl-primary-button" type="button" id="importButton">
+            <i class="fa-solid fa-file-import"></i>
+            Importar Excel
+          </button>
+        </div>
+      </div>
+
+      <div class="sl-tabs" aria-label="Visualização dos candidatos">
+        <button class="sl-tab sl-tab-active" type="button" data-view="list">Lista</button>
+        <button class="sl-tab" type="button" data-view="kanban">Kanban</button>
+      </div>
+
+      <div class="sl-table-wrap" id="listView">
+        <table class="sl-table sl-candidates-table">
+          <thead>
+            <tr>
+              <th>Candidato</th>
+              <th>E-mail</th>
+              <th>CPF</th>
+              <th>Perfil</th>
+              <th>Solicitação Fluig</th>
+              <th>Atividade atual</th>
+              <th>Status</th>
+              <th>SLA</th>
+            </tr>
+          </thead>
+          <tbody id="candidateTable"></tbody>
+        </table>
+      </div>
+
+      <div class="sl-kanban sl-hidden" id="kanbanView"></div>
+    </section>
+
+    <section class="sl-modal-backdrop sl-hidden" id="importPanel" aria-live="polite">
+      <div class="sl-import-panel" role="dialog" aria-modal="true" aria-labelledby="importTitle">
+        <div class="sl-panel-head">
+          <div>
+            <span class="sl-section-icon sl-section-icon-excel"><i class="fa-solid fa-file-excel"></i></span>
+            <div>
+              <h2 id="importTitle">Importação de candidatos</h2>
+              <p>Carregue a planilha, selecione os candidatos e confirme a criação dos registros na vaga.</p>
+            </div>
+          </div>
+          <button class="sl-icon-button" type="button" id="closeImport" aria-label="Fechar importação">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <ol class="sl-stepper" id="importStepper">
+          <li class="sl-step-active">
+            <span class="sl-step-icon"><i class="fa-solid fa-file-arrow-up"></i></span>
+            <span>Arquivo</span>
+          </li>
+          <li>
+            <span class="sl-step-icon"><i class="fa-solid fa-list-check"></i></span>
+            <span>Seleção</span>
+          </li>
+          <li>
+            <span class="sl-step-icon"><i class="fa-solid fa-address-card"></i></span>
+            <span>Detalhes</span>
+          </li>
+        </ol>
+
+      <div class="sl-step-content" id="stepUpload">
+        <div class="sl-upload-box" id="dropZone">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <strong>Importe a planilha exportada da Sólides</strong>
+          <span>Selecione um arquivo CSV, XLS ou XLSX para carregar os candidatos escolhidos pelo RH.</span>
+          <button class="sl-primary-button" type="button" id="selectFileButton">Selecionar arquivo</button>
+        </div>
+        <div class="sl-step-actions">
+          <button class="sl-secondary-button js-cancel-import" type="button">Cancelar</button>
+        </div>
+      </div>
+
+      <div class="sl-step-content sl-hidden" id="stepSelection">
+        <div class="sl-step-toolbar">
+          <div>
+            <h3>Seleção de candidatos da planilha</h3>
+            <p>Marque os candidatos que serão importados e vinculados à vaga.</p>
+          </div>
+          <button class="sl-secondary-button sl-select-toggle" type="button" id="selectAllButton">Selecionar todos</button>
+        </div>
+        <div class="sl-table-wrap">
+        <table class="sl-table sl-selection-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Candidato</th>
+                <th>E-mail</th>
+                <th>Telefone</th>
+                <th>Origem</th>
+                <th>Perfil</th>
+              </tr>
+            </thead>
+            <tbody id="importSelectionTable"></tbody>
+          </table>
+        </div>
+        <div class="sl-step-actions">
+          <button class="sl-secondary-button js-cancel-import" type="button">Cancelar</button>
+          <button class="sl-secondary-button" type="button" data-step-back="upload">Voltar</button>
+          <button class="sl-primary-button" type="button" id="goDetails">Avançar</button>
+        </div>
+      </div>
+
+      <div class="sl-step-content sl-hidden" id="stepDetails">
+        <div class="sl-step-toolbar">
+          <div>
+            <h3>Detalhes do Candidato</h3>
+            <p>Dados complementares simulados a partir do currículo retornado para conferência.</p>
+          </div>
+        </div>
+        <div class="sl-candidate-detail-grid" id="candidateDetails"></div>
+        <div class="sl-step-actions">
+          <button class="sl-secondary-button js-cancel-import" type="button">Cancelar</button>
+          <button class="sl-secondary-button" type="button" data-step-back="selection">Voltar</button>
+          <button class="sl-primary-button" type="button" id="goConfirm">Confirmar</button>
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <section class="sl-confirm-backdrop sl-hidden" id="confirmPanel" aria-live="polite">
+      <div class="sl-confirm-panel" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+        <div class="sl-confirm-box">
+          <i class="fa-solid fa-circle-check"></i>
+          <div>
+            <h3 id="confirmTitle">Confirmar importação</h3>
+            <p id="confirmText">Os candidatos selecionados serão vinculados à vaga e poderão ter o processo seletivo iniciado.</p>
+          </div>
+        </div>
+        <div class="sl-confirm-actions">
+          <button class="sl-secondary-button" type="button" id="cancelConfirm">Voltar</button>
+          <button class="sl-primary-button" type="button" id="finishImport">Confirmar importação</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="sl-confirm-backdrop sl-hidden" id="cancelPanel" aria-live="polite">
+      <div class="sl-confirm-panel" role="dialog" aria-modal="true" aria-labelledby="cancelTitle">
+        <div class="sl-confirm-box sl-cancel-box">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <div>
+            <h3 id="cancelTitle">Cancelar importação</h3>
+            <p>As informações carregadas não serão salvas. Deseja confirmar o cancelamento?</p>
+          </div>
+        </div>
+        <div class="sl-confirm-actions">
+          <button class="sl-secondary-button" type="button" id="backCancel">Voltar</button>
+          <button class="sl-primary-button sl-danger-button" type="button" id="confirmCancel">Confirmar cancelamento</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="sl-confirm-backdrop sl-hidden" id="loadingPanel" aria-live="polite">
+      <div class="sl-result-panel" role="dialog" aria-modal="true" aria-labelledby="loadingTitle">
+        <div class="sl-loading-box">
+          <span class="sl-loader"></span>
+          <h3 id="loadingTitle">Importando candidatos</h3>
+          <p>Criando os registros na vaga e iniciando as solicitações individuais quando aplicável.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="sl-confirm-backdrop sl-hidden" id="successPanel" aria-live="polite">
+      <div class="sl-result-panel sl-result-panel-wide" role="dialog" aria-modal="true" aria-labelledby="successTitle">
+        <div class="sl-success-box">
+          <i class="fa-solid fa-circle-check"></i>
+          <h3 id="successTitle">Candidatos importados com sucesso</h3>
+          <p id="successText">Os registros foram criados e vinculados à vaga.</p>
+          <div class="sl-table-wrap sl-success-table-wrap">
+            <table class="sl-table sl-imported-table">
+              <thead>
+                <tr>
+                  <th>Candidato</th>
+                  <th>CPF</th>
+                  <th>Perfil</th>
+                  <th>Solicitação Fluig</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="successImportedTable"></tbody>
+            </table>
+          </div>
+          <button class="sl-primary-button" type="button" id="finishClose">Concluir</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

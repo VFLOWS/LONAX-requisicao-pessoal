@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestão de Vagas - Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <aside class="sl-sidebar" aria-label="Menu da widget">
+    <div class="sl-sidebar-brand">
+      <img src="https://www.lonax.com.br/wp-content/uploads/2024/08/Logomarca_Lonax-02.webp" alt="Lonax" />
+    </div>
+    <div class="sl-sidebar-group">Gestão de Vagas</div>
+    <a class="sl-sidebar-item sl-sidebar-item-active" href="dashboard.html" aria-label="Dashboard">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Dashboard</span>
+    </a>
+    <a class="sl-sidebar-item" href="index.html" aria-label="Processo seletivo">
+      <i class="fa-solid fa-users"></i>
+      <span>Processo seletivo</span>
+    </a>
+  </aside>
+
+  <main class="sl-page">
+    <header class="sl-page-head">
+      <div class="sl-title-content">
+        <nav aria-label="Caminho da página">
+          <a href="#">Gestão de Vagas</a>
+          <i class="fa-solid fa-chevron-right"></i>
+          <strong>Dashboard</strong>
+        </nav>
+      </div>
+      <a class="sl-back-button" href="#">
+        <i class="fa-solid fa-arrow-left"></i>
+        Voltar para o Fluig
+      </a>
+    </header>
+
+    <section class="sl-page-title">
+      <div>
+        <h1>Dashboard de Vagas</h1>
+        <p>Visão consolidada das vagas, candidatos e admissões acompanhadas pela widget.</p>
+      </div>
+    </section>
+
+    <section class="sl-panel sl-dashboard-panel">
+      <div class="sl-panel-head">
+        <div>
+          <span class="sl-section-icon"><i class="fa-solid fa-chart-simple"></i></span>
+          <div>
+            <h2>Resumo da operação</h2>
+            <p>Panorama das vagas, candidatos e admissões que precisam de acompanhamento.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="sl-dashboard-overview">
+        <div class="sl-dashboard-main-kpis">
+          <article class="sl-main-kpi">
+            <span class="sl-kpi-icon sl-kpi-blue"><i class="fa-solid fa-briefcase"></i></span>
+            <small>Vagas abertas</small>
+            <strong>12</strong>
+            <em>5 em seleção</em>
+          </article>
+          <article class="sl-main-kpi">
+            <span class="sl-kpi-icon sl-kpi-orange"><i class="fa-solid fa-magnifying-glass-chart"></i></span>
+            <small>Candidatos em processo</small>
+            <strong>38</strong>
+            <em>8 aprovados</em>
+          </article>
+          <article class="sl-main-kpi">
+            <span class="sl-kpi-icon sl-kpi-green"><i class="fa-solid fa-file-signature"></i></span>
+            <small>Admissões em andamento</small>
+            <strong>2</strong>
+            <em>3 vagas com aprovado</em>
+          </article>
+          <article class="sl-main-kpi sl-main-kpi-alert">
+            <span class="sl-kpi-icon sl-kpi-red"><i class="fa-solid fa-triangle-exclamation"></i></span>
+            <small>Pontos de atenção</small>
+            <strong>5</strong>
+            <em>4 fora do SLA e 1 cancelada</em>
+          </article>
+        </div>
+
+        <div class="sl-dashboard-breakdown">
+          <article class="sl-dashboard-summary">
+            <div class="sl-summary-head">
+              <h3>Status das vagas</h3>
+              <span>29 registros</span>
+            </div>
+            <div class="sl-status-list">
+              <div class="sl-status-row"><span>Aguardando publicação</span><strong>2</strong><i style="--value: 18%;"></i></div>
+              <div class="sl-status-row"><span>Publicadas</span><strong>4</strong><i style="--value: 36%;"></i></div>
+              <div class="sl-status-row"><span>Em recrutamento</span><strong>3</strong><i style="--value: 27%;"></i></div>
+              <div class="sl-status-row"><span>Em seleção</span><strong>5</strong><i style="--value: 45%;"></i></div>
+              <div class="sl-status-row"><span>Encerradas</span><strong>7</strong><i style="--value: 64%;"></i></div>
+              <div class="sl-status-row sl-status-row-muted"><span>Canceladas</span><strong>1</strong><i style="--value: 9%;"></i></div>
+            </div>
+          </article>
+
+          <article class="sl-dashboard-summary">
+            <div class="sl-summary-head">
+              <h3>Candidatos</h3>
+            </div>
+            <div class="sl-candidate-funnel">
+              <div><span>Em processo</span><strong>38</strong></div>
+              <div><span>Aprovados</span><strong>8</strong></div>
+              <div><span>Reprovados</span><strong>12</strong></div>
+              <div class="sl-funnel-alert"><span>Fora do SLA</span><strong>4</strong></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="sl-panel sl-vagas-panel">
+      <div class="sl-panel-head">
+        <div>
+          <span class="sl-section-icon sl-section-icon-candidates"><i class="fa-solid fa-table-list"></i></span>
+          <div>
+            <h2>Painel de vagas</h2>
+            <p>Acompanhamento gerencial das vagas aprovadas, candidatos e admissões.</p>
+          </div>
+        </div>
+        <div class="sl-panel-actions">
+          <button class="sl-light-button" type="button"><i class="fa-solid fa-rotate-right"></i> Atualizar</button>
+        </div>
+      </div>
+
+      <div class="sl-vagas-toolbar" aria-label="Filtros de vagas">
+        <label class="sl-vagas-search">
+          <span>Buscar vaga</span>
+          <div>
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Código, cargo, requisição ou gestor" />
+          </div>
+        </label>
+        <label>Status<select><option>Todos</option><option>Em seleção</option><option>Em admissão</option><option>Aguardando publicação</option></select></label>
+        <label>Área / Gerência<input type="text" placeholder="Área ou gerência" /></label>
+        <label>Situação da admissão<select><option>Todas</option><option>Não iniciada</option><option>Em andamento</option></select></label>
+      </div>
+
+      <div class="sl-vagas-viewbar">
+        <div class="sl-tabs" aria-label="Visualização das vagas">
+          <button class="sl-tab sl-tab-active" type="button" data-dashboard-view="list"><i class="fa-solid fa-list"></i> Lista</button>
+          <button class="sl-tab" type="button" data-dashboard-view="kanban"><i class="fa-solid fa-table-columns"></i> Kanban</button>
+        </div>
+        <div class="sl-vagas-count">
+          <strong>3 vagas</strong>
+          <span>exibidas nesta visão</span>
+        </div>
+      </div>
+
+      <div class="sl-table-wrap" id="dashboardList">
+        <table class="sl-table sl-vagas-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Requisição</th>
+              <th>Vaga</th>
+              <th>Área e gestor</th>
+              <th>Unidade</th>
+              <th>Posições</th>
+              <th>Abertura</th>
+              <th>Status</th>
+              <th>Candidatos</th>
+              <th>Admissão</th>
+              <th>Sólides</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a class="sl-table-link" href="detalhe-vaga.html">VG-001</a></td>
+              <td>REQ-2026-0184</td>
+              <td><div class="sl-vaga-cell"><strong>Operador de Máquinas</strong><span>Operacional - Step 2</span></div></td>
+              <td><div class="sl-vaga-cell"><strong>Produção</strong><span>Eduardo Martins</span></div></td>
+              <td>Matriz - Sarzedo/MG</td>
+              <td>1</td>
+              <td>31/07/2026</td>
+              <td><span class="sl-status-pill sl-status-neutral">Em seleção</span></td>
+              <td><div class="sl-vaga-metrics"><strong>12</strong><span>7 em processo · 1 aprovado</span></div></td>
+              <td>Não iniciada</td>
+              <td>895022</td>
+            </tr>
+            <tr>
+              <td><a class="sl-table-link" href="detalhe-vaga.html">VG-002</a></td>
+              <td>REQ-2026-0210</td>
+              <td><div class="sl-vaga-cell"><strong>Analista de Qualidade</strong><span>Pleno - Step 2</span></div></td>
+              <td><div class="sl-vaga-cell"><strong>Controle de Qualidade</strong><span>Patrícia Almeida</span></div></td>
+              <td>Matriz - Sarzedo/MG</td>
+              <td>2</td>
+              <td>05/08/2026</td>
+              <td><span class="sl-status-pill sl-status-success">Em admissão</span></td>
+              <td><div class="sl-vaga-metrics"><strong>18</strong><span>4 em processo · 2 aprovados</span></div></td>
+              <td>Em andamento</td>
+              <td>895118</td>
+            </tr>
+            <tr>
+              <td><a class="sl-table-link" href="detalhe-vaga.html">VG-003</a></td>
+              <td>REQ-2026-0224</td>
+              <td><div class="sl-vaga-cell"><strong>Auxiliar Administrativo</strong><span>Júnior - Step 1</span></div></td>
+              <td><div class="sl-vaga-cell"><strong>Administração</strong><span>Carla Mendes</span></div></td>
+              <td>Unidade Contagem/MG</td>
+              <td>1</td>
+              <td>12/08/2026</td>
+              <td><span class="sl-status-pill sl-status-neutral">Aguardando publicação</span></td>
+              <td><div class="sl-vaga-metrics"><strong>0</strong><span>Sem candidatos vinculados</span></div></td>
+              <td>Não iniciada</td>
+              <td>-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sl-dashboard-kanban sl-hidden" id="dashboardKanban">
+        <article class="sl-kanban-column"><div class="sl-kanban-head"><span>Aguardando publicação</span><span class="sl-kanban-count">2</span></div><div class="sl-kanban-list"><a class="sl-kanban-card" href="detalhe-vaga.html"><strong>VG-003</strong><small>Auxiliar Administrativo</small><span>REQ-2026-0224</span></a></div></article>
+        <article class="sl-kanban-column"><div class="sl-kanban-head"><span>Publicada</span><span class="sl-kanban-count">1</span></div><div class="sl-kanban-list"><a class="sl-kanban-card" href="detalhe-vaga.html"><strong>VG-004</strong><small>Técnico de Manutenção</small><span>Publicada na Sólides</span></a></div></article>
+        <article class="sl-kanban-column"><div class="sl-kanban-head"><span>Em seleção</span><span class="sl-kanban-count">2</span></div><div class="sl-kanban-list"><a class="sl-kanban-card" href="detalhe-vaga.html"><strong>VG-001</strong><small>Operador de Máquinas</small><span>12 candidatos · 1 aprovado</span></a><a class="sl-kanban-card" href="detalhe-vaga.html"><strong>VG-005</strong><small>Assistente de Logística</small><span>8 candidatos</span></a></div></article>
+        <article class="sl-kanban-column"><div class="sl-kanban-head"><span>Em admissão</span><span class="sl-kanban-count">1</span></div><div class="sl-kanban-list"><a class="sl-kanban-card" href="detalhe-vaga.html"><strong>VG-002</strong><small>Analista de Qualidade</small><span>2 aprovados · admissão em andamento</span></a></div></article>
+      </div>
+      <p class="sl-kanban-note">O kanban é apenas uma visualização do macrostatus. Movimentar visualmente uma vaga não altera seu status.</p>
+    </section>
+  </main>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

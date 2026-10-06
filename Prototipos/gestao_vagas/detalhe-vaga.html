@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestão de Vagas - Detalhamento</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <aside class="sl-sidebar" aria-label="Menu da widget">
+    <div class="sl-sidebar-brand">
+      <img src="https://www.lonax.com.br/wp-content/uploads/2024/08/Logomarca_Lonax-02.webp" alt="Lonax" />
+    </div>
+    <div class="sl-sidebar-group">Gestão de Vagas</div>
+    <a class="sl-sidebar-item" href="dashboard.html" aria-label="Dashboard">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Dashboard</span>
+    </a>
+    <a class="sl-sidebar-item sl-sidebar-item-active" href="index.html" aria-label="Processo seletivo">
+      <i class="fa-solid fa-users"></i>
+      <span>Processo seletivo</span>
+    </a>
+  </aside>
+
+  <main class="sl-page">
+    <header class="sl-page-head">
+      <div class="sl-title-content">
+        <nav aria-label="Caminho da página">
+          <a href="dashboard.html">Gestão de Vagas</a>
+          <i class="fa-solid fa-chevron-right"></i>
+          <strong>Detalhamento da Vaga</strong>
+        </nav>
+      </div>
+      <a class="sl-back-button" href="dashboard.html">
+        <i class="fa-solid fa-arrow-left"></i>
+        Voltar para vagas
+      </a>
+    </header>
+
+    <section class="sl-page-title">
+      <div>
+        <h1>Operador de Máquinas - Linha Industrial</h1>
+        <p>Detalhamento gerencial da vaga, candidatos vinculados e situação de admissão.</p>
+      </div>
+    </section>
+
+    <section class="sl-panel">
+      <div class="sl-panel-head">
+        <div>
+          <span class="sl-section-icon"><i class="fa-solid fa-briefcase"></i></span>
+          <div>
+            <h2>VG-001 · REQ-2026-0184</h2>
+            <p>Referência Sólides 895022 · Status atual: Em seleção.</p>
+          </div>
+        </div>
+        <div class="sl-panel-actions">
+          <a class="sl-secondary-button" href="index.html"><i class="fa-solid fa-users"></i> Processo seletivo</a>
+        </div>
+      </div>
+
+      <div class="sl-detail-tabs" aria-label="Detalhamento da vaga">
+        <button class="sl-tab sl-tab-active" type="button" data-detail-tab="resumo">Resumo</button>
+        <button class="sl-tab" type="button" data-detail-tab="candidatos">Candidatos</button>
+        <button class="sl-tab" type="button" data-detail-tab="dados">Dados da Vaga</button>
+        <button class="sl-tab" type="button" data-detail-tab="historico">Histórico</button>
+        <button class="sl-tab" type="button" data-detail-tab="admissoes">Admissões</button>
+      </div>
+
+      <div class="sl-detail-section" id="tabResumo">
+        <div class="sl-summary-strip">
+          <div><small>Código da Vaga</small><strong>VG-001</strong></div>
+          <div><small>Requisição de origem</small><strong>REQ-2026-0184</strong></div>
+          <div><small>Status da Vaga</small><strong>Em seleção</strong></div>
+          <div><small>Referência Sólides</small><strong>895022</strong></div>
+        </div>
+        <div class="sl-info-grid">
+          <div><small>Cargo</small><strong>Operador de Máquinas</strong></div>
+          <div><small>Nível</small><strong>Operacional - Step 2</strong></div>
+          <div><small>Área / Gerência</small><strong>Produção</strong></div>
+          <div><small>Gestor</small><strong>Eduardo Martins</strong></div>
+          <div><small>Unidade / Filial</small><strong>Matriz - Sarzedo/MG</strong></div>
+          <div><small>Quantidade de posições</small><strong>1</strong></div>
+          <div><small>Data de abertura</small><strong>31/07/2026</strong></div>
+          <div><small>Total de candidatos</small><strong>12</strong></div>
+          <div><small>Em andamento</small><strong>7</strong></div>
+          <div><small>Aprovados</small><strong>1</strong></div>
+          <div><small>Reprovados</small><strong>3</strong></div>
+          <div><small>Em admissão</small><strong>1</strong></div>
+          <div><small>Posições preenchidas</small><strong>0</strong></div>
+          <div><small>Posições disponíveis</small><strong>1</strong></div>
+        </div>
+      </div>
+
+      <div class="sl-detail-section sl-hidden" id="tabCandidatos">
+        <div class="sl-table-wrap">
+          <table class="sl-table">
+            <thead><tr><th>Candidato</th><th>E-mail</th><th>CPF</th><th>Perfil</th><th>Solicitação Fluig</th><th>Atividade atual</th><th>Status</th><th>SLA</th></tr></thead>
+            <tbody>
+              <tr><td>Marina Oliveira</td><td>marina.oliveira@email.com</td><td>123.456.789-10</td><td>Comunicador / Executor</td><td>5001</td><td>Triagem RH</td><td><span class="sl-status-pill sl-status-neutral">Em processo</span></td><td>No prazo</td></tr>
+              <tr><td>Caio Henrique</td><td>caio.henrique@email.com</td><td>987.654.321-00</td><td>Planejador / Analista</td><td>5002</td><td>Avaliação do Gestor</td><td><span class="sl-status-pill sl-status-neutral">Em processo</span></td><td>No prazo</td></tr>
+              <tr><td>Ana Beatriz</td><td>ana.beatriz@email.com</td><td>229.118.440-55</td><td>Executor</td><td>5003</td><td>Admissão Digital</td><td><span class="sl-status-pill sl-status-success">Aprovado</span></td><td>No prazo</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="sl-detail-section sl-hidden" id="tabDados">
+        <div class="sl-info-grid sl-info-grid-wide">
+          <div><small>Número da Requisição</small><strong>REQ-2026-0184</strong></div>
+          <div><small>ID do processo de Requisição</small><strong>7786</strong></div>
+          <div><small>Código da Vaga</small><strong>VG-001</strong></div>
+          <div><small>Cargo</small><strong>Operador de Máquinas</strong></div>
+          <div><small>Nível</small><strong>Operacional - Step 2</strong></div>
+          <div><small>Área / Seção</small><strong>Produção</strong></div>
+          <div><small>Centro de Custo</small><strong>IND.PRO.001</strong></div>
+          <div><small>Unidade / Filial</small><strong>Matriz - Sarzedo/MG</strong></div>
+          <div><small>Gestor responsável</small><strong>Eduardo Martins</strong></div>
+          <div><small>Quantidade de posições</small><strong>1</strong></div>
+          <div><small>Tipo de contrato</small><strong>Efetivo</strong></div>
+          <div><small>Data de abertura</small><strong>31/07/2026</strong></div>
+          <div><small>Data desejada para contratação</small><strong>20/10/2026</strong></div>
+          <div><small>Código / referência da vaga na Sólides</small><strong>895022</strong></div>
+          <div><small>Data de publicação</small><strong>31/07/2026</strong></div>
+          <div><small>Status de publicação</small><strong>Publicada</strong></div>
+          <div class="sl-info-wide"><small>Link da vaga na Sólides</small><strong>lonax.vagas.solides.com.br/vaga/895022</strong></div>
+          <div class="sl-info-wide"><small>Justificativa</small><strong>Reposição operacional para reforçar a linha industrial diante do aumento de demanda produtiva.</strong></div>
+          <div class="sl-info-wide"><small>Observações</small><strong>Vaga vinculada à requisição de pessoal aprovada e publicada na Sólides.</strong></div>
+        </div>
+      </div>
+
+      <div class="sl-detail-section sl-hidden" id="tabHistorico">
+        <div class="sl-history-list">
+          <div><span><i class="fa-solid fa-circle-check"></i></span><strong>31/07/2026 09:12</strong><p>Vaga criada a partir da Requisição de Pessoal REQ-2026-0184.</p></div>
+          <div><span><i class="fa-solid fa-bullhorn"></i></span><strong>31/07/2026 10:40</strong><p>Vaga publicada na Sólides com referência 895022.</p></div>
+          <div><span><i class="fa-solid fa-users"></i></span><strong>02/08/2026 15:20</strong><p>Candidatos importados para acompanhamento no Fluig.</p></div>
+          <div><span><i class="fa-solid fa-user-check"></i></span><strong>05/08/2026 11:35</strong><p>Candidato aprovado avançou para admissão digital.</p></div>
+        </div>
+      </div>
+
+      <div class="sl-detail-section sl-hidden" id="tabAdmissoes">
+        <div class="sl-admission-list">
+          <div><small>Candidato</small><strong>Ana Beatriz</strong></div>
+          <div><small>Solicitação Fluig</small><strong>5003</strong></div>
+          <div><small>Situação</small><strong>Documentação em análise</strong></div>
+          <div><small>Previsão de início</small><strong>20/10/2026</strong></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="detalhe-vaga.js"></script>
+</body>
+</html>
