@@ -72,7 +72,7 @@
     return [
       '<div class="sl-table-card' + (config.hidden ? " sl-hidden" : "") + '"' + attrs({ id: config.id }) + ">",
       '<div class="sl-table-wrap">',
-      '<table class="sl-table' + (config.className ? " " + escapeHtml(config.className) : "") + '">',
+      '<table class="sl-table' + (config.className ? " " + escapeHtml(config.className) : "") + '"' + attrs({ 'data-sl-table-search': config.search === false ? 'false' : null, 'data-sl-table-compact': config.compact ? 'true' : null, 'data-sl-table-page-size': config.pageSize, 'data-sl-table-label': config.recordLabel }) + '>',
       "<thead><tr>",
       (config.columns || []).map(function (column) {
         return "<th>" + escapeHtml(column) + "</th>";
@@ -383,7 +383,7 @@
       '<div class="sl-confirm-panel sl-confirm-panel-wide" role="dialog" aria-modal="true" aria-labelledby="manualConfirmTitle">',
       '<div class="sl-confirm-intro"><span class="sl-section-icon sl-section-icon-candidates"><i class="fa-solid fa-user-check"></i></span><div><h3 id="manualConfirmTitle">Confirmar cadastro</h3><p>O candidato abaixo será cadastrado manualmente e vinculado à vaga Operador de Máquinas.</p></div></div>',
       '<div class="sl-table-wrap sl-confirm-table-wrap">',
-      '<table class="sl-table sl-manual-confirm-table"><thead><tr><th>Candidato</th><th>CPF</th><th>E-mail</th><th>Telefone</th><th>Perfil</th><th>Status</th></tr></thead><tbody id="manualConfirmTable"></tbody></table>',
+      '<table class="sl-table sl-manual-confirm-table" data-sl-table-compact="true"><thead><tr><th>Candidato</th><th>CPF</th><th>E-mail</th><th>Telefone</th><th>Perfil</th><th>Status</th></tr></thead><tbody id="manualConfirmTable"></tbody></table>',
       "</div>",
       '<div class="sl-confirm-actions">',
       button({ className: "sl-secondary-button", label: "Voltar", attrs: { id: "manualConfirmBack" } }),

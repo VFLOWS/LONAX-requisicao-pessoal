@@ -372,6 +372,7 @@
         ["resumo", "candidatos", "dados", "historico", "admissoes"].forEach(function (name) {
           document.getElementById("tab" + name.charAt(0).toUpperCase() + name.slice(1)).classList.toggle("sl-hidden", name !== tab);
         });
+        SLTables.adjust(document.getElementById("tab" + tab.charAt(0).toUpperCase() + tab.slice(1)));
       });
     });
   }

@@ -285,7 +285,7 @@
         renderExperiences(candidate),
         renderBehaviorProfile(candidate),
         SL.infoSection({ title: "Solicitação Fluig", icon: "fa-file-signature", tone: "green", bodyHtml: candidate.workflow ? SL.table({
-          className: "sl-candidate-workflow-table",
+          className: "sl-candidate-workflow-table", compact: true,
           columns: ["Solicitação", "Atividade atual", "Responsável", "Status", "SLA"],
           rows: [
             [candidate.workflow, candidate.activity, candidate.activity === "Avaliação do Gestor" ? "Eduardo Martins" : candidate.activity === "Admissão Digital" ? "Renato Silva" : "Carla Mendes", statusPill(candidate.status, candidate.statusClass), candidate.sla]

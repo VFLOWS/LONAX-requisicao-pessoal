@@ -236,7 +236,7 @@ function candidateHref(candidate) {
 }
 
 function renderCandidateTable() {
-  els.candidateTable.innerHTML = existingCandidates.map(function (candidate) {
+  SLTables.replace(els.candidateTable, existingCandidates.map(function (candidate) {
     return [
       "<tr>",
       '<td><a class="sl-candidate-name sl-candidate-link" href="' + candidateHref(candidate) + '"><span class="sl-avatar-sm">' + initials(candidate.name) + "</span>" + escapeHtml(candidate.name) + "</a></td>",
@@ -249,7 +249,7 @@ function renderCandidateTable() {
       "<td>" + escapeHtml(candidate.sla || "-") + "</td>",
       "</tr>"
     ].join("");
-  }).join("");
+  }).join(""));
   renderKanban();
 }
 
@@ -261,8 +261,10 @@ function renderKanban() {
     { title: "Solicitação iniciada", match: function (candidate) { return candidate.status === "Solicitação iniciada"; } }
   ];
 
+  var table = els.candidateTable.closest('table');
+  var visible = jQuery.fn.dataTable.isDataTable(table) ? new Set(jQuery(table).DataTable().rows({ search: 'applied' }).indexes().toArray().map(function (index) { return existingCandidates[index]; })) : new Set(existingCandidates);
   els.kanbanView.innerHTML = columns.map(function (column) {
-    var candidates = existingCandidates.filter(column.match);
+    var candidates = existingCandidates.filter(function (candidate) { return visible.has(candidate) && column.match(candidate); });
     return [
       '<article class="sl-kanban-column">',
       '<div class="sl-kanban-head"><span>' + escapeHtml(column.title) + '</span><span class="sl-kanban-count">' + candidates.length + "</span></div>",
@@ -470,7 +472,7 @@ function loadFile(file) {
 }
 
 function renderSelection() {
-  els.importSelectionTable.innerHTML = importedCandidates.map(function (candidate) {
+  SLTables.replace(els.importSelectionTable, importedCandidates.map(function (candidate) {
     return [
       "<tr>",
       '<td><input type="checkbox" data-candidate-id="' + escapeHtml(candidate.id) + '" ' + (selectedIds.indexOf(candidate.id) >= 0 ? "checked" : "") + " /></td>",
@@ -481,19 +483,18 @@ function renderSelection() {
       "<td>" + profileTags(candidate.profile || []) + "</td>",
       "</tr>"
     ].join("");
-  }).join("");
+  }).join(""), true);
 
-  els.importSelectionTable.querySelectorAll("input[type='checkbox']").forEach(function (checkbox) {
-    checkbox.addEventListener("change", function () {
-      var id = checkbox.getAttribute("data-candidate-id");
-      selectedIds = checkbox.checked
-        ? selectedIds.concat([id]).filter(unique)
-        : selectedIds.filter(function (item) { return item !== id; });
-      updateSelectAllButton();
-    });
-  });
   updateSelectAllButton();
 }
+
+els.importSelectionTable.addEventListener("change", function (event) {
+  var checkbox = event.target.closest("input[data-candidate-id]");
+  if (!checkbox) return;
+  var id = checkbox.getAttribute("data-candidate-id");
+  selectedIds = checkbox.checked ? selectedIds.concat([id]).filter(unique) : selectedIds.filter(function (item) { return item !== id; });
+  updateSelectAllButton();
+});
 
 function unique(value, index, array) {
   return array.indexOf(value) === index;
@@ -507,6 +508,7 @@ function selectedCandidates() {
 
 function renderDetails() {
   var candidates = selectedCandidates();
+  SLTables.destroy(els.candidateDetails);
   els.candidateDetails.innerHTML = [
     '<div class="sl-table-wrap sl-detail-table-wrap">',
     '<table class="sl-table sl-detail-table">',
@@ -541,6 +543,7 @@ function renderDetails() {
     "</table>",
     "</div>"
   ].join("");
+  SLTables.mount(els.candidateDetails);
 }
 
 function confirmImport() {
@@ -596,7 +599,7 @@ function finishImport(candidates) {
 }
 
 function renderSuccessTable(candidates) {
-  els.successImportedTable.innerHTML = candidates.map(function (candidate) {
+  SLTables.replace(els.successImportedTable, candidates.map(function (candidate) {
     return [
       "<tr>",
       '<td><strong class="sl-modal-candidate-name">' + escapeHtml(candidate.name) + "</strong></td>",
@@ -606,11 +609,11 @@ function renderSuccessTable(candidates) {
       '<td><span class="sl-status-pill ' + (candidate.status === "Solicitação iniciada" ? "sl-status-success" : "sl-status-neutral") + '">' + escapeHtml(candidate.status) + "</span></td>",
       "</tr>"
     ].join("");
-  }).join("");
+  }).join(""), true);
 }
 
 function renderConfirmTable(candidates) {
-  els.confirmImportedTable.innerHTML = candidates.map(function (candidate) {
+  SLTables.replace(els.confirmImportedTable, candidates.map(function (candidate) {
     return [
       "<tr>",
       '<td><strong class="sl-modal-candidate-name">' + escapeHtml(candidate.name) + "</strong></td>",
@@ -620,7 +623,7 @@ function renderConfirmTable(candidates) {
       '<td><span class="sl-status-pill sl-status-neutral">A importar</span></td>',
       "</tr>"
     ].join("");
-  }).join("");
+  }).join(""), true);
 }
 
 function selectedManualProfiles() {
@@ -675,9 +678,10 @@ function validateManualStep(step) {
 
 function renderManualReview() {
   var candidate = manualCandidateData();
+  SLTables.destroy(els.manualReview);
   els.manualReview.innerHTML = [
     '<div class="sl-table-wrap">',
-    '<table class="sl-table sl-manual-review-table">',
+    '<table class="sl-table sl-manual-review-table" data-sl-table-compact="true">',
     "<thead><tr><th>Candidato</th><th>CPF</th><th>E-mail</th><th>Telefone</th><th>Perfil</th></tr></thead>",
     "<tbody><tr>",
     '<td><strong class="sl-modal-candidate-name">' + escapeHtml(candidate.name) + "</strong></td>",
@@ -694,10 +698,11 @@ function renderManualReview() {
     '<span><small>Endereço</small><strong>' + escapeHtml(candidate.address || "-") + "</strong></span>",
     "</div>"
   ].join("");
+  SLTables.mount(els.manualReview);
 }
 
 function renderManualConfirmTable(candidate) {
-  els.manualConfirmTable.innerHTML = [
+  SLTables.replace(els.manualConfirmTable, [
     "<tr>",
     '<td><strong class="sl-modal-candidate-name">' + escapeHtml(candidate.name) + "</strong></td>",
     "<td>" + escapeHtml(candidate.cpf || "-") + "</td>",
@@ -706,7 +711,7 @@ function renderManualConfirmTable(candidate) {
     "<td>" + profileTags(candidate.profile || []) + "</td>",
     '<td><span class="sl-status-pill sl-status-neutral">A cadastrar</span></td>',
     "</tr>"
-  ].join("");
+  ].join(""), true);
 }
 
 function advanceManualStep() {
@@ -884,6 +889,7 @@ document.querySelectorAll("[data-view]").forEach(function (button) {
     });
     els.listView.classList.toggle("sl-hidden", view !== "list");
     els.kanbanView.classList.toggle("sl-hidden", view !== "kanban");
+    if (view === "list") SLTables.adjust(els.listView);
   });
 });
 
@@ -938,3 +944,4 @@ document.addEventListener("keydown", function (event) {
 });
 
 renderCandidateTable();
+jQuery(els.candidateTable.closest('table')).on('draw.dt.slCandidates', renderKanban);

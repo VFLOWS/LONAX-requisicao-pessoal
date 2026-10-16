@@ -79,29 +79,6 @@
     return '<span class="sl-status-pill ' + SL.escapeHtml(vaga.statusClass) + '">' + SL.escapeHtml(vaga.status) + "</span>";
   }
 
-  function dashboardFooter() {
-    return [
-      '<div class="sl-table-footer" id="dashboardFooter">',
-      '<div class="sl-table-pagination">',
-      "<label>Itens por página",
-      "<select><option>15</option><option>30</option><option>50</option><option>100</option></select>",
-      "</label>",
-      "</div>",
-      '<div class="sl-table-pages">',
-      '<button type="button" aria-label="Página anterior"><i class="fa-solid fa-chevron-left"></i></button>',
-      "<strong>1</strong>",
-      '<button type="button">2</button>',
-      '<button type="button">3</button>',
-      '<button type="button">4</button>',
-      "<span>...</span>",
-      '<button type="button">12</button>',
-      '<button type="button" aria-label="Próxima página"><i class="fa-solid fa-chevron-right"></i></button>',
-      "</div>",
-      '<div class="sl-table-result"><strong>' + vagas.length + ' vagas</strong><span>exibidas nesta visão</span></div>',
-      "</div>"
-    ].join("");
-  }
-
   function renderRows() {
     return vagas.map(function (vaga) {
       return [
@@ -182,10 +159,9 @@
         }) + '<a class="sl-primary-button sl-vagas-create-button" href="cadastro-vaga.html"><i class="fa-solid fa-plus"></i> Cadastrar vaga</a></div>',
         SL.table({
           id: "dashboardList",
-          className: "sl-vagas-table",
+          className: "sl-vagas-table", search: false, recordLabel: "vagas",
           columns: ["Código", "Requisição", "Vaga", "Área e gestor", "Unidade", "Posições", "Abertura", "Status", "Admissão", "Sólides"],
-          rows: renderRows(),
-          footerHtml: dashboardFooter()
+          rows: renderRows()
         }),
         '<div class="sl-dashboard-kanban' + (kanbanStatuses.length === 4 ? ' sl-dashboard-kanban-four' : '') + ' sl-hidden" id="dashboardKanban">' + kanbanStatuses.map(renderKanbanColumn).join("") + "</div>"
       ].join("")
@@ -193,6 +169,35 @@
   }
 
   function bindDashboard() {
+    var controls = document.querySelectorAll(".sl-vagas-toolbar input, .sl-vagas-toolbar select");
+    function applyFilters() {
+      var api = SLTables.mount(document.getElementById("dashboardList"))[0];
+      api.search(controls[0].value)
+        .column(7).search(controls[1].selectedIndex ? controls[1].value : "", { exact: true })
+        .column(3).search(controls[2].value)
+        .column(8).search(controls[3].selectedIndex ? controls[3].value : "", { exact: true }).draw();
+    }
+    var table = document.querySelector('#dashboardList table');
+    var tableApi = SLTables.mount(table)[0];
+    function syncKanban() {
+      var api = tableApi;
+      var visible = new Set(api.rows({ search: "applied" }).data().toArray().map(function (row) {
+        var cell = document.createElement("div"); cell.innerHTML = row[0]; return cell.textContent.trim();
+      }));
+      document.querySelectorAll("#dashboardKanban .sl-kanban-column").forEach(function (column) {
+        var count = 0;
+        column.querySelectorAll(".sl-kanban-card").forEach(function (card) {
+          var show = visible.has(card.querySelector("strong").textContent.trim());
+          card.classList.toggle("sl-hidden", !show); if (show) count++;
+        });
+        column.querySelector(".sl-kanban-count").textContent = count;
+        var empty = column.querySelector(".sl-kanban-empty");
+        if (!empty) { empty = document.createElement("div"); empty.className = "sl-kanban-empty"; empty.textContent = "Nenhuma vaga"; column.querySelector(".sl-kanban-list").appendChild(empty); }
+        empty.classList.toggle("sl-hidden", count > 0);
+      });
+    }
+    jQuery(table).on('draw.dt.slDashboard', syncKanban);
+    controls.forEach(function (control) { control.addEventListener(control.tagName === "SELECT" ? "change" : "input", applyFilters); });
     document.querySelectorAll("[data-dashboard-view]").forEach(function (button) {
       button.addEventListener("click", function () {
         var view = button.getAttribute("data-dashboard-view");
@@ -202,8 +207,8 @@
         });
 
         document.getElementById("dashboardList").classList.toggle("sl-hidden", view !== "list");
-        document.getElementById("dashboardFooter").classList.toggle("sl-hidden", view !== "list");
         document.getElementById("dashboardKanban").classList.toggle("sl-hidden", view !== "kanban");
+        if (view === "list") SLTables.adjust(document.getElementById("dashboardList"));
       });
     });
   }
