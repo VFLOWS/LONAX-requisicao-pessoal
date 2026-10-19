@@ -1014,11 +1014,10 @@ test('DP abre preenchido com 44 checks, preserva edições e conclui no cartão 
     await page.setViewportSize({width,height:844});
     const options=await form.locator('.lx-check-options').first().locator('label').evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return {x:r.x,y:r.y,height:r.height};}));
     assert.equal(options[0].x,options[1].x); assert.ok(options[1].y>=options[0].y+options[0].height);
-    const datePosition=await form.locator('[data-check-date]').first().boundingBox();
-    const checkboxPosition=await form.locator('[data-check]').first().boundingBox();
-    assert.ok(datePosition.x>checkboxPosition.x+checkboxPosition.width,'A data fica ao lado da opção marcada');
-    assert.ok(Math.abs(datePosition.y+datePosition.height/2-checkboxPosition.y-checkboxPosition.height/2)<1);
-    assert.equal(await form.locator('.lx-check-options time').count(),44);
+    const datePosition=await form.locator('.lx-check-marked-date').first().boundingBox();
+    assert.equal(datePosition.x,options[0].x);
+    assert.ok(datePosition.y>=options[1].y+options[1].height,'A data fica abaixo das opções');
+    assert.equal(await form.locator('.lx-check-options time').count(),0);
     const conclusionOptions=await form.locator('.lx-field-name-checklistConcluido .lx-radio-option').evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top};}));
     assert.equal(conclusionOptions[1].left-conclusionOptions[0].right,28);
     assert.equal(conclusionOptions[0].top,conclusionOptions[1].top);
@@ -1042,7 +1041,7 @@ test('DP abre preenchido com 44 checks, preserva edições e conclui no cartão 
   await page.clock.setFixedTime(new Date('2026-10-20T01:00:00.000Z'));
   await form.locator('[data-na="proventos-0"]').check();
   assert.equal(await form.locator('[data-check-date="proventos-0"]').innerText(),'19/10/2026','A data segue o fuso de São Paulo');
-  assert.equal(await form.locator('[data-na="proventos-0"]').locator('..').locator('time').innerText(),'19/10/2026');
+  assert.equal(await form.locator('[data-check-date="proventos-0"]').locator('..').locator('span').innerText(),'Data da marcação');
   await page.clock.setFixedTime(new Date('2026-10-20T03:15:00.000Z'));
   await form.locator('[data-check="proventos-0"]').check();
   assert.equal((await state(page)).checks['proventos-0'].date,'20/10/2026');

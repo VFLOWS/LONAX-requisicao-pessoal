@@ -66,7 +66,9 @@ a.lx-btn { display: inline-flex; align-items: center; justify-content: center; t
 .lx-check-options label { display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; }
 .lx-check-options input { width: 17px; height: 17px; accent-color: var(--lx-green); }
 .lx-check-date { color: var(--lx-muted); font-size: 11px; font-weight: 400; white-space: nowrap; }
-.lx-check-options .lx-check-date { margin-left: 4px; }
+.lx-check-marked-date { display: grid; gap: 3px; }
+.lx-check-marked-date > span { color: var(--lx-muted); font-size: 11px; font-weight: 700; }
+.lx-check-marked-date .lx-check-date { color: var(--lx-blue); font-size: 12px; font-weight: 700; }
 .lx-check-state { display: grid; gap: 6px; }
 .lx-validation { margin-bottom: 16px; padding: 14px 16px; border: 1px solid var(--lx-red); border-radius: var(--lx-radius); background: var(--lx-red-soft); color: #992727; line-height: 1.6; }
 .lx-validation ul { margin-bottom: 0; padding-left: 18px; }
