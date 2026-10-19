@@ -17,6 +17,22 @@ a.lx-btn { display: inline-flex; align-items: center; justify-content: center; t
 .lx-parallel-card span { font-size: 12px; }
 .lx-parallel-card.is-done { background: var(--lx-green-soft); border-color: #a4dfc7; color: #146245; }
 .lx-upload { margin-top: 12px; }
+.lx-signature-tracking { min-width: 0; border: 1px solid transparent; border-radius: var(--lx-radius); }
+.lx-signing-overview { padding: 14px; border: 1px solid var(--lx-line); border-radius: var(--lx-radius); background: var(--lx-blue-soft); }
+.lx-signing-overview-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; color: var(--lx-blue-dark); font-size: 13px; }
+.lx-signing-count { margin: 12px 0; color: var(--lx-blue-dark); font-size: 13px; font-weight: 700; }
+.lx-signing-overview-grid,
+.lx-signing-person-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.lx-signing-status { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: var(--lx-radius); background: var(--lx-orange-soft); color: #985500; font-size: 12px; }
+.lx-signing-status.is-signed { background: var(--lx-green-soft); color: #146245; }
+.lx-signing-person-grid { margin-top: 14px; }
+.lx-signing-person-grid > div { min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 720px) {
+  .lx-signing-overview-grid,
+  .lx-signing-person-grid { grid-template-columns: 1fr; }
+}
+.lx-signature-tracking.lx-error { padding: 12px; border-color: var(--lx-red); background: var(--lx-red-soft); box-shadow: 0 0 0 3px rgba(225, 66, 66, .1); }
+.lx-signature-tracking > .lx-error-message { display: block; margin-top: 12px; }
 .lx-dropzone:focus-within { outline: 3px solid var(--lx-blue); outline-offset: 2px; }
 .lx-signature-card { display: grid; align-content: start; gap: 14px; min-width: 0; padding: 18px; border: 1px solid var(--lx-line); border-radius: var(--lx-radius); background: white; }
 .lx-signature-card strong { color: var(--lx-blue-dark); }
@@ -49,6 +65,9 @@ a.lx-btn { display: inline-flex; align-items: center; justify-content: center; t
 .lx-check-options { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
 .lx-check-options label { display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; }
 .lx-check-options input { width: 17px; height: 17px; accent-color: var(--lx-green); }
+.lx-check-date { color: var(--lx-muted); font-size: 11px; font-weight: 400; white-space: nowrap; }
+.lx-check-options .lx-check-date { margin-left: 4px; }
+.lx-check-state { display: grid; gap: 6px; }
 .lx-validation { margin-bottom: 16px; padding: 14px 16px; border: 1px solid var(--lx-red); border-radius: var(--lx-radius); background: var(--lx-red-soft); color: #992727; line-height: 1.6; }
 .lx-validation ul { margin-bottom: 0; padding-left: 18px; }
 .lx-feedback { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 120; width: max-content; max-width: calc(100% - 32px); padding: 14px 20px; border-radius: var(--lx-radius); background: var(--lx-blue-dark); color: white; box-shadow: 0 8px 24px #142b4c33; }
@@ -118,7 +137,8 @@ button:disabled, input:disabled, select:disabled, textarea:disabled { cursor: de
 .lx-field-name-estabilidade .lx-radio-options,
 .lx-field-name-prosseguir .lx-radio-options,
 .lx-field-name-exame .lx-radio-options,
-.lx-field-name-modalidade .lx-radio-options {
+.lx-field-name-modalidade .lx-radio-options,
+.lx-field-name-checklistConcluido .lx-radio-options {
   grid-template-columns: repeat(2, max-content);
   column-gap: 28px;
 }

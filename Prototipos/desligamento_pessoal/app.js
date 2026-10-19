@@ -90,19 +90,20 @@
     ['sesmt', 'Análise do SESMT', 'helmet-safety', 'orange', 'Exame demissional, devolução de EPI e termos. Em paralelo à TI.'],
     ['ti', 'Análise da TI', 'laptop', 'blue', 'Infraestrutura, itens a devolver e termo de responsabilidade. Em paralelo ao SESMT.'],
     ['documento', 'Documento de Desligamento', 'file-lines', 'purple', 'Consultar o documento de desligamento e encaminhar para assinaturas.'],
-    ['assinaturas', 'Assinaturas', 'file-signature', 'teal', 'Colaborador e Gestor: eletrônica ou presencial, sem ordem obrigatória.'],
+    ['assinaturas', 'Encaminhar para Assinatura', 'file-signature', 'teal', 'Gerar e enviar para assinatura eletrônica ou anexar o documento assinado presencialmente.'],
+    ['validacao_assinaturas', 'Validar Assinaturas', 'file-circle-check', 'teal', 'Acompanhar as assinaturas na plataforma digital e validar o documento assinado.'],
     ['dp', 'DP — Checklist da Rescisão', 'list-check', 'orange', 'Dados da rescisão e conferência manual dos itens aplicáveis.'],
     ['correcao', 'Correção da Solicitação', 'rotate-left', 'slate', 'Dados preservados, parecer da devolução e registro dos ajustes.'],
     ['reprovada', 'Desligamento Reprovado', 'ban', 'red', 'Decisão e histórico do encerramento por reprovação.'],
     ['finalizada', 'Desligamento Finalizado', 'circle-check', 'green', 'Desligamento aprovado e concluído pelo Departamento Pessoal.']
   ].map(([key, title, icon, tone, desc]) => ({ key, title, icon, tone, desc }));
-  const owners = { solicitacao: 'Eduardo Martins', diretoria: 'Roberto Siqueira', rh: 'Ricardo Nunes', paralelo: 'Ricardo Nunes', sesmt: 'Marcos Oliveira', ti: 'Patrícia Almeida', documento: 'Ricardo Nunes', assinaturas: 'Ricardo Nunes', dp: 'Juliana Costa' };
+  const owners = { solicitacao: 'Eduardo Martins', diretoria: 'Roberto Siqueira', rh: 'Ricardo Nunes', paralelo: 'Ricardo Nunes', sesmt: 'Marcos Oliveira', ti: 'Patrícia Almeida', documento: 'Ricardo Nunes', assinaturas: 'Ricardo Nunes', validacao_assinaturas: 'Ricardo Nunes', dp: 'Juliana Costa' };
   const checklistGroups = [
     ['proventos', 'Descontos / Proventos', ['Plano de Saúde', 'Coparticipação', 'Odontológico', 'Alimentação', 'Adicional Noturno', 'Art. 73 — Hora Ficta', 'Faltas', 'Atrasos', 'Comissões', 'Periculosidade / Insalubridade', 'Desconto Vale-Transporte', 'Desconto Combustível', 'Pensão', 'FGTS do mês anterior', 'Farmácia', 'Bazar / Feira da Família', 'Uniforme', 'Banco de Horas', 'Cesta Básica', 'Fretado', 'EPI', 'E-Consignado', 'Insuficiência de saldo do mês anterior', 'Conferência de gozo de férias']],
     ['cancelamentos', 'Cancelamentos', ['Plano de Saúde', 'Odontológico', 'Farmácia', 'Tangerino', 'CTRL ID']],
     ['documentos', 'Documentos / Providências', ['PPP', 'TRCT', 'Folha de Ponto', 'Extrato FGTS', 'GRRF', 'Ficha de Registro', 'Seguro', 'ASO Demissional', 'Aviso Assinado', 'Lançamento Financeiro', 'Arquivo Bancário', 'Lançamento do Líquido', 'Total TRCT', 'Total GRRF', 'Envio do evento S-2299 ao eSocial']]
   ];
-  const labels = { solicitacao: 'Em preenchimento', diretoria: 'Aguardando Diretoria', rh: 'Aguardando RH', paralelo: 'Aguardando SESMT e TI', documento: 'Aguardando documento', assinaturas: 'Aguardando assinaturas', dp: 'Checklist do DP', correcao: 'Em correção', retomada: 'Aguardando regra de retomada', reprovada: 'Reprovado', finalizada: 'Finalizado' };
+  const labels = { solicitacao: 'Em preenchimento', diretoria: 'Aguardando Diretoria', rh: 'Aguardando RH', paralelo: 'Aguardando SESMT e TI', documento: 'Aguardando documento', assinaturas: 'Aguardando encaminhamento para assinatura', validacao_assinaturas: 'Aguardando validação das assinaturas', dp: 'Checklist do DP', correcao: 'Em correção', retomada: 'Aguardando regra de retomada', reprovada: 'Reprovado', finalizada: 'Finalizado' };
 
   function exampleAttachments() {
     return [1, 2, 3].map(index => ({ id: 'exemplo-solicitacao-' + index, name: 'teste ' + index + '.pdf', url: 'anexos/teste ' + index + '.pdf', type: 'application/pdf', size: 25834, origin: 'Solicitante', by: owners.solicitacao, date: '16/10/2026 10:00', revision: 1 }));
@@ -149,8 +150,9 @@
     });
     target.reviewDemoVersion = 1;
   }
+  const checklistExampleDate = '16/10/2026';
   function dpExamples() {
-    const date = '16/10/2026 10:00';
+    const date = checklistExampleDate;
     const notes = { proventos: 'Valor e incidência conferidos na memória de cálculo da rescisão.', cancelamentos: 'Cancelamento conferido com a área responsável.', documentos: 'Documento e lançamento conferidos na pasta da rescisão.' };
     return {
       form: { cpf: '123.456.789-09', pis: '123.45678.90-1', saldoFgts: '18450.75', homologacao: 'Sindicato — Sarzedo/MG', demissao: '2026-10-30', projecaoAviso: '2026-11-29', checklistConcluido: 'Sim', finais: 'Documentação conferida, devoluções acompanhadas e checklist da rescisão concluído.' },
@@ -166,8 +168,8 @@
 
   function freshState() {
     const fresh = {
-      current: 'solicitacao', revision: 1, created: now(), history: [], decisions: {}, files: { solicitacao: exampleAttachments() }, checks: {}, correction: null, document: null, exampleAttachmentsVersion: 1,
-      requestDemoVersion: 3,
+      current: 'solicitacao', revision: 1, created: now(), history: [], decisions: {}, files: { solicitacao: exampleAttachments() }, checks: {}, correction: null, document: null, electronicSigning: null, exampleAttachmentsVersion: 1,
+      requestDemoVersion: 3, signatureDemoVersion: 1,
       form: Object.assign({ employee: '000731', modalidade: 'Eletrônica', assinaturaColaborador: '', assinaturaGestor: '', cpf: '', pis: '', saldoFgts: '', homologacao: '', demissao: '', projecaoAviso: '', checklistConcluido: '', finais: '' }, requestExamples())
     };
     fillAnalysisExamples(fresh);
@@ -193,6 +195,9 @@
   if (!state.reviewDemoVersion) fillAnalysisExamples(state);
   if (!state.documentDemoVersion) fillDocumentExamples(state);
   if (!state.dpDemoVersion) fillDPExamples(state);
+  Object.values(state.checks).forEach(item => {
+    if (['conferido', 'na'].includes(item?.status) && !item.date) item.date = checklistExampleDate;
+  });
   ['infraItems', 'epiItems'].forEach(scope => state.form[scope].forEach(item => { if (item.quantidade == null) item.quantidade = '1'; }));
   if (!Array.isArray(state.form.rmStability)) state.form.rmStability = JSON.parse(JSON.stringify(stabilityExamples[state.form.employee] || []));
   // Acrescenta os detalhes dos exemplos a rascunhos existentes, preservando os registros do histórico.
@@ -201,7 +206,7 @@
     if (!Array.isArray(record.detalhes)) record.detalhes = JSON.parse(JSON.stringify(example?.detalhes || []));
   });
   const stageKey = locationStage();
-  let page = stages.find(s => s.key === stageKey) || stages[0];
+  let page = prepareStage(stageKey);
   let errors = [];
   let fieldErrors = {};
   let dbPromise;
@@ -219,10 +224,26 @@
   const escape = value => String(value == null ? '' : value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   function now() { return new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }); }
   function date(value) { return /^\d{4}-\d{2}-\d{2}$/.test(value || '') ? value.split('-').reverse().join('/') : value || '—'; }
+  function checkDate(value) {
+    const text = String(value || '');
+    return /^\d{4}-\d{2}-\d{2}/.test(text) ? date(text.slice(0, 10)) : text.match(/^\d{2}\/\d{2}\/\d{4}/)?.[0] || '';
+  }
   function employee() { return employees.find(e => e.chapa === state.form.employee); }
   function title(key) { return (stages.find(s => s.key === key) || {}).title || labels[key] || key; }
   function locationStage() { return new URLSearchParams(location.search).get('etapa') || (location.pathname.endsWith('/espera_paralelo.html') ? 'paralelo' : 'solicitacao'); }
   function url(key) { return 'etapa.html?etapa=' + encodeURIComponent(key); }
+  function prepareStage(key) {
+    const stage = stages.find(item => item.key === key) || stages[0];
+    // A apresentação da validação é exclusiva do cenário de assinatura eletrônica.
+    if (stage.key === 'validacao_assinaturas') {
+      state.form.modalidade = 'Eletrônica';
+      if (!state.signatureDemoVersion) {
+        if (state.electronicSigning) Object.assign(state.electronicSigning, { signers: electronicSigningExample('partial').signers, signedDocument: null, validatedAt: '' });
+        state.signatureDemoVersion = 1;
+      }
+    }
+    return stage;
+  }
   function save() {
     try { localStorage.setItem(STORAGE, JSON.stringify(state)); return true; }
     catch (_) { storageOK = false; feedback('Não foi possível salvar no navegador. Mantenha esta página aberta.', true); return false; }
@@ -231,17 +252,21 @@
     state.history.push(Object.assign({ area, action, note: note || '', responsible: owners[area] || owners.solicitacao, date: now(), revision: state.revision }, extra || {}));
   }
   function historyEvidence() {
-    return JSON.parse(JSON.stringify({ snapshot: state.form, files: state.files, document: state.document }));
+    return JSON.parse(JSON.stringify({ snapshot: state.form, files: state.files, document: state.document, electronicSigning: state.electronicSigning || null }));
   }
   function go(key) {
-    save(); page = stages.find(s => s.key === key) || stages[0]; errors = []; fieldErrors = {};
+    page = prepareStage(key); save(); errors = []; fieldErrors = {};
     if (!view) { location.href = url(key); return; }
     history.pushState(null, '', url(key)); render(); window.scrollTo(0, 0);
   }
   function active(key) { return state.current === key || (state.current === 'paralelo' && ['sesmt', 'ti'].includes(key) && !state.decisions[key]?.completed); }
   function completed(key) { return !!state.decisions[key]?.completed; }
+  function isChecklistEditor(control) {
+    return page.key === 'dp' && control.matches('[data-check], [data-na], [data-check-note], [data-field="checklistConcluido"], [data-field="finais"]');
+  }
   function canInteract(key) {
     if (key === 'correcao' && !isCurrentCorrection()) return true;
+    if (key === 'validacao_assinaturas') return true;
     // Permite apresentar as assinaturas mesmo quando outra etapa anterior está aberta.
     if (key === 'assinaturas' && ['solicitacao', 'diretoria', 'rh', 'paralelo', 'documento', 'assinaturas'].includes(state.current)) return true;
     // As atividades abertas diretamente também podem ser demonstradas no rascunho.
@@ -313,7 +338,7 @@
     renderStatus();
     const nav = document.getElementById('stageNav');
     if (nav) {
-      nav.innerHTML = stages.map(s => '<a class="lx-stage-card" href="' + (s.key === 'paralelo' ? 'espera_paralelo.html' : url(s.key)) + '"><span class="lx-stage-icon lx-dot-' + s.tone + '"><i class="fa-solid fa-' + s.icon + '"></i></span><div><h3>' + escape(s.title) + '</h3><p>' + escape(s.desc) + '</p></div></a>').join('');
+      nav.innerHTML = stages.filter(s => !['paralelo', 'documento'].includes(s.key)).map(s => '<a class="lx-stage-card" href="' + (s.key === 'paralelo' ? 'espera_paralelo.html' : url(s.key)) + '"><span class="lx-stage-icon lx-dot-' + s.tone + '"><i class="fa-solid fa-' + s.icon + '"></i></span><div><h3>' + escape(s.title) + '</h3><p>' + escape(s.desc) + '</p></div></a>').join('');
       return;
     }
     let body = '';
@@ -322,6 +347,7 @@
     if (page.key === 'paralelo') body = renderParallelWait();
     if (page.key === 'documento') body = renderDocument();
     if (page.key === 'assinaturas') body = renderSignatures();
+    if (page.key === 'validacao_assinaturas') body = renderSignatureValidation();
     if (page.key === 'dp') body = renderDP();
     if (['finalizada', 'reprovada'].includes(page.key)) body = renderEnding();
     const errorHtml = errors.length && !Object.keys(fieldErrors).length ? '<div class="lx-validation" role="alert" tabindex="-1"><strong>Revise os campos antes de continuar:</strong><ul>' + errors.map(e => '<li>' + escape(e) + '</li>').join('') + '</ul></div>' : '';
@@ -329,7 +355,7 @@
     applyFieldErrors();
     if (!canInteract(page.key)) {
       view.querySelectorAll('input, select, textarea, button').forEach(node => {
-        if (node.matches('[data-decision], [data-note]')) return;
+        if (node.matches('[data-decision], [data-note]') || isChecklistEditor(node)) return;
         if (state.current === 'retomada' && page.key === 'correcao' && (node.dataset.field === 'resumeArea' || node.dataset.action === 'resume')) return;
         if (['file', 'download-file', 'draft'].includes(node.dataset.action) || node.hasAttribute('data-collapse')) return;
         node.disabled = true;
@@ -454,13 +480,15 @@
     const approvals = ['diretoria', 'rh'];
     const waiting = approvals.concat('paralelo');
     const technical = waiting.concat('sesmt', 'ti');
+    const signing = technical.concat('documento', 'assinaturas');
+    const signed = state.form.modalidade === 'Presencial' ? signing : signing.concat('validacao_assinaturas');
     if (key === 'correcao' || key === 'reprovada') {
       const action = key === 'correcao' ? 'Devolução para correção' : 'Reprovado';
       const actual = key === 'correcao' ? isCurrentCorrection() : state.current === 'reprovada';
       const source = (actual && state.history.findLast(record => record.action === action)?.area) || (key === 'correcao' ? correctionContext().origin : 'rh');
       return ({ diretoria: ['diretoria'], rh: approvals, sesmt: waiting.concat('sesmt'), ti: waiting.concat('ti') })[source] || approvals;
     }
-    return ({ diretoria: [], rh: ['diretoria'], paralelo: approvals, sesmt: waiting, ti: waiting, documento: technical, assinaturas: technical.concat('documento'), dp: technical.concat('documento', 'assinaturas'), finalizada: technical.concat('documento', 'assinaturas', 'dp') })[key] || [];
+    return ({ diretoria: [], rh: ['diretoria'], paralelo: approvals, sesmt: waiting, ti: waiting, documento: technical, assinaturas: technical.concat('documento'), validacao_assinaturas: signing, dp: signed, finalizada: signed.concat('dp') })[key] || [];
   }
   function exampleHistoryRecord(area) {
     const f = requestSnapshotExamples(page.key === 'correcao' ? correctionContext().before : state.form);
@@ -482,9 +510,14 @@
         if (f.epi === 'Sim') exampleFile('termoEpi', 'termo-de-epi.pdf', 1);
       } else if (f.infraestrutura === 'Sim') exampleFile('termoInfra', 'termo-de-infraestrutura.pdf', 2);
     }
-    if (area === 'assinaturas') {
-      f.assinaturaColaborador ||= state.created; f.assinaturaGestor ||= state.created;
-      Object.assign(files, documentAttachments(state.revision));
+    let electronicSigning = null;
+    if (area === 'assinaturas' || area === 'validacao_assinaturas') {
+      if (f.modalidade === 'Presencial') files.assinado = documentAttachments(state.revision).assinado;
+      else {
+        electronicSigning = electronicSigningExample(area === 'validacao_assinaturas' ? 'completed' : 'pending', f);
+        files.paraAssinatura = [electronicSigning.document];
+        if (electronicSigning.signedDocument) files.assinado = [electronicSigning.signedDocument];
+      }
     }
     if (area === 'documento') files.documento = documentAttachments(state.revision).documento;
     let snapshot = f;
@@ -498,7 +531,7 @@
     if (returned && correctionContext().files) Object.assign(files, JSON.parse(JSON.stringify(correctionContext().files)));
     if (rejected && area === 'rh') { f.estabilidade = 'Sim'; f.prosseguir = 'Não'; f.motivoEstabilidade = 'Mandato de representante dos empregados na CIPA informado no cadastro do colaborador.'; }
     return { area, action: returned ? 'Devolução para correção' : rejected ? 'Reprovado' : 'Análise concluída', responsible: owners[area], date: state.created, revision: state.revision, note: returned ? correctionContext().note : rejected ? 'Continuidade do desligamento impedida pelo RH após análise das informações de estabilidade do colaborador.' : 'Etapa aprovada sem ressalvas.', snapshot, files,
-      document: area === 'documento' ? state.document || { date: state.created, by: owners.documento, revision: state.revision } : null };
+      electronicSigning, document: area === 'documento' ? state.document || { date: state.created, by: owners.documento, revision: state.revision } : null };
   }
   function processHistoryEntries() {
     const conditional = ['correcao', 'reprovada'].includes(page.key);
@@ -512,11 +545,11 @@
       const area = record.action === 'Correção registrada' ? 'correcao' : record.area;
       return { record: Object.assign({}, record, { area }), key: (['diretoria', 'rh', 'sesmt', 'ti'].includes(area) ? 'approval-' : 'history-' + area + '-') + index };
     }).filter(({ record }, index) => {
-      const milestone = ['Análise concluída', 'Análises paralelas concluídas', 'Devolução para correção', 'Reprovado', 'Correção registrada', 'Encaminhado para assinaturas', 'Documento assinado conferido', 'Checklist concluído e processo encerrado'].includes(record.action);
+      const milestone = ['Análise concluída', 'Análises paralelas concluídas', 'Devolução para correção', 'Reprovado', 'Correção registrada', 'Encaminhado para assinaturas', 'Documento enviado para assinatura eletrônica', 'Assinaturas validadas', 'Documento assinado conferido', 'Checklist concluído e processo encerrado'].includes(record.action);
       const generated = record.action === 'Minuta demonstrativa gerada' && !state.history.slice(index + 1).some(next => next.area === 'documento' && next.revision === record.revision && ['Minuta demonstrativa gerada', 'Encaminhado para assinaturas'].includes(next.action));
       if (!milestone && !generated) return false;
       if (conditional) return cutoff >= 0 && index <= cutoff;
-      if (page.key === 'paralelo' && ['sesmt', 'ti', 'paralelo', 'documento', 'assinaturas', 'dp'].includes(record.area)) return false;
+      if (page.key === 'paralelo' && ['sesmt', 'ti', 'paralelo', 'documento', 'assinaturas', 'validacao_assinaturas', 'dp'].includes(record.area)) return false;
       const pastRevision = (record.revision || 1) < state.revision;
       return conditional || pastRevision || record.area === 'correcao' || previous.includes(record.area) || (record.area === sibling && record.action === 'Análise concluída');
     });
@@ -525,7 +558,7 @@
       if (!conditional && ['correcao', 'retomada', 'reprovada'].includes(state.current)) return;
       if (entries.some(({ record }) => record.area === area)) return;
       const example = { record: exampleHistoryRecord(area), key: ['diretoria', 'rh', 'sesmt', 'ti'].includes(area) ? 'approval-' + area : 'history-' + area };
-      const ranks = { diretoria: 0, rh: 1, paralelo: 2, sesmt: 3, ti: 3, documento: 4, assinaturas: 5, dp: 6 };
+      const ranks = { diretoria: 0, rh: 1, paralelo: 2, sesmt: 3, ti: 3, documento: 4, assinaturas: 5, validacao_assinaturas: 6, dp: 7 };
       const next = entries.findIndex(({ record }) => ranks[record.area] > ranks[area]);
       if (next < 0) entries.push(example); else entries.splice(next, 0, example);
     });
@@ -537,7 +570,8 @@
         entries.splice(index, 1); entries.splice(firstAnalysis, 0, entry);
       }
     });
-    return entries;
+    // A espera permanece no fluxo e nos registros, sem um componente no histórico.
+    return entries.filter(({ record }) => record.area !== 'paralelo');
   }
   function historyFiles(record, group) {
     return record.files ? record.files[group] || [] : (state.files[group] || []).filter(file => (file.revision || 1) === (record.revision || 1));
@@ -576,15 +610,22 @@
         body = historyCustomSection('Documento de Desligamento', 'file-lines', 'blue', attachments('documento', '', false, historyFiles(record, 'documento').length ? historyFiles(record, 'documento') : documentAttachments(record.revision).documento));
       }
       if (record.area === 'assinaturas') {
-        const e = employees.find(item => item.chapa === f.employee) || {};
         const electronic = f.modalidade === 'Eletrônica';
-        body = historySection('Modalidade de Assinatura', 'pen-nib', 'teal', [['Modalidade', f.modalidade]]) + (electronic ? historyCustomSection('Assinatura Eletrônica', 'file-signature', 'teal', grid([signatureCard('Colaborador', e.nome, 'assinaturaColaborador', f, true), signatureCard('Gestor', owners.solicitacao, 'assinaturaGestor', f, true)], 2)) : '') + historyCustomSection(electronic ? 'Documento para assinatura' : 'Documento Assinado', 'paperclip', 'purple', attachments(electronic ? 'paraAssinatura' : 'assinado', '', false, historyFiles(record, electronic ? 'paraAssinatura' : 'assinado').length ? historyFiles(record, electronic ? 'paraAssinatura' : 'assinado') : historyFiles(record, 'assinado')));
+        body = historySection('Modalidade de Assinatura', 'pen-nib', 'teal', [['Modalidade', f.modalidade]]) + (electronic ?
+          historyCustomSection('Envio para Assinatura Eletrônica', 'paper-plane', 'blue', signingSummary(record.electronicSigning || electronicSigningExample('pending', f, record.revision))) :
+          historyCustomSection('Documento Assinado', 'paperclip', 'purple', attachments('assinado', '', false, historyFiles(record, 'assinado'))));
+      }
+      if (record.area === 'validacao_assinaturas') {
+        const signing = record.electronicSigning || electronicSigningExample('completed', f, record.revision);
+        body = historyCustomSection('Acompanhamento das Assinaturas', 'file-signature', 'teal', signingSummary(signing) + signingStatus(signing)) +
+          historySection('Validação das Assinaturas', 'file-circle-check', 'green', [['Situação', 'Assinaturas validadas'], ['Responsável', record.responsible], ['Data da validação', signing.validatedAt]]) +
+          historyCustomSection('Documento Assinado', 'paperclip', 'purple', attachments('assinado', '', false, historyFiles(record, 'assinado')));
       }
       if (record.area === 'dp') {
         const e = employees.find(item => item.chapa === f.employee) || {};
         body = historySection('Dados da Rescisão', 'id-card', 'blue', [['Nome', e.nome], ['Chapa', e.chapa], ['CPF', f.cpf], ['PIS', f.pis], ['Data de Admissão', date(e.admissao)], ['Saldo FGTS (R$)', f.saldoFgts], ['Homologação', f.homologacao], ['Data de Demissão', date(f.demissao)], ['Tipo de Demissão', normalizeTerminationType(f.tipo)], ['Projeção de Aviso', date(f.projecaoAviso)], ['Filial', e.filial]]) + historySection('Conclusão pelo Departamento Pessoal', 'clipboard-check', 'teal', [['Checklist concluído?', f.checklistConcluido], ['Observações finais', f.finais], ['Responsável', record.responsible], ['Data da conclusão', record.date]]) + renderChecklists(true, record.snapshot?.checklist || {});
       }
-      const department = { diretoria: 'Diretoria Industrial', rh: 'Recursos Humanos', paralelo: 'Recursos Humanos', sesmt: 'Segurança do Trabalho', ti: 'Tecnologia da Informação', documento: 'Recursos Humanos', assinaturas: 'Recursos Humanos', dp: 'Departamento Pessoal', correcao: 'Gerência Industrial' }[record.area];
+      const department = { diretoria: 'Diretoria Industrial', rh: 'Recursos Humanos', paralelo: 'Recursos Humanos', sesmt: 'Segurança do Trabalho', ti: 'Tecnologia da Informação', documento: 'Recursos Humanos', assinaturas: 'Recursos Humanos', validacao_assinaturas: 'Recursos Humanos', dp: 'Departamento Pessoal', correcao: 'Gerência Industrial' }[record.area];
       return historyPanel(stage.title, record.date + ' - ' + record.responsible + ' - ' + department, body, key, stage.icon, tone);
     }).join('');
   }
@@ -625,14 +666,53 @@
     return '<div class="lx-upload" data-file-group="' + group + '">' + (label ? '<strong>' + label + '</strong>' : '') + (editable ? '<div class="lx-dropzone" data-drop="' + group + '"><i class="fa-solid fa-cloud-arrow-up"></i><p>Arraste e solte seus arquivos aqui</p><span>ou</span><button type="button" class="lx-btn-outline" data-action="choose-file" data-group="' + group + '">Escolher arquivo</button><input class="lx-file-input" type="file" accept="application/pdf,image/png,image/jpeg,image/webp" data-upload="' + group + '" multiple /></div>' : '') + '<div class="lx-attachment-list">' + (files.length ? files.map((f, i) => '<div class="lx-attachment-row"><div class="lx-attachment-info"><i class="fa-solid fa-file-lines"></i><div><strong>' + escape(f.name) + '</strong><span>' + Math.ceil(f.size / 1024) + ' KB - ' + escape(f.origin || attachmentOrigin(group)) + '</span></div></div><div class="lx-attachment-actions">' + attachmentButton('file', 'eye', 'Visualizar anexo', group, i, false, source) + attachmentButton('download-file', 'download', 'Baixar anexo', group, i, false, source) + (editable ? attachmentButton('delete-file', 'trash', 'Excluir anexo', group, i, true, source) : '') + '</div></div>').join('') : '<div class="lx-empty-list">Nenhum arquivo anexado.</div>') + '</div></div>';
   }
   function renderDocument() {
-    return fieldset('Documento de Desligamento', 'file-lines', attachments('documento', '', false)) + actions('send-signatures', 'Encaminhar para assinaturas');
+    return fieldset('Documento de Desligamento', 'file-lines', attachments('documento', '', false)) + actions('send-signatures', 'Encaminhar para Assinatura');
   }
   function renderSignatures() {
     const electronic = state.form.modalidade === 'Eletrônica';
     return fieldset('Modalidade de Assinatura', 'pen-nib', radios('Como o documento será assinado?', 'modalidade', ['Eletrônica', 'Presencial'])) +
-      (electronic ? fieldset('Documento para assinatura', 'file-lines', attachments('paraAssinatura', '', true)) +
-        fieldset('Assinatura Eletrônica', 'file-signature', grid([signatureCard('Colaborador', employee()?.nome || '—', 'assinaturaColaborador'), signatureCard('Gestor', owners.solicitacao, 'assinaturaGestor')], 2)) :
-        fieldset('Documento Assinado', 'paperclip', attachments('assinado', '', true))) + actions('finish-signatures', 'Encaminhar documento assinado ao DP');
+      (electronic ? notice('O documento será gerado automaticamente e enviado à plataforma digital.') :
+        fieldset('Documento Assinado', 'paperclip', attachments('assinado', '', true))) + actions('finish-signatures', electronic ? 'Gerar e enviar para assinatura' : 'Encaminhar documento assinado ao DP');
+  }
+  function automaticDocument(group, revision, timestamp) {
+    return Object.assign({}, documentAttachments(revision)[group][0], { id: 'automatico-' + group + '-' + revision, origin: group === 'assinado' ? 'Plataforma digital' : 'Gerado automaticamente', by: 'Sistema', date: timestamp });
+  }
+  function electronicSigningExample(status = 'partial', form = state.form, revision = state.revision) {
+    const e = employees.find(item => item.chapa === form.employee) || employees[0];
+    const timestamp = state.created;
+    const signers = [
+      { role: 'Colaborador', name: e.nome, email: ({ '000731': 'carlos.pereira', '000918': 'fernanda.lima', '001042': 'rafael.souza' }[e.chapa]) + '@exemplo.com' },
+      { role: 'Gestor', name: owners.solicitacao, email: 'eduardo.martins@exemplo.com' }
+    ].map((signer, index) => Object.assign(signer, { status: status === 'completed' || (status === 'partial' && index === 0) ? 'Assinado' : 'Pendente', signedAt: status === 'completed' || (status === 'partial' && index === 0) ? timestamp : '' }));
+    return { revision, employee: e.chapa, provider: 'Plataforma digital', protocol: 'DESL-' + e.chapa + '-R' + revision, sentAt: timestamp, updatedAt: timestamp, signers,
+      document: automaticDocument('paraAssinatura', revision, timestamp), signedDocument: status === 'completed' ? automaticDocument('assinado', revision, timestamp) : null, validatedAt: status === 'completed' ? timestamp : '' };
+  }
+  function electronicSignaturesComplete(signing) {
+    return !!signing && signing.revision === state.revision && signing.employee === state.form.employee &&
+      ['Colaborador', 'Gestor'].every(role => signing.signers?.some(signer => signer.role === role && signer.status === 'Assinado' && signer.signedAt));
+  }
+  function electronicDocumentReady(signing) {
+    return electronicSignaturesComplete(signing) && signing.signedDocument?.revision === state.revision &&
+      state.files.assinado?.some(file => file.id === signing.signedDocument.id && file.revision === state.revision);
+  }
+  function signingSummary(signing) {
+    return readGrid([['Documento', signing.document?.name || 'documento-de-desligamento.pdf'], ['Plataforma', signing.provider], ['Protocolo do documento', signing.protocol], ['Data do envio', signing.sentAt], ['Última atualização', signing.updatedAt]]);
+  }
+  function signingStatus(signing, current = false) {
+    const signed = signing.signers.filter(signer => signer.status === 'Assinado');
+    const pending = signing.signers.filter(signer => signer.status !== 'Assinado');
+    const complete = pending.length === 0 && signed.length > 0;
+    const status = complete ? 'Assinado' : signed.length ? 'Parcialmente assinado' : 'Aguardando assinaturas';
+    return '<div class="lx-signature-tracking"' + (current ? ' data-signature-tracking' : '') + '><div class="lx-signing-overview" role="status"><div class="lx-signing-overview-head"><strong>Status do documento</strong><span class="lx-signing-status' + (complete ? ' is-signed' : '') + '" data-document-signing-status><i class="fa-solid fa-' + (complete ? 'circle-check' : 'clock') + '"></i> ' + status + '</span></div><p class="lx-signing-count">' + signed.length + ' de ' + signing.signers.length + ' assinaturas recebidas</p>' + readGrid([['Assinado por', signed.map(signer => signer.name).join(', ') || 'Nenhuma assinatura recebida'], ['Aguardando assinatura de', pending.map(signer => signer.name).join(', ') || 'Nenhuma assinatura pendente']], 'lx-signing-overview-grid') + '</div>' + signing.signers.map(signer =>
+      '<div class="lx-stability-record" data-signer="' + escape(signer.role) + '"><div class="lx-stability-record-head"><h3>' + escape(signer.role) + '</h3><span class="lx-signing-status' + (signer.status === 'Assinado' ? ' is-signed' : '') + '"><i class="fa-solid fa-' + (signer.status === 'Assinado' ? 'circle-check' : 'clock') + '"></i> ' + escape(signer.status) + '</span></div>' + readGrid([['Nome', signer.name], ['E-mail', signer.email], ['Assinou o documento?', signer.status === 'Assinado' ? 'Sim' : 'Não'], ['Data da assinatura', signer.signedAt || 'Aguardando assinatura']], 'lx-signing-person-grid') + '</div>'
+    ).join('') + '</div>';
+  }
+  function renderSignatureValidation() {
+    const signing = state.electronicSigning || electronicSigningExample();
+    return fieldset('Envio para Assinatura Eletrônica', 'paper-plane', signingSummary(signing)) +
+      fieldset('Acompanhamento das Assinaturas', 'file-signature', signingStatus(signing, true)) +
+      (signing.signedDocument ? fieldset('Documento Assinado', 'file-circle-check', attachments('assinado', '', false, [signing.signedDocument])) : '') +
+      actions('validate-signatures', 'Validar assinaturas e encaminhar ao DP');
   }
   function signatureCard(role, name, key, form = state.form, readonly = false) {
     const image = form[key + 'Imagem'];
@@ -676,8 +756,11 @@
     ['assinaturaColaborador', 'assinaturaGestor'].forEach(key => { state.form[key] = ''; delete state.form[key + 'Imagem']; });
   }
   function signaturesReady() {
-    if (state.form.modalidade === 'Presencial') return !!state.files.assinado?.length;
-    return !!state.files.paraAssinatura?.length && !!state.form.assinaturaColaborador && !!state.form.assinaturaGestor;
+    if (state.form.modalidade === 'Presencial') return !!state.files.assinado?.some(file => (file.revision || 1) === state.revision);
+    const signing = state.electronicSigning;
+    if (signing) return electronicDocumentReady(signing) && !!signing.validatedAt;
+    // Preserva conclusões registradas pela versão anterior, sem liberar novos envios.
+    return state.history.some(record => record.area === 'assinaturas' && record.action === 'Documento assinado conferido' && record.revision === state.revision && record.snapshot?.modalidade === 'Eletrônica');
   }
   function allCheckIds() { return checklistGroups.flatMap(([group, , items]) => items.map((_, i) => group + '-' + i)); }
   function checkDone(id, checks = state.checks) { return ['conferido', 'na'].includes(checks[id]?.status); }
@@ -686,8 +769,10 @@
     return '<div class="lx-check-progress"><strong>Conferência manual: <span' + (readonly ? '' : ' id="checkCount"') + '>' + count + '</span> de ' + ids.length + ' itens tratados</strong><progress' + (readonly ? '' : ' id="checkProgress"') + ' value="' + count + '" max="' + ids.length + '" aria-label="Progresso do checklist"></progress>' + (readonly ? '' : '<span>Marque Conferido para os itens aplicáveis ou Não se aplica com justificativa.</span>') + '</div>' + checklistGroups.map(([group, heading, items]) => {
       const content = '<div class="lx-check-list">' + items.map((name, i) => {
       const id = group + '-' + i; const item = checks[id] || {};
-      if (readonly) return '<div class="lx-check-row"><strong>' + escape(name) + '</strong><span>' + (item.status === 'conferido' ? 'Conferido' : item.status === 'na' ? 'Não se aplica' : 'Pendente') + '</span><span>' + escape(item.note || '') + '</span></div>';
-      return '<div class="lx-check-row lx-check-row-editor"><div class="lx-check-item"><strong id="check-title-' + id + '">' + escape(name) + '</strong><div class="lx-check-options" role="group" aria-labelledby="check-title-' + id + '"><label><input type="checkbox" data-check="' + id + '"' + (item.status === 'conferido' ? ' checked' : '') + ' /> Conferido</label><label><input type="checkbox" data-na="' + id + '"' + (item.status === 'na' ? ' checked' : '') + ' /> Não se aplica</label></div></div><label class="lx-field"><span>Observação' + (item.status === 'na' ? ' / justificativa de não aplicação *' : '') + '</span><textarea data-check-note="' + id + '" rows="3">' + escape(item.note || '') + '</textarea></label></div>';
+      const markedDate = checkDate(item.date) || checklistExampleDate;
+      const stamp = '<time class="lx-check-date" data-check-date="' + id + '" datetime="' + markedDate.split('/').reverse().join('-') + '" title="Marcado em ' + markedDate + '">' + markedDate + '</time>';
+      if (readonly) return '<div class="lx-check-row"><strong>' + escape(name) + '</strong><span class="lx-check-state">' + (item.status === 'conferido' ? 'Conferido' : item.status === 'na' ? 'Não se aplica' : 'Pendente') + (checkDone(id, checks) ? stamp : '') + '</span><span>' + escape(item.note || '') + '</span></div>';
+      return '<div class="lx-check-row lx-check-row-editor"><div class="lx-check-item"><strong id="check-title-' + id + '">' + escape(name) + '</strong><div class="lx-check-options" role="group" aria-labelledby="check-title-' + id + '"><label><input type="checkbox" data-check="' + id + '"' + (item.status === 'conferido' ? ' checked' : '') + ' /> Conferido' + (item.status === 'conferido' ? stamp : '') + '</label><label><input type="checkbox" data-na="' + id + '"' + (item.status === 'na' ? ' checked' : '') + ' /> Não se aplica' + (item.status === 'na' ? stamp : '') + '</label></div></div><label class="lx-field"><span>Observação' + (item.status === 'na' ? ' / justificativa de não aplicação *' : '') + '</span><textarea data-check-note="' + id + '" rows="3">' + escape(item.note || '') + '</textarea></label></div>';
       }).join('') + '</div>';
       return readonly ? historyCustomSection('Checklist de ' + heading, 'list-check', 'blue', content) : fieldset('Checklist de ' + heading, 'list-check', content);
     }).join('');
@@ -717,6 +802,7 @@
     if (key === 'decision') return view.querySelector('.lx-current-decision');
     if (key === 'note') return view.querySelector('[data-note]')?.closest('.lx-field');
     if (key === 'checklist') return view.querySelector('.lx-check-progress');
+    if (key === 'electronicSigning') return view.querySelector('[data-signature-tracking]');
     if (key === 'document') return view.querySelector('.lx-view-shell:last-of-type .lx-fieldset');
     return view.querySelector('[data-field="' + key + '"]')?.closest('.lx-field');
   }
@@ -817,7 +903,7 @@
   }
   function handleAction(node) {
     const action = node.dataset.action;
-    if (['submit', 'correct', 'decide', 'finish', 'finish-signatures', 'add-item', 'delete-item'].includes(action)) { errors = []; fieldErrors = {}; }
+    if (['submit', 'correct', 'decide', 'finish', 'finish-signatures', 'validate-signatures', 'add-item', 'delete-item'].includes(action)) { errors = []; fieldErrors = {}; }
     if (action === 'draft') {
       modal('Salvar rascunho', '<p>Deseja salvar os dados preenchidos até o momento?</p>', () => { if (save()) feedback('Rascunho salvo neste navegador.'); }, 'Salvar', 'save'); return;
     }
@@ -839,7 +925,7 @@
         const clear = target === 'diretoria' ? ['diretoria', 'rh', 'sesmt', 'ti'] : target === 'rh' ? ['rh', 'sesmt', 'ti'] : ['sesmt', 'ti'];
         clear.forEach(k => { delete state.decisions[k]; });
         state.files.anteriores = (state.files.anteriores || []).concat(state.files.assinado || []);
-        state.document = null; state.form.assinaturaColaborador = ''; state.form.assinaturaGestor = ''; delete state.form.assinaturaColaboradorImagem; delete state.form.assinaturaGestorImagem; Object.assign(state.files, documentAttachments(state.revision)); state.checks = dpExamples().checks; state.form.checklistConcluido = 'Sim';
+        state.document = null; state.electronicSigning = null; state.form.assinaturaColaborador = ''; state.form.assinaturaGestor = ''; delete state.form.assinaturaColaboradorImagem; delete state.form.assinaturaGestorImagem; Object.assign(state.files, documentAttachments(state.revision)); state.checks = dpExamples().checks; state.form.checklistConcluido = 'Sim';
         state.current = ['sesmt', 'ti'].includes(target) ? 'paralelo' : target;
         log('solicitacao', 'Retomada simulada', 'Escolha explícita para demonstração: ' + title(target) + '. Regra BPM pendente.'); go(state.current === 'paralelo' ? 'paralelo' : target);
       }, 'Simular reanálise', 'rotate-left'); return;
@@ -892,14 +978,37 @@
     if (action === 'sign') openSignature(node.dataset.sign);
     if (action === 'finish-signatures') {
       if (state.form.modalidade === 'Eletrônica') {
-        ['assinaturaColaborador', 'assinaturaGestor'].forEach(key => { if (!state.form[key]) invalid('sign.' + key, 'Registre a assinatura deste signatário.'); });
-        if (!state.files.paraAssinatura?.length) invalid('files.paraAssinatura', 'Anexe o documento para assinatura.');
-      } else if (!state.files.assinado?.length) invalid('files.assinado', 'Anexe o documento assinado pelo Colaborador e pelo Gestor.');
+        modal('Gerar e enviar para assinatura?', '<p>O documento será gerado automaticamente e enviado à plataforma digital para assinatura do Colaborador e do Gestor. A próxima etapa permitirá acompanhar e validar as assinaturas.</p>', () => {
+          const timestamp = now();
+          const signing = electronicSigningExample('partial');
+          signing.sentAt = timestamp; signing.updatedAt = timestamp;
+          signing.signers.find(signer => signer.role === 'Colaborador').signedAt = timestamp;
+          signing.document = automaticDocument('paraAssinatura', state.revision, timestamp);
+          state.electronicSigning = signing;
+          state.document = { date: timestamp, by: 'Sistema', revision: state.revision };
+          state.files.paraAssinatura = [signing.document];
+          state.files.anteriores = (state.files.anteriores || []).concat(state.files.assinado || []);
+          state.files.assinado = [];
+          state.current = 'validacao_assinaturas';
+          log('assinaturas', 'Documento enviado para assinatura eletrônica', 'Documento gerado automaticamente e enviado à plataforma digital.', historyEvidence()); go('validacao_assinaturas');
+        }, 'Gerar e enviar', 'paper-plane'); return;
+      }
+      if (!state.files.assinado?.some(file => (file.revision || 1) === state.revision)) invalid('files.assinado', 'Anexe o documento assinado pelo Colaborador e pelo Gestor.');
       if (fail()) return;
-      modal('Encaminhar ao DP?', '<p>' + (state.form.modalidade === 'Presencial' ? 'Confirme que o arquivo anexado contém as assinaturas do Colaborador e do Gestor.' : 'Confirme o encaminhamento do documento e das assinaturas do Colaborador e do Gestor.') + '</p>', () => {
+      modal('Encaminhar ao DP?', '<p>Confirme que o arquivo anexado contém as assinaturas presenciais do Colaborador e do Gestor.</p>', () => {
         state.document ||= { date: now(), by: owners.documento, revision: state.revision };
+        state.electronicSigning = null;
         state.current = 'dp'; log('assinaturas', 'Documento assinado conferido', 'Modalidade ' + state.form.modalidade + '; Colaborador e Gestor.', historyEvidence()); go('dp');
       }, 'Encaminhar', 'file-signature');
+    }
+    if (action === 'validate-signatures' && page.key === 'validacao_assinaturas') {
+      const signing = state.electronicSigning;
+      if (!electronicDocumentReady(signing)) invalid('electronicSigning', 'Aguarde a assinatura do Colaborador e do Gestor e o retorno do documento assinado pela plataforma digital.');
+      if (fail()) return;
+      modal('Validar assinaturas e encaminhar ao DP?', '<p>As assinaturas do Colaborador e do Gestor foram concluídas. Confirme a validação para encaminhar o documento assinado ao DP.</p>', () => {
+        signing.validatedAt = now();
+        state.current = 'dp'; log('validacao_assinaturas', 'Assinaturas validadas', 'Assinaturas eletrônicas conferidas e documento assinado encaminhado ao DP.', historyEvidence()); go('dp');
+      }, 'Validar e encaminhar', 'file-circle-check');
     }
     if (action === 'finish') {
       const pending = allCheckIds().filter(id => !checkDone(id));
@@ -907,7 +1016,7 @@
       if (pending.length) invalid('checklist', 'Há ' + pending.length + ' item(ns) pendente(s) no checklist. Confira os aplicáveis e indique os que não se aplicam.');
       unjustified.forEach(id => invalid('checkNote.' + id, 'Justifique a opção Não se aplica.'));
       if (state.form.checklistConcluido !== 'Sim') invalid('checklistConcluido', 'Confirme Checklist concluído = Sim.');
-      if (state.current !== 'solicitacao' && !signaturesReady()) invalid('checklistConcluido', 'O documento assinado pelos dois signatários deve estar anexado.');
+      if (state.current !== 'solicitacao' && !signaturesReady()) invalid('checklistConcluido', state.form.modalidade === 'Presencial' ? 'Anexe o documento assinado presencialmente pelos dois signatários.' : 'As assinaturas eletrônicas e o documento assinado devem ser validados antes da conclusão pelo DP.');
       if (fail()) return;
       modal('Encerrar processo de desligamento?', '<p>O DP confirma a conferência manual dos itens aplicáveis e conclui o Checklist da Rescisão. Esta é a última atividade do workflow.</p>', () => {
         if (state.current === 'solicitacao') {
@@ -924,7 +1033,7 @@
     const el = event.target;
     const isField = el.matches('[data-field], [data-item], [data-decision], [data-note], [data-check], [data-na], [data-check-note]');
     if (!isField || el.readOnly) return;
-    if (!(canInteract(page.key) || el.matches('[data-decision], [data-note]') || (page.key === 'correcao' && state.current === 'retomada' && el.dataset.field === 'resumeArea'))) { render(); feedback('Esta etapa está em visualização. Abra a atividade atual para editar.', true); return; }
+    if (!(canInteract(page.key) || isChecklistEditor(el) || el.matches('[data-decision], [data-note]') || (page.key === 'correcao' && state.current === 'retomada' && el.dataset.field === 'resumeArea'))) { render(); feedback('Esta etapa está em visualização. Abra a atividade atual para editar.', true); return; }
     clearFieldError(el);
     if (el.dataset.field) {
       const key = el.dataset.field;
@@ -934,6 +1043,7 @@
       }
       if (key === 'employee' && previous !== el.value) {
         clearElectronicSignatures();
+        state.electronicSigning = null;
         state.form.rmStability = JSON.parse(JSON.stringify(stabilityExamples[el.value] || []));
         const examples = analysisAttachments();
         ['guia', 'termoEpi', 'termoInfra'].forEach(group => { state.files.anteriores = (state.files.anteriores || []).concat(state.files[group] || []); state.files[group] = examples[group].map(file => Object.assign({}, file, { revision: state.revision })); });
@@ -949,7 +1059,7 @@
       const id = el.dataset.check || el.dataset.na;
       const item = state.checks[id] || (state.checks[id] = {});
       item.status = el.checked ? (el.dataset.na ? 'na' : 'conferido') : '';
-      item.by = owners.dp; item.date = now(); save(); render();
+      item.by = owners.dp; item.date = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }); save(); render();
     }
     if (el.dataset.checkNote) { const id = el.dataset.checkNote; (state.checks[id] || (state.checks[id] = {})).note = el.value; }
     save();
@@ -1061,7 +1171,7 @@
       else if (!event.shiftKey && (document.activeElement === last || document.activeElement === dialog)) { event.preventDefault(); first?.focus(); }
     }
   });
-  window.addEventListener('popstate', () => { page = stages.find(s => s.key === locationStage()) || stages[0]; errors = []; fieldErrors = {}; render(); });
+  window.addEventListener('popstate', () => { page = prepareStage(locationStage()); save(); errors = []; fieldErrors = {}; render(); });
   window.addEventListener('storage', event => {
     if (event.key !== STORAGE || !event.newValue) return;
     try { state = JSON.parse(event.newValue); errors = []; fieldErrors = {}; render(); } catch (_) { /* Ignore malformed external storage updates. */ }

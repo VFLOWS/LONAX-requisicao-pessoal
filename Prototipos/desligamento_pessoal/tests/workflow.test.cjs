@@ -59,13 +59,6 @@ async function review(page, area, value = 'approve', note = 'Dados conferidos pe
   if (await noteField.isVisible()) await noteField.fill(note);
   await click(page, 'decide'); await confirm(page);
 }
-async function sign(page, key) {
-  await page.locator('[data-sign="' + key + '"]').click();
-  const r = await page.locator('#signatureCanvas').boundingBox();
-  await page.mouse.move(r.x + 30, r.y + 90); await page.mouse.down();
-  for (let i = 1; i < 12; i++) await page.mouse.move(r.x + 30 + i * 15, r.y + 90 + Math.sin(i) * 28);
-  await page.mouse.up(); await confirm(page);
-}
 async function pick(page, key, value) {
   const control = page.locator('[data-single-select][data-key="' + key + '"]');
   await control.locator('.lx-single-select-control').click();
@@ -100,6 +93,31 @@ async function upload(page, group) {
   await page.locator('[data-upload="' + group + '"]').setInputFiles(image);
   await page.waitForFunction(({ key, group, count }) => JSON.parse(localStorage.getItem(key)).files[group]?.length > count, { key: storageKey, group, count });
 }
+async function receiveSignatures(page, roles = ['Colaborador', 'Gestor']) {
+  // Retorno de exemplo da plataforma, recebido independentemente de ações na interface.
+  await page.evaluate(({ key, roles }) => {
+    const saved = JSON.parse(localStorage.getItem(key));
+    const timestamp = saved.created;
+    const signing = saved.electronicSigning || {
+      revision: saved.revision, employee: saved.form.employee, provider: 'Plataforma digital', protocol: 'DESL-' + saved.form.employee + '-R' + saved.revision,
+      sentAt: timestamp, document: saved.files.paraAssinatura[0], validatedAt: '', signedDocument: null,
+      signers: [
+        { role: 'Colaborador', name: 'Carlos Pereira', email: 'carlos.pereira@exemplo.com', status: 'Assinado', signedAt: timestamp },
+        { role: 'Gestor', name: 'Eduardo Martins', email: 'eduardo.martins@exemplo.com', status: 'Pendente', signedAt: '' }
+      ]
+    };
+    signing.signers.forEach(signer => { if (roles.includes(signer.role)) { signer.status = 'Assinado'; signer.signedAt = timestamp; } });
+    signing.updatedAt = timestamp;
+    if (signing.signers.every(signer => signer.status === 'Assinado')) {
+      signing.signedDocument = { id: 'retorno-assinado-' + saved.revision, name: 'documento-de-desligamento-assinado.pdf', url: 'anexos/documento-de-desligamento-assinado.pdf', type: 'application/pdf', size: 2857, revision: saved.revision, origin: 'Plataforma digital', by: 'Sistema', date: timestamp };
+      saved.files.assinado = [signing.signedDocument];
+    }
+    saved.electronicSigning = signing;
+    const updated = JSON.stringify(saved);
+    localStorage.setItem(key, updated);
+    window.dispatchEvent(new StorageEvent('storage', { key, newValue: updated }));
+  }, { key: storageKey, roles });
+}
 
 test('fluxo completo: TI primeiro, SESMT, anexos, assinaturas e 44 checks manuais do DP', { skip }, async () => session(async page => {
   await load(page, 'solicitacao'); await page.locator('[data-key="tipo"] [data-clear-select]').click(); await click(page, 'submit');
@@ -107,7 +125,7 @@ test('fluxo completo: TI primeiro, SESMT, anexos, assinaturas e 44 checks manuai
   assert.equal(await page.locator('.lx-field-name-tipo.lx-error').count(), 1);
   await untilParallel(page, true);
   assert.equal((await state(page)).current, 'paralelo');
-  assert.deepEqual(await historyTitles(page), ['Dados de Desligamento', 'Aprovação da Diretoria', 'Aprovação do RH', parallelTitle]);
+  assert.deepEqual(await historyTitles(page), ['Dados de Desligamento', 'Aprovação da Diretoria', 'Aprovação do RH']);
   await load(page, 'documento');
   assert.equal(await page.locator('[data-action="send-signatures"]').isDisabled(), true);
   await load(page, 'ti');
@@ -129,29 +147,46 @@ test('fluxo completo: TI primeiro, SESMT, anexos, assinaturas e 44 checks manuai
   assert.equal(await page.locator('[data-action="continue-parallel"]').isEnabled(), true);
   await click(page, 'continue-parallel');
   assert.equal((await state(page)).current, 'documento');
-  assert.deepEqual(await historyTitles(page), ['Dados de Desligamento', 'Aprovação da Diretoria', 'Aprovação do RH', parallelTitle, 'Análise da TI', 'Análise do SESMT']);
+  assert.deepEqual(await historyTitles(page), ['Dados de Desligamento', 'Aprovação da Diretoria', 'Aprovação do RH', 'Análise da TI', 'Análise do SESMT']);
+  assert.ok((await state(page)).history.some(record => record.area === 'paralelo'), 'A espera continua registrada no processo');
   assert.equal(await page.locator('[data-file-group="documento"]:visible .lx-attachment-row').count(), 1);
   assert.equal(await page.locator('[data-file-group="documento"]:visible [data-upload]').count(), 0);
   await click(page, 'send-signatures');
   assert.equal((await historyTitles(page)).at(-1), 'Documento de Desligamento');
-  await page.locator('[data-action="delete-file"][data-group="paraAssinatura"]').click(); await confirm(page);
-  await click(page, 'finish-signatures');
-  assert.match(await validationText(page), /documento para assinatura/);
-  assert.equal(await page.locator('.lx-signature-card.lx-error').count(), 2);
-  await upload(page, 'paraAssinatura');
-  await sign(page, 'assinaturaGestor');
-  assert.ok((await state(page)).form.assinaturaGestor); assert.equal((await state(page)).form.assinaturaColaborador, '');
-  await sign(page, 'assinaturaColaborador');
+  assert.equal(await page.locator('[data-upload]').count(), 0, 'A assinatura eletrônica dispensa anexação manual');
+  assert.equal(await page.locator('.lx-signature-card, [data-sign]').count(), 0);
+  await page.evaluate(key => {
+    const saved = JSON.parse(localStorage.getItem(key)); saved.files.paraAssinatura = []; saved.files.assinado = []; localStorage.setItem(key, JSON.stringify(saved));
+  }, storageKey);
   await page.reload();
-  assert.equal(await page.locator('.lx-signature-preview img:visible').count(), 2, 'As assinaturas persistem ao recarregar');
-  assert.equal(await page.locator('.lx-attachment-row:visible').count(), 1, 'Anexo persiste ao recarregar');
   await click(page, 'finish-signatures'); await confirm(page);
+  assert.equal((await state(page)).current, 'validacao_assinaturas');
+  assert.equal(stageOf(page), 'validacao_assinaturas');
+  assert.equal((await state(page)).files.paraAssinatura[0].origin, 'Gerado automaticamente');
+  assert.equal((await state(page)).files.assinado.length, 0);
+  assert.deepEqual(await page.locator('[data-signature-tracking] [data-signer] .lx-signing-status').allTextContents(), [' Assinado', ' Pendente']);
+  assert.equal(await page.locator('[data-document-signing-status]').innerText(), 'Parcialmente assinado');
+  await click(page, 'validate-signatures');
+  assert.match(await validationText(page), /Aguarde a assinatura/);
+  assert.equal(await page.locator('[data-signature-tracking].lx-error').count(), 1);
+  assert.match(await page.locator('[data-signature-tracking] .lx-signing-count').innerText(), /1 de 2/);
+  await page.reload();
+  await click(page, 'validate-signatures');
+  assert.match(await validationText(page), /Aguarde a assinatura/);
+  await receiveSignatures(page);
+  assert.match(await page.locator('[data-signature-tracking] .lx-signing-count').innerText(), /2 de 2/);
+  assert.equal((await state(page)).electronicSigning.validatedAt, '');
+  assert.equal((await state(page)).current, 'validacao_assinaturas');
+  await click(page, 'validate-signatures'); await confirm(page);
   assert.equal((await state(page)).current, 'dp');
-  assert.deepEqual((await historyTitles(page)).slice(-2), ['Documento de Desligamento', 'Assinaturas']);
-  const signedRecord = (await state(page)).history.find(row => row.action === 'Documento assinado conferido');
-  assert.equal(signedRecord.files.paraAssinatura[0].name, 'evidencia.png');
-  assert.ok(signedRecord.snapshot.assinaturaColaborador);
-  assert.ok(signedRecord.snapshot.assinaturaGestor);
+  assert.deepEqual((await historyTitles(page)).slice(-3), ['Documento de Desligamento', 'Encaminhar para Assinatura', 'Validar Assinaturas']);
+  const signedRecord = (await state(page)).history.find(row => row.action === 'Assinaturas validadas');
+  assert.equal(signedRecord.files.assinado[0].name, 'documento-de-desligamento-assinado.pdf');
+  assert.ok(signedRecord.electronicSigning.validatedAt);
+  const sentRecord = (await state(page)).history.find(row => row.action === 'Documento enviado para assinatura eletrônica');
+  assert.deepEqual(sentRecord.electronicSigning.signers.map(signer => signer.status), ['Assinado', 'Pendente'], 'O histórico do envio preserva o cenário original');
+  assert.equal(signedRecord.snapshot.assinaturaColaborador, '');
+  assert.equal(signedRecord.snapshot.assinaturaGestor, '');
   assert.equal(await page.locator('[data-check]').count(), 44);
   assert.equal(await page.locator('[data-check]:checked').count(), 44);
   await page.evaluate(() => Array.from(document.querySelectorAll('[data-check]'), node => node.dataset.check).forEach(id => document.querySelector('[data-check="' + id + '"]').click()));
@@ -167,9 +202,9 @@ test('fluxo completo: TI primeiro, SESMT, anexos, assinaturas e 44 checks manuai
   assert.equal((await state(page)).endedBy, 'Juliana Costa');
   assert.equal((await historyTitles(page)).at(-1), 'DP — Checklist da Rescisão');
   await page.reload(); assert.match(await page.locator('#statusLabel').innerText(), /Finalizado/);
-  await page.getByRole('button', { name: 'Assinaturas', exact: true }).click();
+  await page.getByRole('button', { name: 'Validar Assinaturas', exact: true }).click();
   await page.locator('[data-action="file"]:visible').first().click();
-  await page.locator('.lx-file-image').waitFor(); await confirm(page);
+  await page.locator('#modalMessage iframe').waitFor(); await confirm(page);
   await page.setViewportSize({ width: 390, height: 844 });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'Sem rolagem horizontal no celular');
   await load(page, 'rh');
@@ -493,18 +528,19 @@ test('CIPA, afastamento e maternidade aparecem na solicitação e no histórico 
 
 test('todas as telas mostram seus predecessores e exemplos de histórico sem avançar o processo', { skip }, async () => session(async page => {
   const approvals = ['Dados de Desligamento', 'Aprovação da Diretoria', 'Aprovação do RH'];
-  const technical = approvals.concat(parallelTitle, 'Análise do SESMT', 'Análise da TI');
+  const technical = approvals.concat('Análise do SESMT', 'Análise da TI');
   const cases = [
     ['solicitacao', []],
     ['diretoria', approvals.slice(0, 1)],
     ['rh', approvals.slice(0, 2)],
     ['paralelo', approvals],
-    ['sesmt', approvals.concat(parallelTitle)],
-    ['ti', approvals.concat(parallelTitle)],
+    ['sesmt', approvals],
+    ['ti', approvals],
     ['documento', technical],
     ['assinaturas', technical.concat('Documento de Desligamento')],
-    ['dp', technical.concat('Documento de Desligamento', 'Assinaturas')],
-    ['finalizada', technical.concat('Documento de Desligamento', 'Assinaturas', 'DP — Checklist da Rescisão')]
+    ['validacao_assinaturas', technical.concat('Documento de Desligamento', 'Encaminhar para Assinatura')],
+    ['dp', technical.concat('Documento de Desligamento', 'Encaminhar para Assinatura', 'Validar Assinaturas')],
+    ['finalizada', technical.concat('Documento de Desligamento', 'Encaminhar para Assinatura', 'Validar Assinaturas', 'DP — Checklist da Rescisão')]
   ];
   for (const [stage, expected] of cases) {
     await load(page, stage);
@@ -524,11 +560,11 @@ test('todas as telas mostram seus predecessores e exemplos de histórico sem ava
   assert.equal(await page.getByRole('button', { name: 'Análise da TI', exact: true }).count(), 0, 'A atividade paralela pendente não aparece como etapa anterior concluída');
 
   await load(page, 'dp');
-  const toggle = page.getByRole('button', { name: 'Assinaturas', exact: true });
+  const toggle = page.getByRole('button', { name: 'Validar Assinaturas', exact: true });
   await toggle.click();
   const record = toggle.locator('xpath=ancestor::section[1]');
   await record.getByRole('button', { name: 'Visualizar anexo', exact: true }).click();
-  assert.equal(await page.locator('#modalTitle').innerText(), 'documento-de-desligamento.pdf');
+  assert.equal(await page.locator('#modalTitle').innerText(), 'documento-de-desligamento-assinado.pdf');
   assert.equal(await page.locator('#modalIcon .fa-eye').count(), 1);
   await confirm(page);
   await page.setViewportSize({ width: 390, height: 844 });
@@ -624,7 +660,11 @@ test('análises abrem preenchidas, com observações em textarea e PDFs fixos di
 
 test('apresentação da espera mantém histórico até o RH e cartões navegáveis Pendente / Aprovado', { skip }, async () => session(async page => {
   await page.goto(origin + '/desligamento_pessoal/index.html');
-  await page.locator('a[href="espera_paralelo.html"]').click();
+  assert.equal(await page.locator('#stageNav .lx-stage-card').count(), 11);
+  assert.equal(await page.locator('#stageNav a[href="espera_paralelo.html"], #stageNav a[href="etapa.html?etapa=paralelo"], #stageNav a[href="etapa.html?etapa=documento"]').count(), 0);
+  assert.equal(await page.locator('#stageNav a[href="etapa.html?etapa=assinaturas"]').count(), 1);
+  assert.equal(await page.locator('#stageNav a[href="etapa.html?etapa=assinaturas"] h3').innerText(), 'Encaminhar para Assinatura');
+  await page.goto(origin + '/desligamento_pessoal/espera_paralelo.html');
   await page.getByRole('heading', { name: parallelTitle, exact: true }).waitFor();
   const history = ['Dados de Desligamento', 'Aprovação da Diretoria', 'Aprovação do RH'];
   assert.deepEqual(await historyTitles(page), history);
@@ -646,7 +686,7 @@ test('apresentação da espera mantém histórico até o RH e cartões navegáve
   await page.getByRole('heading', { name: parallelTitle, exact: true }).waitFor();
   await page.locator('.lx-parallel-card[href="etapa.html?etapa=ti"]').click();
   await page.locator('textarea[data-item="infraItems"][data-prop="parecer"]').first().waitFor();
-  assert.deepEqual(await historyTitles(page), history.concat(parallelTitle, 'Análise do SESMT'), 'As aprovações anteriores vêm antes do retorno da área paralela');
+  assert.deepEqual(await historyTitles(page), history.concat('Análise do SESMT'), 'As aprovações anteriores vêm antes do retorno da área paralela');
   await click(page, 'decide'); await confirm(page);
   assert.deepEqual(await page.locator('.lx-parallel-card span').allTextContents(), ['Aprovado', 'Aprovado']);
   assert.deepEqual(await historyTitles(page), history);
@@ -677,11 +717,10 @@ test('apresentação aberta por arquivo preserva o estado ao acessar análises e
   assert.equal(page.url().startsWith('file:'), true);
 }));
 
-test('histórico coloca a espera antes das análises e as duas observações em uma linha própria', { skip }, async () => session(async page => {
+test('histórico omite a espera e mantém as duas observações em uma linha própria', { skip }, async () => session(async page => {
   await load(page, 'documento');
   const titles = await historyTitles(page);
-  assert.ok(titles.indexOf(parallelTitle) < titles.indexOf('Análise do SESMT'));
-  assert.ok(titles.indexOf(parallelTitle) < titles.indexOf('Análise da TI'));
+  assert.equal(titles.includes(parallelTitle), false);
   for (const title of ['Análise do SESMT', 'Análise da TI']) {
     const toggle = page.getByRole('button', { name: title, exact: true });
     await toggle.click();
@@ -736,42 +775,26 @@ test('documento de desligamento usa o mesmo PDF anexado na atividade e no histó
   await confirm(page);
 }));
 
-test('assinaturas abertas diretamente permitem escolher modalidade, desenhar, limpar e encaminhar o anexo presencial', { skip }, async () => session(async page => {
+test('encaminhamento eletrônico dispensa upload e presencial exige documento assinado, sem validação digital', { skip }, async () => session(async page => {
   await load(page, 'assinaturas');
   const current = page.locator('.lx-view-shell:not(.lx-view-shell-history)');
   assert.match(await current.locator('.lx-fieldset legend').first().innerText(), /Modalidade de Assinatura/);
   assert.equal(await page.locator('[data-action="finish-signatures"]').isEnabled(), true);
-  assert.equal(await page.locator('[data-upload="paraAssinatura"]').isEnabled(), true);
+  assert.equal(await page.locator('[data-upload], [data-file-group="paraAssinatura"]').count(), 0);
   assert.equal(await page.locator('[data-upload="assinado"]').count(), 0);
+  assert.equal(await current.locator('.lx-alert').innerText(), 'O documento será gerado automaticamente e enviado à plataforma digital.');
   assert.doesNotMatch(await current.innerText(), /Simular assinatura|Os registros abaixo|Não há envio|mecanismo de assinatura/);
   const options = await page.locator('.lx-field-name-modalidade .lx-radio-option').evaluateAll(nodes => nodes.map(node => {
     const r=node.getBoundingClientRect(); return { left:r.left,right:r.right,top:r.top };
   }));
   assert.equal(options[1].left-options[0].right, 28); assert.equal(options[0].top, options[1].top);
 
-  await page.locator('[data-sign="assinaturaColaborador"]').click();
-  assert.equal(await page.locator('#modalIcon .fa-pen-nib').count(), 1);
-  await confirm(page);
-  assert.equal(await page.locator('#modalBackdrop').isVisible(), true);
-  assert.match(await page.locator('#signatureError').innerText(), /Desenhe a assinatura/);
-  assert.equal((await state(page)).form.assinaturaColaborador, '');
-  await page.locator('#modalCancel').click();
-  await sign(page, 'assinaturaColaborador');
-  const original = (await state(page)).form.assinaturaColaboradorImagem;
-  assert.ok(original.startsWith('data:image/png;base64,'));
-  await page.locator('[data-sign="assinaturaColaborador"]').click();
-  const box = await page.locator('#signatureCanvas').boundingBox();
-  await page.mouse.click(box.x+40,box.y+70);
-  await page.locator('#clearSignature').click(); await confirm(page);
-  assert.equal(await page.locator('#modalBackdrop').isVisible(), true, 'Limpar remove o traço antes da confirmação');
-  await page.locator('#modalCancel').click();
-  assert.equal((await state(page)).form.assinaturaColaboradorImagem, original, 'Cancelar preserva a assinatura anterior');
-  await page.reload();
-  assert.equal(await page.locator('.lx-signature-preview img:visible').getAttribute('src'), original);
-  // Mudar o documento invalida assinaturas vinculadas ao conteúdo anterior.
-  await upload(page,'paraAssinatura');
-  assert.equal((await state(page)).form.assinaturaColaborador,'');
-  assert.equal(await page.locator('.lx-signature-preview img:visible').count(),0);
+  assert.equal(await current.locator('.lx-fieldset').count(),1);
+  assert.equal(await page.locator('.lx-signature-card, [data-sign]').count(),0);
+  assert.equal(await current.locator('legend').filter({hasText:'Assinatura Eletrônica'}).count(),0);
+  await click(page,'finish-signatures'); await page.locator('#modalCancel').click();
+  assert.equal((await state(page)).current,'solicitacao');
+  assert.equal((await state(page)).electronicSigning, null, 'Cancelar o envio não gera uma solicitação de assinatura');
 
   // Um estado anterior já salvo também permite apresentar a tela de assinaturas.
   await page.evaluate(key => {
@@ -792,9 +815,115 @@ test('assinaturas abertas diretamente permitem escolher modalidade, desenhar, li
   assert.equal((await state(page)).current,'paralelo');
   await click(page,'finish-signatures'); await confirm(page);
   assert.equal((await state(page)).current,'dp');
+  assert.equal((await state(page)).electronicSigning,null);
+  assert.equal((await historyTitles(page)).includes('Validar Assinaturas'),false);
   const snapshot=(await state(page)).history.find(record=>record.action==='Documento assinado conferido').snapshot;
   assert.equal(snapshot.modalidade,'Presencial');
   assert.equal(snapshot.assinaturaColaborador,'');
+}));
+
+test('validar assinaturas apresenta o retorno digital e abre sempre com o cenário eletrônico ativo', { skip }, async () => session(async page => {
+  await load(page, 'validacao_assinaturas');
+  const current = page.locator('.lx-view-shell:not(.lx-view-shell-history)');
+  assert.equal(await page.locator('[data-upload], [data-sign]').count(), 0);
+  assert.match(await current.innerText(), /DESL-000731-R1/);
+  assert.match(await current.innerText(), /1 de 2 assinaturas recebidas/);
+  assert.equal(await current.locator('[data-document-signing-status]').innerText(), 'Parcialmente assinado');
+  assert.equal(await current.locator('.lx-readonly-item-assinado-por strong').innerText(), 'Carlos Pereira');
+  assert.equal(await current.locator('.lx-readonly-item-aguardando-assinatura-de strong').innerText(), 'Eduardo Martins');
+  const collaborator = current.locator('[data-signer="Colaborador"]');
+  const manager = current.locator('[data-signer="Gestor"]');
+  assert.equal(await collaborator.locator('.lx-signing-status').innerText(), 'Assinado');
+  assert.equal(await collaborator.locator('.lx-readonly-item-assinou-o-documento strong').innerText(), 'Sim');
+  assert.match(await collaborator.locator('.lx-readonly-item-data-da-assinatura strong').innerText(), /\d{2}\/\d{2}\/\d{4}/);
+  assert.equal(await manager.locator('.lx-signing-status').innerText(), 'Pendente');
+  assert.equal(await manager.locator('.lx-readonly-item-assinou-o-documento strong').innerText(), 'Não');
+  assert.equal(await manager.locator('.lx-readonly-item-data-da-assinatura strong').innerText(), 'Aguardando assinatura');
+  assert.equal(await current.locator('.lx-readonly-item-documento strong').innerText(), 'documento-de-desligamento.pdf');
+  await current.screenshot({ path: '/tmp/desligamento-acompanhamento-assinaturas.png' });
+  await page.setViewportSize({ width: 390, height: 844 });
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await current.screenshot({ path: '/tmp/desligamento-acompanhamento-assinaturas-mobile.png' });
+  await page.setViewportSize({ width: 1280, height: 720 });
+  assert.equal((await state(page)).electronicSigning, null, 'A apresentação direta não registra um envio nem uma conclusão');
+  await click(page, 'validate-signatures');
+  assert.match(await validationText(page), /Aguarde a assinatura/);
+  await receiveSignatures(page);
+  assert.equal((await state(page)).current, 'solicitacao');
+  assert.equal((await state(page)).electronicSigning.validatedAt, '');
+  assert.match(await current.innerText(), /2 de 2 assinaturas recebidas/);
+  assert.equal(await current.locator('[data-document-signing-status]').innerText(), 'Assinado');
+  assert.equal(await current.locator('.lx-readonly-item-assinado-por strong').innerText(), 'Carlos Pereira, Eduardo Martins');
+  assert.equal(await current.locator('.lx-readonly-item-aguardando-assinatura-de strong').innerText(), 'Nenhuma assinatura pendente');
+  assert.equal(await manager.locator('.lx-readonly-item-assinou-o-documento strong').innerText(), 'Sim');
+  assert.equal(await current.locator('[data-file-group="assinado"] .lx-attachment-row').count(), 1);
+  await page.reload();
+  assert.match(await current.innerText(), /2 de 2 assinaturas recebidas/);
+  assert.equal(await current.locator('[data-upload]').count(), 0);
+  await page.screenshot({ path: '/tmp/desligamento-validar-assinaturas.png', fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await page.screenshot({ path: '/tmp/desligamento-validar-assinaturas-mobile.png', fullPage: true });
+  await click(page, 'validate-signatures'); await page.locator('#modalCancel').click();
+  assert.equal((await state(page)).current, 'solicitacao');
+  await click(page, 'validate-signatures'); await confirm(page);
+  assert.equal((await state(page)).current, 'dp');
+  await page.getByRole('button', { name: 'Validar Assinaturas', exact: true }).click();
+  const historical = page.locator('.lx-view-shell-history').filter({ has: page.getByRole('button', { name: 'Validar Assinaturas', exact: true }) });
+  assert.equal(await historical.locator('[data-action="refresh-signatures"], [data-action="validate-signatures"], [data-upload]').count(), 0);
+  assert.match(await historical.innerText(), /Assinaturas validadas/);
+  assert.equal(await historical.locator('[data-document-signing-status]').innerText(), 'Assinado');
+  assert.equal(await historical.locator('.lx-readonly-item-assinado-por strong').innerText(), 'Carlos Pereira, Eduardo Martins');
+
+  const recordedHistory = (await state(page)).history;
+  await page.evaluate(key => {
+    const saved = JSON.parse(localStorage.getItem(key)); saved.form.modalidade = 'Presencial'; saved.current = 'dp'; delete saved.signatureDemoVersion; localStorage.setItem(key, JSON.stringify(saved));
+  }, storageKey);
+  await load(page, 'validacao_assinaturas');
+  assert.equal((await state(page)).form.modalidade, 'Eletrônica');
+  assert.equal((await state(page)).current, 'dp', 'Abrir o cenário eletrônico não movimenta o processo');
+  assert.equal(await current.locator('[data-signature-tracking]').count(), 1);
+  assert.equal(await current.locator('[data-document-signing-status]').innerText(), 'Parcialmente assinado');
+  assert.deepEqual((await state(page)).electronicSigning.signers.map(signer => signer.status), ['Assinado', 'Pendente']);
+  assert.deepEqual((await state(page)).history, recordedHistory, 'O ajuste do exemplo mantém os registros anteriores preservados');
+  assert.equal(await page.getByRole('button', { name: 'Atualizar status das assinaturas', exact: true }).count(), 0);
+  assert.equal(await current.locator('[data-action="validate-signatures"]').isEnabled(), true);
+  assert.doesNotMatch(await current.innerText(), /O documento foi assinado presencialmente/);
+  await click(page, 'validate-signatures');
+  assert.match(await validationText(page), /Aguarde a assinatura/);
+  await receiveSignatures(page);
+  assert.equal(await current.locator('[data-document-signing-status]').innerText(), 'Assinado');
+  await page.reload();
+  assert.equal((await state(page)).form.modalidade, 'Eletrônica');
+  assert.equal(await current.locator('[data-document-signing-status]').innerText(), 'Assinado');
+}));
+
+test('arquivo avulso, assinatura pendente ou de outra revisão não liberam a validação digital nem a conclusão do DP', { skip }, async () => session(async page => {
+  await load(page, 'assinaturas');
+  await click(page, 'finish-signatures'); await confirm(page);
+  await page.evaluate(key => {
+    const saved = JSON.parse(localStorage.getItem(key));
+    saved.files.assinado = [Object.assign({}, saved.files.paraAssinatura[0], { id: 'arquivo-avulso', name: 'arquivo-avulso.pdf' })];
+    localStorage.setItem(key, JSON.stringify(saved));
+  }, storageKey);
+  await page.reload(); // Um arquivo isolado não comprova o retorno das assinaturas.
+  await click(page, 'validate-signatures');
+  assert.match(await validationText(page), /Aguarde a assinatura/);
+  await receiveSignatures(page);
+  const completed = await state(page);
+  await page.evaluate(key => {
+    const saved = JSON.parse(localStorage.getItem(key)); saved.electronicSigning.revision = saved.revision - 1; localStorage.setItem(key, JSON.stringify(saved));
+  }, storageKey);
+  await page.reload();
+  await click(page, 'validate-signatures');
+  assert.match(await validationText(page), /Aguarde a assinatura/);
+  await page.evaluate(({ key, completed }) => {
+    completed.current = 'dp'; localStorage.setItem(key, JSON.stringify(completed));
+  }, { key: storageKey, completed });
+  await load(page, 'dp');
+  await click(page, 'finish');
+  assert.match(await validationText(page), /devem ser validados/);
+  assert.equal((await state(page)).current, 'dp');
 }));
 
 test('correção aberta diretamente traz devolução do RH, formulário completo e resumo original preservado', { skip }, async () => session(async page => {
@@ -871,32 +1000,54 @@ test('reprovação efetiva na Diretoria preserva o limite do histórico e seu re
 }));
 
 test('DP abre preenchido com 44 checks, preserva edições e conclui no cartão verde sem duplicar o checklist', { skip }, async () => session(async page => {
+  await page.clock.setFixedTime(new Date('2026-10-19T12:00:00.000Z'));
   await load(page,'dp');
   const form=page.locator('.lx-view-shell:not(.lx-view-shell-history)');
   const empty=await form.locator('input[data-field]:not([type="radio"]), textarea[data-field], [data-check-note]').evaluateAll(nodes=>nodes.filter(node=>!node.value.trim()).map(node=>node.dataset.field || node.dataset.checkNote));
   assert.deepEqual(empty,[]);
   assert.equal(await form.locator('[data-check]:checked').count(),44);
   assert.equal(await form.locator('textarea[data-check-note]').count(),44);
+  assert.deepEqual(await form.locator('[data-check-date]').allTextContents(),Array(44).fill('16/10/2026'));
   assert.equal(await form.locator('input[data-check-note], [data-field="rmEfetivado"], [data-field="rmObs"], .lx-readonly-item-responsavel, .lx-readonly-item-data-da-conclusao').count(),0);
   assert.doesNotMatch(await form.innerText(), /Efetivação Manual no TOTVS RM|Registrada ao concluir a atividade/);
   for (const width of [1280,390]) {
     await page.setViewportSize({width,height:844});
     const options=await form.locator('.lx-check-options').first().locator('label').evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return {x:r.x,y:r.y,height:r.height};}));
     assert.equal(options[0].x,options[1].x); assert.ok(options[1].y>=options[0].y+options[0].height);
+    const datePosition=await form.locator('[data-check-date]').first().boundingBox();
+    const checkboxPosition=await form.locator('[data-check]').first().boundingBox();
+    assert.ok(datePosition.x>checkboxPosition.x+checkboxPosition.width,'A data fica ao lado da opção marcada');
+    assert.ok(Math.abs(datePosition.y+datePosition.height/2-checkboxPosition.y-checkboxPosition.height/2)<1);
+    assert.equal(await form.locator('.lx-check-options time').count(),44);
+    const conclusionOptions=await form.locator('.lx-field-name-checklistConcluido .lx-radio-option').evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top};}));
+    assert.equal(conclusionOptions[1].left-conclusionOptions[0].right,28);
+    assert.equal(conclusionOptions[0].top,conclusionOptions[1].top);
+    await form.locator('.lx-check-row-editor').first().screenshot({path:'/tmp/desligamento-check-date-'+width+'.png'});
   }
   await page.setViewportSize({width:1280,height:844});
   const observation='Plano de saúde conferido.\nConferência complementar realizada pelo DP.';
   await form.locator('[data-check-note="proventos-0"]').fill(observation);
+  assert.equal(await form.locator('[data-check-date="proventos-0"]').innerText(),'16/10/2026','Editar a observação preserva a data de marcação');
   assert.equal(await page.locator('#checkCount').innerText(),'44');
   assert.equal(await form.locator('[data-action="finish"]').isEnabled(),true);
   await form.locator('[data-check="proventos-0"]').uncheck();
+  assert.equal(await form.locator('[data-check-date="proventos-0"]').count(),0,'Item desmarcado não apresenta data de marcação');
+  assert.equal((await state(page)).checks['proventos-0'].date,'19/10/2026');
   await form.locator('[data-field="cpf"]').fill('987.654.321-00');
   await page.reload();
   assert.equal(await form.locator('[data-check]:checked').count(),43);
   assert.equal(await form.locator('[data-field="cpf"]').inputValue(),'987.654.321-00');
   assert.equal(await form.locator('[data-check-note="proventos-0"]').inputValue(),observation);
   await click(page,'finish'); assert.match(await validationText(page),/1 item/);
+  await page.clock.setFixedTime(new Date('2026-10-20T01:00:00.000Z'));
+  await form.locator('[data-na="proventos-0"]').check();
+  assert.equal(await form.locator('[data-check-date="proventos-0"]').innerText(),'19/10/2026','A data segue o fuso de São Paulo');
+  assert.equal(await form.locator('[data-na="proventos-0"]').locator('..').locator('time').innerText(),'19/10/2026');
+  await page.clock.setFixedTime(new Date('2026-10-20T03:15:00.000Z'));
   await form.locator('[data-check="proventos-0"]').check();
+  assert.equal((await state(page)).checks['proventos-0'].date,'20/10/2026');
+  assert.equal(await form.locator('[data-check-date="proventos-0"]').innerText(),'20/10/2026');
+  assert.equal(await form.locator('[data-check-date="proventos-0"]').getAttribute('datetime'),'2026-10-20');
   await click(page,'finish'); await page.locator('#modalCancel').click();
   assert.equal((await state(page)).current,'solicitacao');
   await click(page,'finish'); await confirm(page);
@@ -911,13 +1062,49 @@ test('DP abre preenchido com 44 checks, preserva edições e conclui no cartão 
   assert.equal(await dp.locator('.lx-check-row').count(),44);
   assert.equal(await dp.locator('.lx-readonly-item-cpf strong').innerText(),'987.654.321-00');
   assert.equal(await dp.locator('input, textarea, select').count(),0);
+  assert.equal(await page.locator('.lx-signature-card').count(),0);
   assert.equal(await dp.locator('.lx-readonly-item-responsavel strong').innerText(),'Juliana Costa');
   const completed=(await state(page)).history.find(record=>record.action==='Checklist concluído e processo encerrado');
   assert.equal(await dp.locator('.lx-readonly-item-data-da-conclusao strong').innerText(),completed.date);
   assert.equal(await dp.locator('.lx-check-row').first().locator('span').last().innerText(),observation);
+  assert.equal(await dp.locator('[data-check-date="proventos-0"]').innerText(),'20/10/2026');
   assert.doesNotMatch(await dp.innerText(),/Desligamento efetivado manualmente no RM|Observações da efetivação manual/);
   await page.setViewportSize({width:390,height:844});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+  await load(page,'dp');
+  await page.clock.setFixedTime(new Date('2026-10-21T12:00:00.000Z'));
+  await form.locator('[data-na="proventos-0"]').check();
+  await form.locator('[data-check-note="proventos-0"]').fill('Observação editada após a conclusão.');
+  assert.equal((await state(page)).checks['proventos-0'].status,'na');
+  assert.equal(await form.locator('[data-check-date="proventos-0"]').innerText(),'21/10/2026');
+  assert.deepEqual((await state(page)).history.find(record=>record.action==='Checklist concluído e processo encerrado'),completed,'Editar o checklist mantém o registro da conclusão preservado');
+}));
+
+test('checklists e conclusão do DP permanecem editáveis e persistem em qualquer etapa do processo', { skip }, async () => session(async page => {
+  await load(page,'dp');
+  const form=page.locator('.lx-view-shell:not(.lx-view-shell-history)');
+  for (const current of ['solicitacao','diretoria','rh','paralelo','documento','assinaturas','validacao_assinaturas','dp','correcao','retomada','reprovada','finalizada']) {
+    await page.evaluate(({key,current})=>{
+      const saved=JSON.parse(localStorage.getItem(key));saved.current=current;localStorage.setItem(key,JSON.stringify(saved));
+    },{key:storageKey,current});
+    await page.reload();
+    assert.equal(await form.locator('[data-check], [data-na], [data-check-note]').count(),132);
+    assert.equal(await form.locator('[data-check]:disabled, [data-na]:disabled, [data-check-note]:disabled, [data-field="checklistConcluido"]:disabled, [data-field="finais"]:disabled').count(),0,'Campos habilitados durante '+current);
+    await form.locator('[data-na="proventos-0"]').check();
+    const note='Conferência editada durante '+current;
+    await form.locator('[data-check-note="proventos-0"]').fill(note);
+    await radio(page,'checklistConcluido','Não');
+    await form.locator('[data-field="finais"]').fill(note);
+    await page.reload();
+    assert.equal(await form.locator('[data-na="proventos-0"]').isChecked(),true);
+    assert.equal(await form.locator('[data-check-note="proventos-0"]').inputValue(),note);
+    assert.equal((await state(page)).form.checklistConcluido,'Não');
+    assert.equal((await state(page)).form.finais,note);
+    await form.locator('[data-check="proventos-0"]').check();
+    await radio(page,'checklistConcluido','Sim');
+    assert.equal(await form.locator('[data-na="proventos-0"]').isChecked(),false);
+    assert.equal((await state(page)).current,current,'A edição não movimenta o processo');
+  }
 }));
 
 test('preenchimento do DP atualiza estados antigos e preserva os campos e checks já editados', { skip }, async () => session(async page => {
@@ -925,7 +1112,7 @@ test('preenchimento do DP atualiza estados antigos e preserva os campos e checks
   await page.evaluate(key=>{
     const saved=JSON.parse(localStorage.getItem(key));delete saved.dpDemoVersion;
     saved.form.cpf='987.654.321-00';saved.form.pis='';
-    saved.checks={'proventos-0':{status:'na',note:'Sem plano de saúde.'},'documentos-0':{status:'',note:'Aguardando conferência.'}};
+    saved.checks={'proventos-0':{status:'na',note:'Sem plano de saúde.',date:'15/10/2026 10:00'},'proventos-1':{status:'conferido',note:'Valor conferido.',date:'2026-10-14T10:00:00'},'proventos-2':{status:'conferido',note:'Conferência anterior.'},'documentos-0':{status:'',note:'Aguardando conferência.'}};
     localStorage.setItem(key,JSON.stringify(saved));
   },storageKey);
   await load(page,'dp');
@@ -934,6 +1121,12 @@ test('preenchimento do DP atualiza estados antigos e preserva os campos e checks
   assert.equal(Object.keys(saved.checks).length,44);
   assert.equal(saved.checks['proventos-0'].status,'na');
   assert.equal(saved.checks['proventos-0'].note,'Sem plano de saúde.');
+  assert.equal(await page.locator('[data-check-date="proventos-0"]').innerText(),'15/10/2026');
+  assert.equal(await page.locator('[data-check-date="proventos-1"]').innerText(),'14/10/2026');
+  assert.equal(await page.locator('[data-check-date="proventos-2"]').innerText(),'16/10/2026');
+  assert.equal(saved.checks['proventos-0'].date,'15/10/2026 10:00','A apresentação mantém a data original armazenada');
+  assert.equal(saved.checks['proventos-2'].date,'16/10/2026');
+  assert.equal(await page.locator('[data-check-date="documentos-0"]').count(),0);
   assert.equal(saved.checks['documentos-0'].status,'');
   assert.equal(saved.checks['documentos-0'].note,'Aguardando conferência.');
   assert.equal(await page.locator('[data-check]:checked').count(),42);
