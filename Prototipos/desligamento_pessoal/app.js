@@ -91,7 +91,7 @@
     ['ti', 'Análise da TI', 'laptop', 'blue', 'Infraestrutura, itens a devolver e termo de responsabilidade. Em paralelo ao SESMT.'],
     ['documento', 'Documento de Desligamento', 'file-lines', 'purple', 'Consultar o documento de desligamento e encaminhar para assinaturas.'],
     ['assinaturas', 'Encaminhar para Assinatura', 'file-signature', 'teal', 'Gerar e enviar para assinatura eletrônica ou anexar o documento assinado presencialmente.'],
-    ['validacao_assinaturas', 'Validar Assinaturas', 'file-circle-check', 'teal', 'Acompanhar as assinaturas na plataforma digital e validar o documento assinado.'],
+    ['validacao_assinaturas', 'Validação das Assinaturas', 'file-circle-check', 'teal', 'Acompanhar as assinaturas na plataforma digital e validar o documento assinado.'],
     ['dp', 'DP — Checklist da Rescisão', 'list-check', 'orange', 'Dados da rescisão e conferência manual dos itens aplicáveis.'],
     ['correcao', 'Correção da Solicitação', 'rotate-left', 'slate', 'Dados preservados, parecer da devolução e registro dos ajustes.'],
     ['reprovada', 'Desligamento Reprovado', 'ban', 'red', 'Decisão e histórico do encerramento por reprovação.'],
@@ -196,7 +196,7 @@
   if (!state.documentDemoVersion) fillDocumentExamples(state);
   if (!state.dpDemoVersion) fillDPExamples(state);
   Object.values(state.checks).forEach(item => {
-    if (['conferido', 'na'].includes(item?.status) && !item.date) item.date = checklistExampleDate;
+    if (['conferido', 'na'].includes(item?.status) && item.date == null) item.date = checklistExampleDate;
   });
   ['infraItems', 'epiItems'].forEach(scope => state.form[scope].forEach(item => { if (item.quantidade == null) item.quantidade = '1'; }));
   if (!Array.isArray(state.form.rmStability)) state.form.rmStability = JSON.parse(JSON.stringify(stabilityExamples[state.form.employee] || []));
@@ -217,6 +217,7 @@
   let summaryOpen = false;
   let correctionExample;
   const openApprovals = {};
+  const openChecklists = {};
   const displayedFiles = [];
   const view = document.getElementById('appView');
   const backdrop = document.getElementById('modalBackdrop');
@@ -262,7 +263,7 @@
   function active(key) { return state.current === key || (state.current === 'paralelo' && ['sesmt', 'ti'].includes(key) && !state.decisions[key]?.completed); }
   function completed(key) { return !!state.decisions[key]?.completed; }
   function isChecklistEditor(control) {
-    return page.key === 'dp' && control.matches('[data-check], [data-na], [data-check-note], [data-field="checklistConcluido"], [data-field="finais"]');
+    return page.key === 'dp' && control.matches('[data-check], [data-na], [data-pending], input[data-check-date], [data-check-note], [data-field="checklistConcluido"], [data-field="finais"]');
   }
   function canInteract(key) {
     if (key === 'correcao' && !isCurrentCorrection()) return true;
@@ -355,6 +356,7 @@
     applyFieldErrors();
     if (!canInteract(page.key)) {
       view.querySelectorAll('input, select, textarea, button').forEach(node => {
+        if (node.readOnly && node.closest('[data-dp-reference]')) return;
         if (node.matches('[data-decision], [data-note]') || isChecklistEditor(node)) return;
         if (state.current === 'retomada' && page.key === 'correcao' && (node.dataset.field === 'resumeArea' || node.dataset.action === 'resume')) return;
         if (['file', 'download-file', 'draft'].includes(node.dataset.action) || node.hasAttribute('data-collapse')) return;
@@ -617,13 +619,14 @@
       }
       if (record.area === 'validacao_assinaturas') {
         const signing = record.electronicSigning || electronicSigningExample('completed', f, record.revision);
-        body = historyCustomSection('Acompanhamento das Assinaturas', 'file-signature', 'teal', signingSummary(signing) + signingStatus(signing)) +
-          historySection('Validação das Assinaturas', 'file-circle-check', 'green', [['Situação', 'Assinaturas validadas'], ['Responsável', record.responsible], ['Data da validação', signing.validatedAt]]) +
+        body = historyCustomSection('Envio para Assinatura Eletrônica', 'paper-plane', 'blue', signingSummary(signing)) +
+          historyCustomSection('Acompanhamento das Assinaturas', 'file-signature', 'teal', signingStatus(signing)) +
           historyCustomSection('Documento Assinado', 'paperclip', 'purple', attachments('assinado', '', false, historyFiles(record, 'assinado')));
       }
       if (record.area === 'dp') {
         const e = employees.find(item => item.chapa === f.employee) || {};
-        body = historySection('Dados da Rescisão', 'id-card', 'blue', [['Nome', e.nome], ['Chapa', e.chapa], ['CPF', f.cpf], ['PIS', f.pis], ['Data de Admissão', date(e.admissao)], ['Saldo FGTS (R$)', f.saldoFgts], ['Homologação', f.homologacao], ['Data de Demissão', date(f.demissao)], ['Tipo de Demissão', normalizeTerminationType(f.tipo)], ['Projeção de Aviso', date(f.projecaoAviso)], ['Filial', e.filial]]) + historySection('Conclusão pelo Departamento Pessoal', 'clipboard-check', 'teal', [['Checklist concluído?', f.checklistConcluido], ['Observações finais', f.finais], ['Responsável', record.responsible], ['Data da conclusão', record.date]]) + renderChecklists(true, record.snapshot?.checklist || {});
+        body = historySection('Dados da Rescisão', 'id-card', 'blue', dpReferenceRows(f, e)) + renderChecklists(true, record.snapshot?.checklist || {}) +
+          historySection('Conclusão pelo Departamento Pessoal', 'clipboard-check', 'teal', [['Checklist concluído?', f.checklistConcluido], ['Responsável', record.responsible], ['Data da conclusão', record.date], ['Observações finais', f.finais]], 'lx-dp-conclusion-history-grid');
       }
       const department = { diretoria: 'Diretoria Industrial', rh: 'Recursos Humanos', paralelo: 'Recursos Humanos', sesmt: 'Segurança do Trabalho', ti: 'Tecnologia da Informação', documento: 'Recursos Humanos', assinaturas: 'Recursos Humanos', validacao_assinaturas: 'Recursos Humanos', dp: 'Departamento Pessoal', correcao: 'Gerência Industrial' }[record.area];
       return historyPanel(stage.title, record.date + ' - ' + record.responsible + ' - ' + department, body, key, stage.icon, tone);
@@ -696,22 +699,21 @@
       state.files.assinado?.some(file => file.id === signing.signedDocument.id && file.revision === state.revision);
   }
   function signingSummary(signing) {
-    return readGrid([['Documento', signing.document?.name || 'documento-de-desligamento.pdf'], ['Plataforma', signing.provider], ['Protocolo do documento', signing.protocol], ['Data do envio', signing.sentAt], ['Última atualização', signing.updatedAt]]);
+    const signed = signing.signers.length > 0 && signing.signers.every(signer => signer.status === 'Assinado');
+    return readGrid([['Documento', signing.document?.name || 'documento-de-desligamento.pdf'], ['Plataforma', signing.provider], ['Protocolo do documento', signing.protocol], ['Data do envio', signing.sentAt], ['Última atualização', signing.updatedAt], ['Status do documento', signed ? 'Assinado' : 'Pendente']], 'lx-signing-summary-grid');
   }
   function signingStatus(signing, current = false) {
-    const signed = signing.signers.filter(signer => signer.status === 'Assinado');
-    const pending = signing.signers.filter(signer => signer.status !== 'Assinado');
-    const complete = pending.length === 0 && signed.length > 0;
-    const status = complete ? 'Assinado' : signed.length ? 'Parcialmente assinado' : 'Aguardando assinaturas';
-    return '<div class="lx-signature-tracking"' + (current ? ' data-signature-tracking' : '') + '><div class="lx-signing-overview" role="status"><div class="lx-signing-overview-head"><strong>Status do documento</strong><span class="lx-signing-status' + (complete ? ' is-signed' : '') + '" data-document-signing-status><i class="fa-solid fa-' + (complete ? 'circle-check' : 'clock') + '"></i> ' + status + '</span></div><p class="lx-signing-count">' + signed.length + ' de ' + signing.signers.length + ' assinaturas recebidas</p>' + readGrid([['Assinado por', signed.map(signer => signer.name).join(', ') || 'Nenhuma assinatura recebida'], ['Aguardando assinatura de', pending.map(signer => signer.name).join(', ') || 'Nenhuma assinatura pendente']], 'lx-signing-overview-grid') + '</div>' + signing.signers.map(signer =>
-      '<div class="lx-stability-record" data-signer="' + escape(signer.role) + '"><div class="lx-stability-record-head"><h3>' + escape(signer.role) + '</h3><span class="lx-signing-status' + (signer.status === 'Assinado' ? ' is-signed' : '') + '"><i class="fa-solid fa-' + (signer.status === 'Assinado' ? 'circle-check' : 'clock') + '"></i> ' + escape(signer.status) + '</span></div>' + readGrid([['Nome', signer.name], ['E-mail', signer.email], ['Assinou o documento?', signer.status === 'Assinado' ? 'Sim' : 'Não'], ['Data da assinatura', signer.signedAt || 'Aguardando assinatura']], 'lx-signing-person-grid') + '</div>'
+    return '<div class="lx-signature-tracking"' + (current ? ' data-signature-tracking' : '') + '>' + signing.signers.map(signer =>
+      '<article class="lx-signing-person" data-signer="' + escape(signer.role) + '"><div class="lx-stability-record-head"><h3>' + escape(signer.role) + '</h3><span class="lx-signing-status' + (signer.status === 'Assinado' ? ' is-signed' : '') + '"><i class="fa-solid fa-' + (signer.status === 'Assinado' ? 'circle-check' : 'clock') + '"></i> ' + escape(signer.status) + '</span></div>' + readGrid([['Nome', signer.name], ['E-mail', signer.email], ['Assinou o documento?', signer.status === 'Assinado' ? 'Sim' : 'Não'], ['Data da assinatura', signer.signedAt || 'Aguardando assinatura']], 'lx-signing-person-grid') + '</article>'
     ).join('') + '</div>';
   }
   function renderSignatureValidation() {
     const signing = state.electronicSigning || electronicSigningExample();
+    const signed = !!signing.signedDocument;
+    const document = signing.signedDocument || signing.document || automaticDocument('paraAssinatura', signing.revision || state.revision, signing.sentAt || state.created);
     return fieldset('Envio para Assinatura Eletrônica', 'paper-plane', signingSummary(signing)) +
       fieldset('Acompanhamento das Assinaturas', 'file-signature', signingStatus(signing, true)) +
-      (signing.signedDocument ? fieldset('Documento Assinado', 'file-circle-check', attachments('assinado', '', false, [signing.signedDocument])) : '') +
+      fieldset(signed ? 'Documento Assinado' : 'Documento para Assinatura', signed ? 'file-circle-check' : 'file-lines', attachments(signed ? 'assinado' : 'paraAssinatura', '', false, [document])) +
       actions('validate-signatures', 'Validar assinaturas e encaminhar ao DP');
   }
   function signatureCard(role, name, key, form = state.form, readonly = false) {
@@ -764,23 +766,52 @@
   }
   function allCheckIds() { return checklistGroups.flatMap(([group, , items]) => items.map((_, i) => group + '-' + i)); }
   function checkDone(id, checks = state.checks) { return ['conferido', 'na'].includes(checks[id]?.status); }
+  function money(value) {
+    if (value == null || value === '') return '—';
+    const raw = String(value).replace(/[^0-9,.-]/g, '');
+    const amount = Number(raw.includes(',') ? raw.replace(/\./g, '').replace(',', '.') : raw);
+    return Number.isFinite(amount) ? amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }).replace(/\u00a0/g, ' ') : '—';
+  }
+  function dpReferenceRows(f, e) {
+    return [['Nome', e.nome, 'dp_nome'], ['Chapa', e.chapa, 'dp_chapa'], ['CPF', f.cpf, 'cpf'], ['PIS', f.pis, 'pis'], ['Data de Admissão', date(e.admissao), 'dp_admissao'], ['Saldo FGTS (R$)', money(f.saldoFgts), 'saldoFgts'], ['Homologação', f.homologacao, 'homologacao'], ['Data de Demissão', date(f.demissao), 'demissao'], ['Tipo de Demissão', normalizeTerminationType(f.tipo), 'tipo'], ['Projeção de Aviso', date(f.projecaoAviso), 'projecaoAviso'], ['Filial', e.filial, 'dp_filial']];
+  }
   function renderChecklists(readonly = false, checks = state.checks) {
-    const ids = allCheckIds(); const count = ids.filter(id => checkDone(id, checks)).length;
-    return '<div class="lx-check-progress"><strong>Conferência manual: <span' + (readonly ? '' : ' id="checkCount"') + '>' + count + '</span> de ' + ids.length + ' itens tratados</strong><progress' + (readonly ? '' : ' id="checkProgress"') + ' value="' + count + '" max="' + ids.length + '" aria-label="Progresso do checklist"></progress>' + (readonly ? '' : '<span>Marque Conferido para os itens aplicáveis ou Não se aplica com justificativa.</span>') + '</div>' + checklistGroups.map(([group, heading, items]) => {
-      const content = '<div class="lx-check-list">' + items.map((name, i) => {
-      const id = group + '-' + i; const item = checks[id] || {};
-      const markedDate = checkDate(item.date) || checklistExampleDate;
-      const stamp = '<time class="lx-check-date" data-check-date="' + id + '" datetime="' + markedDate.split('/').reverse().join('-') + '" title="Marcado em ' + markedDate + '">' + markedDate + '</time>';
-      if (readonly) return '<div class="lx-check-row"><strong>' + escape(name) + '</strong><span class="lx-check-state">' + (item.status === 'conferido' ? 'Conferido' : item.status === 'na' ? 'Não se aplica' : 'Pendente') + (checkDone(id, checks) ? stamp : '') + '</span><span>' + escape(item.note || '') + '</span></div>';
-      return '<div class="lx-check-row lx-check-row-editor"><div class="lx-check-item"><strong id="check-title-' + id + '">' + escape(name) + '</strong><div class="lx-check-options" role="group" aria-labelledby="check-title-' + id + '"><label><input type="checkbox" data-check="' + id + '"' + (item.status === 'conferido' ? ' checked' : '') + ' /> Conferido</label><label><input type="checkbox" data-na="' + id + '"' + (item.status === 'na' ? ' checked' : '') + ' /> Não se aplica</label></div>' + (checkDone(id, checks) ? '<div class="lx-check-marked-date"><span>Data da marcação</span>' + stamp + '</div>' : '') + '</div><label class="lx-field"><span>Observação' + (item.status === 'na' ? ' / justificativa de não aplicação *' : '') + '</span><textarea data-check-note="' + id + '" rows="3">' + escape(item.note || '') + '</textarea></label></div>';
-      }).join('') + '</div>';
-      return readonly ? historyCustomSection('Checklist de ' + heading, 'list-check', 'blue', content) : fieldset('Checklist de ' + heading, 'list-check', content);
+    const ids = allCheckIds();
+    const count = ids.filter(id => checkDone(id, checks)).length;
+    const percent = Math.round(count / ids.length * 100);
+    const progress = '<div class="lx-check-progress"><div class="lx-check-progress-title"><span class="lx-section-icon"><i class="fa-solid fa-list-check"></i></span><div><strong>Checklist da Rescisão</strong><p>' + (readonly ? 'Conferência registrada pelo Departamento Pessoal.' : 'Preencha o checklist linha a linha, conforme a conferência dos documentos e lançamentos da rescisão.') + '</p></div></div><div class="lx-check-progress-summary"><span><b' + (readonly ? '' : ' id="checkCount"') + '>' + count + '</b> de ' + ids.length + ' concluídos</span><div class="lx-check-progress-meter"><progress' + (readonly ? '' : ' id="checkProgress"') + ' value="' + count + '" max="' + ids.length + '" aria-label="Progresso do checklist"></progress><strong data-check-percent>' + percent + '%</strong></div></div></div>';
+    return progress + checklistGroups.map(([group, heading, items]) => {
+      const done = items.filter((_, index) => checkDone(group + '-' + index, checks)).length;
+      const open = readonly || openChecklists[group] !== false;
+      const rows = items.map((name, index) => {
+        const id = group + '-' + index;
+        const item = checks[id] || {};
+        const status = checkDone(id, checks) ? item.status : '';
+        const markedDate = checkDate(item.date) || (status && item.date == null ? checklistExampleDate : '');
+        const isoDate = markedDate.split('/').reverse().join('-');
+        const dateField = readonly ? '<div class="lx-check-date-box"><i class="fa-regular fa-calendar" aria-hidden="true"></i>' + (markedDate ? '<time class="lx-check-date" data-check-date="' + id + '" datetime="' + isoDate + '">' + markedDate + '</time>' : '<span class="lx-check-date-placeholder">—</span>') + '</div>' : '<label class="lx-field lx-check-date-field"><span class="lx-check-sr-only">Data da marcação de ' + escape(name) + '</span><input type="date" lang="pt-BR" data-check-date="' + id + '" value="' + isoDate + '" /></label>';
+        const choices = [['conferido', 'Conferido', 'circle-check', 'check'], ['', 'Pendente', 'clock', 'pending'], ['na', 'Não se aplica', 'ban', 'na']];
+        const statusContent = readonly ? '<span class="lx-check-status-badge is-' + (status || 'pending') + '">' + choices.find(choice => choice[0] === status)[1] + '</span>' : '<div class="lx-check-options" role="group" aria-label="Status de ' + escape(name) + '">' + choices.map(([value, label, icon, attr]) => '<label class="lx-check-choice is-' + (value || 'pending') + (status === value ? ' is-selected' : '') + '"><input type="radio" name="check-' + id + '" data-' + attr + '="' + id + '" value="' + value + '"' + (status === value ? ' checked' : '') + ' /><span><i class="fa-solid fa-' + icon + '" aria-hidden="true"></i> ' + label + '</span></label>').join('') + '</div>';
+        const note = escape(item.note || '');
+        const observation = readonly ? '<span class="lx-check-readonly-note">' + note + '</span>' : '<label class="lx-field lx-check-observation"><span class="lx-check-sr-only">Observação de ' + escape(name) + '</span><input type="text" data-check-note="' + id + '" value="' + note + '" maxlength="500" aria-describedby="check-note-count-' + id + '" placeholder="Digite a observação..." /><small class="lx-check-note-count" id="check-note-count-' + id + '"><span data-note-count="' + id + '">' + (item.note || '').length + '</span>/500</small></label>';
+        return '<tr class="lx-check-row' + (readonly ? '' : ' lx-check-row-editor') + '"><td class="lx-check-number" data-label="#">' + (index + 1) + '</td><th scope="row" class="lx-check-item">' + escape(name) + '</th><td data-label="Status">' + statusContent + '</td><td data-label="Data da marcação">' + dateField + '</td><td data-label="Observação">' + observation + '</td></tr>';
+      }).join('');
+      return '<details class="lx-check-group" data-check-group="' + group + '"' + (readonly ? '' : ' data-check-editor') + (open ? ' open' : '') + '><summary><i class="fa-solid fa-chevron-down lx-check-chevron" aria-hidden="true"></i><strong>' + heading + '</strong><span class="lx-check-group-badge">' + items.length + ' itens</span><span class="lx-check-group-count">' + done + ' de ' + items.length + ' concluídos</span></summary><div class="lx-check-table-scroll"><table class="lx-check-table"><colgroup><col class="lx-check-col-number"><col class="lx-check-col-item"><col class="lx-check-col-status"><col class="lx-check-col-date"><col class="lx-check-col-note"></colgroup><thead><tr><th scope="col">#</th><th scope="col">Item</th><th scope="col">Status</th><th scope="col">Data da marcação</th><th scope="col">Observação</th></tr></thead><tbody>' + rows + '</tbody></table></div></details>';
     }).join('');
   }
   function renderDP() {
     const e = employee() || {};
-    return fieldset('Dados de Referência da Rescisão', 'address-card', grid([input('Nome', 'refNome', { value: e.nome || '', readonly: true }), input('Chapa', 'refChapa', { value: e.chapa || '', readonly: true }), input('CPF', 'cpf'), input('PIS', 'pis'), input('Data de Admissão', 'refAdmissao', { value: date(e.admissao), readonly: true }), input('Saldo FGTS (R$)', 'saldoFgts', { type: 'number', min: 0 }), input('Homologação', 'homologacao'), input('Data de Demissão', 'demissao', { type: 'date' }), input('Tipo de Demissão', 'refTipo', { value: state.form.tipo, readonly: true }), input('Projeção de Aviso', 'projecaoAviso', { type: 'date' }), input('Filial', 'refFilial', { value: e.filial || '', readonly: true })]) + '<p class="lx-help">Dados informativos, separados dos checks. Campos disponíveis e origem serão validados com o DP.</p>') +
-      renderChecklists() + fieldset('Conclusão pelo Departamento Pessoal', 'clipboard-check', radios('Checklist concluído?', 'checklistConcluido', ['Sim', 'Não']) + input('Observações finais', 'finais', { textarea: true })) + actions('finish', 'Concluir Checklist e Encerrar Processo');
+    const fields = dpReferenceRows(state.form, e).map(([label, value, key]) => input(label, key, { value: value || '—', readonly: true })).join('');
+    return fieldset('Dados de Referência da Rescisão', 'address-card', '<div class="lx-grid-3 lx-dp-reference-grid" data-dp-reference>' + fields + '</div>') + renderChecklists() + renderDPConclusion();
+  }
+  function renderDPConclusion() {
+    const options = [
+      ['Sim', 'Concluir checklist', 'Confirmar a conferência dos itens aplicáveis e encerrar o processo.', 'approve'],
+      ['Não', 'Manter em conferência', 'Continuar a conferência dos itens antes de concluir o checklist.', 'return']
+    ];
+    return fieldset('Decisão de Aprovação', 'list-check', '<div class="lx-current-decision" data-approval="dp">' + options.map(([value, label, text, tone]) =>
+      '<label class="lx-decision-option lx-decision-' + tone + (state.form.checklistConcluido === value ? ' lx-decision-option-selected' : '') + '"><input type="radio" name="checklistConcluido" data-field="checklistConcluido" value="' + value + '"' + (state.form.checklistConcluido === value ? ' checked' : '') + ' /><div><span>' + label + '</span><p>' + text + '</p></div></label>'
+    ).join('') + input('Observações finais', 'finais', { textarea: true }) + actions('finish', 'Concluir Checklist e Encerrar Processo') + '</div>');
   }
   function renderEnding() {
     const ended = page.key === 'finalizada';
@@ -802,6 +833,7 @@
     if (key === 'decision') return view.querySelector('.lx-current-decision');
     if (key === 'note') return view.querySelector('[data-note]')?.closest('.lx-field');
     if (key === 'checklist') return view.querySelector('.lx-check-progress');
+    if (key === 'checklistConcluido') return view.querySelector('[data-approval="dp"]');
     if (key === 'electronicSigning') return view.querySelector('[data-signature-tracking]');
     if (key === 'document') return view.querySelector('.lx-view-shell:last-of-type .lx-fieldset');
     return view.querySelector('[data-field="' + key + '"]')?.closest('.lx-field');
@@ -875,6 +907,8 @@
     window.requestAnimationFrame(() => {
       const first = view.querySelector('.lx-error');
       if (!first) return;
+      const group = first.closest('details');
+      if (group) group.open = true;
       first.scrollIntoView({ behavior: 'smooth', block: 'center' });
       const focusable = Array.from(first.querySelectorAll('input:not([readonly]):not([type="hidden"]), select, textarea:not([readonly]), button')).find(node => !node.disabled && node.getClientRects().length);
       focusable?.focus({ preventScroll: true });
@@ -1015,7 +1049,7 @@
       const unjustified = allCheckIds().filter(id => state.checks[id]?.status === 'na' && !state.checks[id].note?.trim());
       if (pending.length) invalid('checklist', 'Há ' + pending.length + ' item(ns) pendente(s) no checklist. Confira os aplicáveis e indique os que não se aplicam.');
       unjustified.forEach(id => invalid('checkNote.' + id, 'Justifique a opção Não se aplica.'));
-      if (state.form.checklistConcluido !== 'Sim') invalid('checklistConcluido', 'Confirme Checklist concluído = Sim.');
+      if (state.form.checklistConcluido !== 'Sim') invalid('checklistConcluido', 'Selecione Concluir checklist para encerrar o processo.');
       if (state.current !== 'solicitacao' && !signaturesReady()) invalid('checklistConcluido', state.form.modalidade === 'Presencial' ? 'Anexe o documento assinado presencialmente pelos dois signatários.' : 'As assinaturas eletrônicas e o documento assinado devem ser validados antes da conclusão pelo DP.');
       if (fail()) return;
       modal('Encerrar processo de desligamento?', '<p>O DP confirma a conferência manual dos itens aplicáveis e conclui o Checklist da Rescisão. Esta é a última atividade do workflow.</p>', () => {
@@ -1031,7 +1065,7 @@
   }
   function update(event) {
     const el = event.target;
-    const isField = el.matches('[data-field], [data-item], [data-decision], [data-note], [data-check], [data-na], [data-check-note]');
+    const isField = el.matches('[data-field], [data-item], [data-decision], [data-note], [data-check], [data-na], [data-pending], input[data-check-date], [data-check-note]');
     if (!isField || el.readOnly) return;
     if (!(canInteract(page.key) || isChecklistEditor(el) || el.matches('[data-decision], [data-note]') || (page.key === 'correcao' && state.current === 'retomada' && el.dataset.field === 'resumeArea'))) { render(); feedback('Esta etapa está em visualização. Abra a atividade atual para editar.', true); return; }
     clearFieldError(el);
@@ -1050,18 +1084,26 @@
         const request = requestExamples();
         ['infraItems', 'epiItems', 'infraestrutura', 'epi', 'infraObs', 'epiObs'].forEach(field => { state.form[field] = request[field]; });
       }
-      if (event.type === 'change' && ['employee', 'infraestrutura', 'epi', 'estabilidade', 'exame', 'modalidade'].includes(key)) { save(); render(); }
+      if (event.type === 'change' && ['employee', 'infraestrutura', 'epi', 'estabilidade', 'exame', 'modalidade', 'checklistConcluido'].includes(key)) { save(); render(); }
     }
     if (el.dataset.item) state.form[el.dataset.item][+el.dataset.index][el.dataset.prop] = el.value;
     if (el.dataset.decision) { decision(el.dataset.decision).value = el.value; save(); render(); }
     if (el.dataset.note) decision(el.dataset.note).note = el.value;
-    if (el.dataset.check || el.dataset.na) {
-      const id = el.dataset.check || el.dataset.na;
+    if (el.dataset.check || el.dataset.na || el.dataset.pending) {
+      const id = el.dataset.check || el.dataset.na || el.dataset.pending;
       const item = state.checks[id] || (state.checks[id] = {});
-      item.status = el.checked ? (el.dataset.na ? 'na' : 'conferido') : '';
+      item.status = el.checked && !el.dataset.pending ? (el.dataset.na ? 'na' : 'conferido') : '';
       item.by = owners.dp; item.date = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }); save(); render();
     }
-    if (el.dataset.checkNote) { const id = el.dataset.checkNote; (state.checks[id] || (state.checks[id] = {})).note = el.value; }
+    if (el.dataset.checkDate) {
+      const item = state.checks[el.dataset.checkDate] || (state.checks[el.dataset.checkDate] = {});
+      item.date = checkDate(el.value); item.by = owners.dp;
+    }
+    if (el.dataset.checkNote) {
+      (state.checks[el.dataset.checkNote] || (state.checks[el.dataset.checkNote] = {})).note = el.value;
+      const counter = el.closest('.lx-check-observation')?.querySelector('[data-note-count]');
+      if (counter) counter.textContent = el.value.length;
+    }
     save();
   }
   function openDB() {
@@ -1124,7 +1166,15 @@
     const field = node.querySelector('input[type="hidden"]');
     field.value = value; field.dispatchEvent(new Event('input', { bubbles: true })); render();
   }
+  document.addEventListener('toggle', event => {
+    const group = event.target;
+    if (group.matches('details[data-check-editor]') && group.isConnected) openChecklists[group.dataset.checkGroup] = group.open;
+  }, true);
   document.addEventListener('click', event => {
+    const checkDateInput = event.target.closest('input[data-check-date]');
+    if (checkDateInput && !checkDateInput.disabled && !checkDateInput.readOnly && checkDateInput.showPicker) {
+      try { checkDateInput.showPicker(); } catch (_) { /* O seletor nativo continua disponível pelo ícone do campo. */ }
+    }
     const collapse = event.target.closest('[data-collapse]');
     if (collapse) { const key = collapse.dataset.collapse; if (key === 'request') summaryOpen = !summaryOpen; else openApprovals[key] = !openApprovals[key]; render(); return; }
     const selector = event.target.closest('[data-single-select]');

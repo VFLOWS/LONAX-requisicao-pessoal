@@ -165,21 +165,21 @@ test('fluxo completo: TI primeiro, SESMT, anexos, assinaturas e 44 checks manuai
   assert.equal((await state(page)).files.paraAssinatura[0].origin, 'Gerado automaticamente');
   assert.equal((await state(page)).files.assinado.length, 0);
   assert.deepEqual(await page.locator('[data-signature-tracking] [data-signer] .lx-signing-status').allTextContents(), [' Assinado', ' Pendente']);
-  assert.equal(await page.locator('[data-document-signing-status]').innerText(), 'Parcialmente assinado');
+  assert.equal(await page.locator('.lx-view-shell:not(.lx-view-shell-history) .lx-readonly-item-status-do-documento strong').innerText(), 'Pendente');
   await click(page, 'validate-signatures');
   assert.match(await validationText(page), /Aguarde a assinatura/);
   assert.equal(await page.locator('[data-signature-tracking].lx-error').count(), 1);
-  assert.match(await page.locator('[data-signature-tracking] .lx-signing-count').innerText(), /1 de 2/);
+  assert.equal(await page.locator('.lx-view-shell:not(.lx-view-shell-history) .lx-readonly-item-status-do-documento strong').innerText(), 'Pendente');
   await page.reload();
   await click(page, 'validate-signatures');
   assert.match(await validationText(page), /Aguarde a assinatura/);
   await receiveSignatures(page);
-  assert.match(await page.locator('[data-signature-tracking] .lx-signing-count').innerText(), /2 de 2/);
+  assert.equal(await page.locator('.lx-view-shell:not(.lx-view-shell-history) .lx-readonly-item-status-do-documento strong').innerText(), 'Assinado');
   assert.equal((await state(page)).electronicSigning.validatedAt, '');
   assert.equal((await state(page)).current, 'validacao_assinaturas');
   await click(page, 'validate-signatures'); await confirm(page);
   assert.equal((await state(page)).current, 'dp');
-  assert.deepEqual((await historyTitles(page)).slice(-3), ['Documento de Desligamento', 'Encaminhar para Assinatura', 'Validar Assinaturas']);
+  assert.deepEqual((await historyTitles(page)).slice(-3), ['Documento de Desligamento', 'Encaminhar para Assinatura', 'Validação das Assinaturas']);
   const signedRecord = (await state(page)).history.find(row => row.action === 'Assinaturas validadas');
   assert.equal(signedRecord.files.assinado[0].name, 'documento-de-desligamento-assinado.pdf');
   assert.ok(signedRecord.electronicSigning.validatedAt);
@@ -189,7 +189,7 @@ test('fluxo completo: TI primeiro, SESMT, anexos, assinaturas e 44 checks manuai
   assert.equal(signedRecord.snapshot.assinaturaGestor, '');
   assert.equal(await page.locator('[data-check]').count(), 44);
   assert.equal(await page.locator('[data-check]:checked').count(), 44);
-  await page.evaluate(() => Array.from(document.querySelectorAll('[data-check]'), node => node.dataset.check).forEach(id => document.querySelector('[data-check="' + id + '"]').click()));
+  await page.evaluate(() => Array.from(document.querySelectorAll('[data-pending]'), node => node.dataset.pending).forEach(id => document.querySelector('[data-pending="' + id + '"]').click()));
   await click(page, 'finish'); assert.match(await validationText(page), /44 item/);
   await radio(page, 'checklistConcluido', 'Sim');
   await page.evaluate(() => {
@@ -202,7 +202,7 @@ test('fluxo completo: TI primeiro, SESMT, anexos, assinaturas e 44 checks manuai
   assert.equal((await state(page)).endedBy, 'Juliana Costa');
   assert.equal((await historyTitles(page)).at(-1), 'DP — Checklist da Rescisão');
   await page.reload(); assert.match(await page.locator('#statusLabel').innerText(), /Finalizado/);
-  await page.getByRole('button', { name: 'Validar Assinaturas', exact: true }).click();
+  await page.getByRole('button', { name: 'Validação das Assinaturas', exact: true }).click();
   await page.locator('[data-action="file"]:visible').first().click();
   await page.locator('#modalMessage iframe').waitFor(); await confirm(page);
   await page.setViewportSize({ width: 390, height: 844 });
@@ -539,8 +539,8 @@ test('todas as telas mostram seus predecessores e exemplos de histórico sem ava
     ['documento', technical],
     ['assinaturas', technical.concat('Documento de Desligamento')],
     ['validacao_assinaturas', technical.concat('Documento de Desligamento', 'Encaminhar para Assinatura')],
-    ['dp', technical.concat('Documento de Desligamento', 'Encaminhar para Assinatura', 'Validar Assinaturas')],
-    ['finalizada', technical.concat('Documento de Desligamento', 'Encaminhar para Assinatura', 'Validar Assinaturas', 'DP — Checklist da Rescisão')]
+    ['dp', technical.concat('Documento de Desligamento', 'Encaminhar para Assinatura', 'Validação das Assinaturas')],
+    ['finalizada', technical.concat('Documento de Desligamento', 'Encaminhar para Assinatura', 'Validação das Assinaturas', 'DP — Checklist da Rescisão')]
   ];
   for (const [stage, expected] of cases) {
     await load(page, stage);
@@ -560,7 +560,7 @@ test('todas as telas mostram seus predecessores e exemplos de histórico sem ava
   assert.equal(await page.getByRole('button', { name: 'Análise da TI', exact: true }).count(), 0, 'A atividade paralela pendente não aparece como etapa anterior concluída');
 
   await load(page, 'dp');
-  const toggle = page.getByRole('button', { name: 'Validar Assinaturas', exact: true });
+  const toggle = page.getByRole('button', { name: 'Validação das Assinaturas', exact: true });
   await toggle.click();
   const record = toggle.locator('xpath=ancestor::section[1]');
   await record.getByRole('button', { name: 'Visualizar anexo', exact: true }).click();
@@ -816,7 +816,7 @@ test('encaminhamento eletrônico dispensa upload e presencial exige documento as
   await click(page,'finish-signatures'); await confirm(page);
   assert.equal((await state(page)).current,'dp');
   assert.equal((await state(page)).electronicSigning,null);
-  assert.equal((await historyTitles(page)).includes('Validar Assinaturas'),false);
+  assert.equal((await historyTitles(page)).includes('Validação das Assinaturas'),false);
   const snapshot=(await state(page)).history.find(record=>record.action==='Documento assinado conferido').snapshot;
   assert.equal(snapshot.modalidade,'Presencial');
   assert.equal(snapshot.assinaturaColaborador,'');
@@ -827,10 +827,16 @@ test('validar assinaturas apresenta o retorno digital e abre sempre com o cenár
   const current = page.locator('.lx-view-shell:not(.lx-view-shell-history)');
   assert.equal(await page.locator('[data-upload], [data-sign]').count(), 0);
   assert.match(await current.innerText(), /DESL-000731-R1/);
-  assert.match(await current.innerText(), /1 de 2 assinaturas recebidas/);
-  assert.equal(await current.locator('[data-document-signing-status]').innerText(), 'Parcialmente assinado');
-  assert.equal(await current.locator('.lx-readonly-item-assinado-por strong').innerText(), 'Carlos Pereira');
-  assert.equal(await current.locator('.lx-readonly-item-aguardando-assinatura-de strong').innerText(), 'Eduardo Martins');
+  assert.doesNotMatch(await current.innerText(), /assinaturas recebidas|Assinado por|Aguardando assinatura de/);
+  assert.equal(await current.locator('.lx-readonly-item-status-do-documento strong').innerText(), 'Pendente');
+  const sending=current.locator('fieldset').filter({has:page.locator('legend').filter({hasText:'Envio para Assinatura Eletrônica'})});
+  assert.equal(await sending.locator('.lx-readonly-item-status-do-documento strong').count(),1);
+  assert.equal(await current.locator('[data-signature-tracking] .lx-readonly-item-status-do-documento strong').count(),0);
+  assert.equal(await current.locator('.lx-signing-person').count(),2);
+  assert.equal(await current.locator('.lx-signing-overview').count(), 0);
+  assert.equal(await sending.locator('.lx-history-stage-item').count(), 6);
+  const metadataTops = await sending.locator('.lx-history-stage-item').evaluateAll(nodes => nodes.map(node => node.getBoundingClientRect().top));
+  assert.equal(new Set(metadataTops).size, 1, 'O status e os dados de envio aparecem na mesma linha');
   const collaborator = current.locator('[data-signer="Colaborador"]');
   const manager = current.locator('[data-signer="Gestor"]');
   assert.equal(await collaborator.locator('.lx-signing-status').innerText(), 'Assinado');
@@ -840,6 +846,14 @@ test('validar assinaturas apresenta o retorno digital e abre sempre com o cenár
   assert.equal(await manager.locator('.lx-readonly-item-assinou-o-documento strong').innerText(), 'Não');
   assert.equal(await manager.locator('.lx-readonly-item-data-da-assinatura strong').innerText(), 'Aguardando assinatura');
   assert.equal(await current.locator('.lx-readonly-item-documento strong').innerText(), 'documento-de-desligamento.pdf');
+  const pendingDocument = current.locator('[data-file-group="paraAssinatura"]');
+  assert.equal(await pendingDocument.locator('.lx-attachment-row').count(), 1, 'O documento enviado pode ser consultado enquanto há assinatura pendente');
+  assert.equal(await pendingDocument.locator('[data-upload], [data-drop], [data-action="delete-file"]').count(), 0);
+  await pendingDocument.getByRole('button', { name: 'Visualizar anexo', exact: true }).click();
+  assert.equal(await page.locator('#modalTitle').innerText(), 'documento-de-desligamento.pdf');
+  assert.equal(await page.locator('#modalIcon .fa-eye').count(), 1);
+  assert.match(await page.locator('#modalMessage iframe').getAttribute('src'), /anexos\/documento-de-desligamento\.pdf$/);
+  await confirm(page);
   await current.screenshot({ path: '/tmp/desligamento-acompanhamento-assinaturas.png' });
   await page.setViewportSize({ width: 390, height: 844 });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
@@ -851,14 +865,13 @@ test('validar assinaturas apresenta o retorno digital e abre sempre com o cenár
   await receiveSignatures(page);
   assert.equal((await state(page)).current, 'solicitacao');
   assert.equal((await state(page)).electronicSigning.validatedAt, '');
-  assert.match(await current.innerText(), /2 de 2 assinaturas recebidas/);
-  assert.equal(await current.locator('[data-document-signing-status]').innerText(), 'Assinado');
-  assert.equal(await current.locator('.lx-readonly-item-assinado-por strong').innerText(), 'Carlos Pereira, Eduardo Martins');
-  assert.equal(await current.locator('.lx-readonly-item-aguardando-assinatura-de strong').innerText(), 'Nenhuma assinatura pendente');
+  assert.doesNotMatch(await current.innerText(), /assinaturas recebidas|Assinado por|Aguardando assinatura de/);
+  assert.equal(await current.locator('.lx-readonly-item-status-do-documento strong').innerText(), 'Assinado');
   assert.equal(await manager.locator('.lx-readonly-item-assinou-o-documento strong').innerText(), 'Sim');
   assert.equal(await current.locator('[data-file-group="assinado"] .lx-attachment-row').count(), 1);
+  assert.equal(await current.locator('[data-file-group="paraAssinatura"]').count(), 0, 'A versão concluída substitui o documento enviado na visualização');
   await page.reload();
-  assert.match(await current.innerText(), /2 de 2 assinaturas recebidas/);
+  assert.doesNotMatch(await current.innerText(), /assinaturas recebidas|Assinado por|Aguardando assinatura de/);
   assert.equal(await current.locator('[data-upload]').count(), 0);
   await page.screenshot({ path: '/tmp/desligamento-validar-assinaturas.png', fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
@@ -868,12 +881,13 @@ test('validar assinaturas apresenta o retorno digital e abre sempre com o cenár
   assert.equal((await state(page)).current, 'solicitacao');
   await click(page, 'validate-signatures'); await confirm(page);
   assert.equal((await state(page)).current, 'dp');
-  await page.getByRole('button', { name: 'Validar Assinaturas', exact: true }).click();
-  const historical = page.locator('.lx-view-shell-history').filter({ has: page.getByRole('button', { name: 'Validar Assinaturas', exact: true }) });
+  await page.getByRole('button', { name: 'Validação das Assinaturas', exact: true }).click();
+  const historical = page.locator('.lx-view-shell-history').filter({ has: page.getByRole('button', { name: 'Validação das Assinaturas', exact: true }) });
   assert.equal(await historical.locator('[data-action="refresh-signatures"], [data-action="validate-signatures"], [data-upload]').count(), 0);
-  assert.match(await historical.innerText(), /Assinaturas validadas/);
-  assert.equal(await historical.locator('[data-document-signing-status]').innerText(), 'Assinado');
-  assert.equal(await historical.locator('.lx-readonly-item-assinado-por strong').innerText(), 'Carlos Pereira, Eduardo Martins');
+  assert.doesNotMatch(await historical.innerText(), /Situação|Data da validação/);
+  assert.equal(await historical.locator('.lx-readonly-item-responsavel').count(), 0);
+  assert.equal(await historical.locator('.lx-readonly-item-status-do-documento strong').innerText(), 'Assinado');
+  assert.equal(await historical.locator('.lx-signing-overview, .lx-readonly-item-assinado-por, .lx-readonly-item-aguardando-assinatura-de').count(), 0);
 
   const recordedHistory = (await state(page)).history;
   await page.evaluate(key => {
@@ -883,8 +897,9 @@ test('validar assinaturas apresenta o retorno digital e abre sempre com o cenár
   assert.equal((await state(page)).form.modalidade, 'Eletrônica');
   assert.equal((await state(page)).current, 'dp', 'Abrir o cenário eletrônico não movimenta o processo');
   assert.equal(await current.locator('[data-signature-tracking]').count(), 1);
-  assert.equal(await current.locator('[data-document-signing-status]').innerText(), 'Parcialmente assinado');
+  assert.equal(await current.locator('.lx-readonly-item-status-do-documento strong').innerText(), 'Pendente');
   assert.deepEqual((await state(page)).electronicSigning.signers.map(signer => signer.status), ['Assinado', 'Pendente']);
+  assert.equal(await current.locator('[data-file-group="paraAssinatura"] .lx-attachment-row').count(), 1);
   assert.deepEqual((await state(page)).history, recordedHistory, 'O ajuste do exemplo mantém os registros anteriores preservados');
   assert.equal(await page.getByRole('button', { name: 'Atualizar status das assinaturas', exact: true }).count(), 0);
   assert.equal(await current.locator('[data-action="validate-signatures"]').isEnabled(), true);
@@ -892,10 +907,10 @@ test('validar assinaturas apresenta o retorno digital e abre sempre com o cenár
   await click(page, 'validate-signatures');
   assert.match(await validationText(page), /Aguarde a assinatura/);
   await receiveSignatures(page);
-  assert.equal(await current.locator('[data-document-signing-status]').innerText(), 'Assinado');
+  assert.equal(await current.locator('.lx-readonly-item-status-do-documento strong').innerText(), 'Assinado');
   await page.reload();
   assert.equal((await state(page)).form.modalidade, 'Eletrônica');
-  assert.equal(await current.locator('[data-document-signing-status]').innerText(), 'Assinado');
+  assert.equal(await current.locator('.lx-readonly-item-status-do-documento strong').innerText(), 'Assinado');
 }));
 
 test('arquivo avulso, assinatura pendente ou de outra revisão não liberam a validação digital nem a conclusão do DP', { skip }, async () => session(async page => {
@@ -1002,51 +1017,107 @@ test('reprovação efetiva na Diretoria preserva o limite do histórico e seu re
 test('DP abre preenchido com 44 checks, preserva edições e conclui no cartão verde sem duplicar o checklist', { skip }, async () => session(async page => {
   await page.clock.setFixedTime(new Date('2026-10-19T12:00:00.000Z'));
   await load(page,'dp');
+  await page.evaluate(key=>{const saved=JSON.parse(localStorage.getItem(key));saved.form.cpf='987.654.321-00';saved.form.saldoFgts='18.450,75';localStorage.setItem(key,JSON.stringify(saved));},storageKey);
+  await page.reload();
   const form=page.locator('.lx-view-shell:not(.lx-view-shell-history)');
   const empty=await form.locator('input[data-field]:not([type="radio"]), textarea[data-field], [data-check-note]').evaluateAll(nodes=>nodes.filter(node=>!node.value.trim()).map(node=>node.dataset.field || node.dataset.checkNote));
   assert.deepEqual(empty,[]);
   assert.equal(await form.locator('[data-check]:checked').count(),44);
-  assert.equal(await form.locator('textarea[data-check-note]').count(),44);
-  assert.deepEqual(await form.locator('[data-check-date]').allTextContents(),Array(44).fill('16/10/2026'));
-  assert.equal(await form.locator('input[data-check-note], [data-field="rmEfetivado"], [data-field="rmObs"], .lx-readonly-item-responsavel, .lx-readonly-item-data-da-conclusao').count(),0);
+  assert.equal(await form.locator('[data-dp-reference] input[readonly]').count(),11);
+  assert.equal(await form.locator('[data-dp-reference] input:not([readonly]), [data-dp-reference] textarea, [data-dp-reference] select').count(),0);
+  assert.equal(await form.locator('[data-dp-reference] [data-field="saldoFgts"]').inputValue(),'R$ 18.450,75');
+  assert.equal(await form.locator('details[data-check-editor]').count(),3);
+  assert.deepEqual(await form.locator('.lx-check-group-badge').allTextContents(),['24 itens','5 itens','15 itens']);
+  assert.equal(await form.locator('[data-pending]').count(),44);
+  assert.equal(await form.locator('input[type="text"][data-check-note]').count(),44);
+  assert.deepEqual(await form.locator('input[type="date"][data-check-date]').evaluateAll(nodes=>nodes.map(node=>node.value)),Array(44).fill('2026-10-16'));
+  assert.equal(await form.locator('textarea[data-check-note], [data-field="rmEfetivado"], [data-field="rmObs"], .lx-readonly-item-responsavel, .lx-readonly-item-data-da-conclusao').count(),0);
   assert.doesNotMatch(await form.innerText(), /Efetivação Manual no TOTVS RM|Registrada ao concluir a atividade/);
+  const conclusion=form.locator('[data-approval="dp"]');
+  assert.equal(await conclusion.locator('.lx-decision-option').count(),2);
+  assert.equal(await conclusion.locator('.lx-decision-approve.lx-decision-option-selected').count(),1);
+  assert.equal(await conclusion.locator('[data-field="finais"], [data-action="finish"], [data-action="draft"]').count(),3);
+  assert.equal(await conclusion.locator('..').locator('legend').innerText(),'Decisão de Aprovação');
+  assert.doesNotMatch(await conclusion.innerText(),/Checklist concluído\?/);
   for (const width of [1280,390]) {
     await page.setViewportSize({width,height:844});
-    const options=await form.locator('.lx-check-options').first().locator('label').evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return {x:r.x,y:r.y,height:r.height};}));
-    assert.equal(options[0].x,options[1].x); assert.ok(options[1].y>=options[0].y+options[0].height);
-    const datePosition=await form.locator('.lx-check-marked-date').first().boundingBox();
-    assert.equal(datePosition.x,options[0].x);
-    assert.ok(datePosition.y>=options[1].y+options[1].height,'A data fica abaixo das opções');
-    assert.equal(await form.locator('.lx-check-options time').count(),0);
-    const conclusionOptions=await form.locator('.lx-field-name-checklistConcluido .lx-radio-option').evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top};}));
-    assert.equal(conclusionOptions[1].left-conclusionOptions[0].right,28);
-    assert.equal(conclusionOptions[0].top,conclusionOptions[1].top);
-    await form.locator('.lx-check-row-editor').first().screenshot({path:'/tmp/desligamento-check-date-'+width+'.png'});
+    const row=form.locator('.lx-check-row-editor').first();
+    assert.equal(await row.locator('input[type="radio"]').count(),3);
+    assert.equal(await row.locator('[data-check-date]').count(),1);
+    assert.equal(await row.locator('[data-check-note]').getAttribute('maxlength'),'500');
+    const heights = await row.locator('input[type="date"], input[type="text"]').evaluateAll(nodes=>nodes.map(node=>node.getBoundingClientRect().height));
+    assert.equal(heights[0], heights[1], 'Data e observação possuem a mesma altura');
+    if(width===1280) {
+      const cells=await row.locator('td, th').evaluateAll(nodes=>nodes.map(node=>node.getBoundingClientRect().left));
+      assert.ok(cells.every((left,index)=>index===0 || left>cells[index-1]),'As colunas seguem a referência');
+      await form.locator('[data-check-group="documentos"]').screenshot({path:'/tmp/lonax-dp-checklist-1280.png'});
+    } else {
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+      await row.screenshot({path:'/tmp/lonax-dp-checklist-mobile.png'});
+    }
+    const conclusionOptions=await conclusion.locator('.lx-decision-option').evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return {left:r.left,width:r.width,top:r.top,bottom:r.bottom};}));
+    assert.equal(conclusionOptions[0].left,conclusionOptions[1].left);
+    assert.equal(conclusionOptions[0].width,conclusionOptions[1].width);
+    assert.ok(conclusionOptions[1].top>conclusionOptions[0].bottom);
+    await conclusion.locator('..').screenshot({path:'/tmp/desligamento-decisao-dp-'+width+'.png'});
   }
   await page.setViewportSize({width:1280,height:844});
-  const observation='Plano de saúde conferido.\nConferência complementar realizada pelo DP.';
+  await form.locator('[data-check-group="documentos"] > summary').click();
+  await radio(page,'checklistConcluido','Não');
+  assert.equal(await form.locator('[data-check-group="documentos"]').getAttribute('open'),null,'O grupo permanece recolhido após alterar a decisão');
+  assert.equal(await conclusion.locator('.lx-decision-return.lx-decision-option-selected').count(),1);
+  await click(page,'finish');
+  assert.match(await validationText(page),/Selecione Concluir checklist/);
+  assert.equal(await conclusion.locator('xpath=self::*[contains(@class,"lx-error")]').count(),1);
+  assert.equal((await state(page)).current,'solicitacao');
+  await radio(page,'checklistConcluido','Sim');
+  await form.locator('[data-check-group="documentos"] > summary').click();
+  assert.equal(await conclusion.locator('.lx-decision-approve.lx-decision-option-selected').count(),1);
+  const documentNote=(await state(page)).checks['documentos-0'].note;
+  await form.locator('[data-na="documentos-0"]').check();
+  await form.locator('[data-check-note="documentos-0"]').fill('');
+  await form.locator('[data-check-group="documentos"] > summary').click();
+  await click(page,'finish');
+  await page.waitForFunction(()=>document.querySelector('[data-check-group="documentos"]').open);
+  assert.equal(await form.locator('[data-check-note="documentos-0"]').getAttribute('aria-invalid'),'true','A validação abre o grupo e destaca a observação obrigatória');
+  await form.locator('[data-check-note="documentos-0"]').fill(documentNote);
+  await form.locator('[data-check="documentos-0"]').check();
+  const dateInput=form.locator('input[data-check-date="proventos-0"]');
+  await dateInput.evaluate(node=>{node.showPicker=()=>{node.dataset.pickerOpened='true';};});
+  await dateInput.click();
+  assert.equal(await dateInput.getAttribute('data-picker-opened'),'true','Clicar no campo abre o calendário');
+  await dateInput.fill('2026-10-18');
+  assert.equal((await state(page)).checks['proventos-0'].date,'18/10/2026');
+  await page.reload();
+  assert.equal(await dateInput.inputValue(),'2026-10-18','A data escolhida permanece após recarregar');
+  await dateInput.fill('');
+  await page.reload();
+  assert.equal(await dateInput.inputValue(),'','Uma data removida não é reposta pelo exemplo');
+  await dateInput.fill('2026-10-18');
+  const observation='Plano de saúde conferido. Conferência complementar realizada pelo DP.';
   await form.locator('[data-check-note="proventos-0"]').fill(observation);
-  assert.equal(await form.locator('[data-check-date="proventos-0"]').innerText(),'16/10/2026','Editar a observação preserva a data de marcação');
+  assert.equal(await dateInput.inputValue(),'2026-10-18','Editar a observação preserva a data escolhida');
   assert.equal(await page.locator('#checkCount').innerText(),'44');
   assert.equal(await form.locator('[data-action="finish"]').isEnabled(),true);
-  await form.locator('[data-check="proventos-0"]').uncheck();
-  assert.equal(await form.locator('[data-check-date="proventos-0"]').count(),0,'Item desmarcado não apresenta data de marcação');
+  await form.locator('[data-pending="proventos-0"]').check();
+  assert.match(await form.locator('[data-check-group="proventos"] .lx-check-group-count').innerText(),/23 de 24/);
+  assert.equal(await form.locator('[data-check-percent]').innerText(),'98%');
+  assert.equal(await dateInput.inputValue(),'2026-10-19','O campo de data continua editável ao marcar Pendente');
   assert.equal((await state(page)).checks['proventos-0'].date,'19/10/2026');
-  await form.locator('[data-field="cpf"]').fill('987.654.321-00');
   await page.reload();
   assert.equal(await form.locator('[data-check]:checked').count(),43);
-  assert.equal(await form.locator('[data-field="cpf"]').inputValue(),'987.654.321-00');
+  assert.equal(await form.locator('[data-dp-reference] [data-field="cpf"]').inputValue(),'987.654.321-00');
   assert.equal(await form.locator('[data-check-note="proventos-0"]').inputValue(),observation);
   await click(page,'finish'); assert.match(await validationText(page),/1 item/);
   await page.clock.setFixedTime(new Date('2026-10-20T01:00:00.000Z'));
   await form.locator('[data-na="proventos-0"]').check();
-  assert.equal(await form.locator('[data-check-date="proventos-0"]').innerText(),'19/10/2026','A data segue o fuso de São Paulo');
-  assert.equal(await form.locator('[data-check-date="proventos-0"]').locator('..').locator('span').innerText(),'Data da marcação');
+  assert.equal(await dateInput.inputValue(),'2026-10-19','A data segue o fuso de São Paulo');
+  assert.equal(await form.locator('[data-check-date="proventos-0"]').locator('xpath=ancestor::td[1]').getAttribute('data-label'),'Data da marcação');
   await page.clock.setFixedTime(new Date('2026-10-20T03:15:00.000Z'));
   await form.locator('[data-check="proventos-0"]').check();
   assert.equal((await state(page)).checks['proventos-0'].date,'20/10/2026');
-  assert.equal(await form.locator('[data-check-date="proventos-0"]').innerText(),'20/10/2026');
-  assert.equal(await form.locator('[data-check-date="proventos-0"]').getAttribute('datetime'),'2026-10-20');
+  assert.equal(await dateInput.inputValue(),'2026-10-20');
+  await dateInput.fill('2026-10-22');
   await click(page,'finish'); await page.locator('#modalCancel').click();
   assert.equal((await state(page)).current,'solicitacao');
   await click(page,'finish'); await confirm(page);
@@ -1066,7 +1137,7 @@ test('DP abre preenchido com 44 checks, preserva edições e conclui no cartão 
   const completed=(await state(page)).history.find(record=>record.action==='Checklist concluído e processo encerrado');
   assert.equal(await dp.locator('.lx-readonly-item-data-da-conclusao strong').innerText(),completed.date);
   assert.equal(await dp.locator('.lx-check-row').first().locator('span').last().innerText(),observation);
-  assert.equal(await dp.locator('[data-check-date="proventos-0"]').innerText(),'20/10/2026');
+  assert.equal(await dp.locator('[data-check-date="proventos-0"]').innerText(),'22/10/2026','O histórico preserva a data selecionada pelo usuário');
   assert.doesNotMatch(await dp.innerText(),/Desligamento efetivado manualmente no RM|Observações da efetivação manual/);
   await page.setViewportSize({width:390,height:844});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
@@ -1075,7 +1146,7 @@ test('DP abre preenchido com 44 checks, preserva edições e conclui no cartão 
   await form.locator('[data-na="proventos-0"]').check();
   await form.locator('[data-check-note="proventos-0"]').fill('Observação editada após a conclusão.');
   assert.equal((await state(page)).checks['proventos-0'].status,'na');
-  assert.equal(await form.locator('[data-check-date="proventos-0"]').innerText(),'21/10/2026');
+  assert.equal(await dateInput.inputValue(),'2026-10-21');
   assert.deepEqual((await state(page)).history.find(record=>record.action==='Checklist concluído e processo encerrado'),completed,'Editar o checklist mantém o registro da conclusão preservado');
 }));
 
@@ -1088,15 +1159,17 @@ test('checklists e conclusão do DP permanecem editáveis e persistem em qualque
     },{key:storageKey,current});
     await page.reload();
     assert.equal(await form.locator('[data-check], [data-na], [data-check-note]').count(),132);
-    assert.equal(await form.locator('[data-check]:disabled, [data-na]:disabled, [data-check-note]:disabled, [data-field="checklistConcluido"]:disabled, [data-field="finais"]:disabled').count(),0,'Campos habilitados durante '+current);
+    assert.equal(await form.locator('[data-check]:disabled, [data-na]:disabled, [data-pending]:disabled, [data-check-note]:disabled, input[data-check-date]:disabled, [data-field="checklistConcluido"]:disabled, [data-field="finais"]:disabled').count(),0,'Campos habilitados durante '+current);
     await form.locator('[data-na="proventos-0"]').check();
     const note='Conferência editada durante '+current;
     await form.locator('[data-check-note="proventos-0"]').fill(note);
+    await form.locator('input[data-check-date="proventos-0"]').fill('2026-10-18');
     await radio(page,'checklistConcluido','Não');
     await form.locator('[data-field="finais"]').fill(note);
     await page.reload();
     assert.equal(await form.locator('[data-na="proventos-0"]').isChecked(),true);
     assert.equal(await form.locator('[data-check-note="proventos-0"]').inputValue(),note);
+    assert.equal(await form.locator('input[data-check-date="proventos-0"]').inputValue(),'2026-10-18');
     assert.equal((await state(page)).form.checklistConcluido,'Não');
     assert.equal((await state(page)).form.finais,note);
     await form.locator('[data-check="proventos-0"]').check();
@@ -1120,12 +1193,12 @@ test('preenchimento do DP atualiza estados antigos e preserva os campos e checks
   assert.equal(Object.keys(saved.checks).length,44);
   assert.equal(saved.checks['proventos-0'].status,'na');
   assert.equal(saved.checks['proventos-0'].note,'Sem plano de saúde.');
-  assert.equal(await page.locator('[data-check-date="proventos-0"]').innerText(),'15/10/2026');
-  assert.equal(await page.locator('[data-check-date="proventos-1"]').innerText(),'14/10/2026');
-  assert.equal(await page.locator('[data-check-date="proventos-2"]').innerText(),'16/10/2026');
+  assert.equal(await page.locator('input[data-check-date="proventos-0"]').inputValue(),'2026-10-15');
+  assert.equal(await page.locator('input[data-check-date="proventos-1"]').inputValue(),'2026-10-14');
+  assert.equal(await page.locator('input[data-check-date="proventos-2"]').inputValue(),'2026-10-16');
   assert.equal(saved.checks['proventos-0'].date,'15/10/2026 10:00','A apresentação mantém a data original armazenada');
   assert.equal(saved.checks['proventos-2'].date,'16/10/2026');
-  assert.equal(await page.locator('[data-check-date="documentos-0"]').count(),0);
+  assert.equal(await page.locator('input[data-check-date="documentos-0"]').inputValue(),'');
   assert.equal(saved.checks['documentos-0'].status,'');
   assert.equal(saved.checks['documentos-0'].note,'Aguardando conferência.');
   assert.equal(await page.locator('[data-check]:checked').count(),42);
