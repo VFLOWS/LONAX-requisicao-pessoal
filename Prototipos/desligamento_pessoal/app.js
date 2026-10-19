@@ -151,19 +151,25 @@
     target.reviewDemoVersion = 1;
   }
   const checklistExampleDate = '16/10/2026';
-  function dpExamples() {
+  function dpExamples(completed = false) {
     const date = checklistExampleDate;
     const notes = { proventos: 'Valor e incidência conferidos na memória de cálculo da rescisão.', cancelamentos: 'Cancelamento conferido com a área responsável.', documentos: 'Documento e lançamento conferidos na pasta da rescisão.' };
     return {
       form: { cpf: '123.456.789-09', pis: '123.45678.90-1', saldoFgts: '18450.75', homologacao: 'Sindicato — Sarzedo/MG', demissao: '2026-10-30', projecaoAviso: '2026-11-29', checklistConcluido: 'Sim', finais: 'Documentação conferida, devoluções acompanhadas e checklist da rescisão concluído.' },
-      checks: Object.fromEntries(checklistGroups.flatMap(([group, , items]) => items.map((_, index) => [group + '-' + index, { status: 'conferido', note: notes[group], by: owners.dp, date }])))
+      checks: Object.fromEntries(checklistGroups.flatMap(([group, , items]) => items.map((name, index) => {
+        const status = completed ? (index % 2 ? 'na' : 'conferido') : '';
+        return [group + '-' + index, { status, note: completed ? (status === 'na' ? 'O item ' + name + ' não se aplica a esta rescisão, conforme conferência do Departamento Pessoal.' : notes[group]) : 'Aguardando conferência pelo Departamento Pessoal.', by: completed ? owners.dp : '', date: completed ? date : '' }];
+      })))
     };
   }
   function fillDPExamples(target) {
     const examples = dpExamples();
     Object.entries(examples.form).forEach(([key, value]) => { if (!target.form[key]) target.form[key] = value; });
-    Object.entries(examples.checks).forEach(([key, value]) => { if (!Object.hasOwn(target.checks, key)) target.checks[key] = value; });
-    target.dpDemoVersion = 1;
+    Object.entries(examples.checks).forEach(([key, value]) => {
+      if (!Object.hasOwn(target.checks, key)) target.checks[key] = value;
+      else if (target.dpDemoVersion === 1) Object.assign(target.checks[key], { status: '', by: '', date: '' });
+    });
+    target.dpDemoVersion = 2;
   }
 
   function freshState() {
@@ -194,7 +200,7 @@
   state.form.tipo = normalizeTerminationType(state.form.tipo);
   if (!state.reviewDemoVersion) fillAnalysisExamples(state);
   if (!state.documentDemoVersion) fillDocumentExamples(state);
-  if (!state.dpDemoVersion) fillDPExamples(state);
+  if (!state.dpDemoVersion || state.dpDemoVersion < 2) fillDPExamples(state);
   Object.values(state.checks).forEach(item => {
     if (['conferido', 'na'].includes(item?.status) && item.date == null) item.date = checklistExampleDate;
   });
@@ -524,7 +530,7 @@
     if (area === 'documento') files.documento = documentAttachments(state.revision).documento;
     let snapshot = f;
     if (area === 'dp') {
-      const examples = dpExamples();
+      const examples = dpExamples(true);
       Object.entries(examples.form).forEach(([key, value]) => { if (!f[key]) f[key] = value; });
       snapshot = { referencia: f, checklist: examples.checks };
     }

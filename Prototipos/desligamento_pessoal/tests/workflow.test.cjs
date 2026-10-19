@@ -188,7 +188,7 @@ test('fluxo completo: TI primeiro, SESMT, anexos, assinaturas e 44 checks manuai
   assert.equal(signedRecord.snapshot.assinaturaColaborador, '');
   assert.equal(signedRecord.snapshot.assinaturaGestor, '');
   assert.equal(await page.locator('[data-check]').count(), 44);
-  assert.equal(await page.locator('[data-check]:checked').count(), 44);
+  assert.equal(await page.locator('[data-pending]:checked').count(), 44);
   await page.evaluate(() => Array.from(document.querySelectorAll('[data-pending]'), node => node.dataset.pending).forEach(id => document.querySelector('[data-pending="' + id + '"]').click()));
   await click(page, 'finish'); assert.match(await validationText(page), /44 item/);
   await radio(page, 'checklistConcluido', 'Sim');
@@ -549,11 +549,19 @@ test('todas as telas mostram seus predecessores e exemplos de histórico sem ava
     assert.equal(saved.current, 'solicitacao');
     assert.equal(saved.history.length, 0);
     assert.equal(Object.keys(saved.checks).length, 44);
-    assert.ok(Object.values(saved.checks).every(item => item.status === 'conferido'));
+    assert.ok(Object.values(saved.checks).every(item => item.status === ''));
     assert.equal(saved.document, null);
     assert.equal(saved.form.assinaturaColaborador, '');
     assert.equal(saved.form.estabilidade, undefined);
   }
+  const dpToggle=page.getByRole('button',{name:'DP — Checklist da Rescisão',exact:true});
+  await dpToggle.click();
+  const dpHistory=dpToggle.locator('xpath=ancestor::section[1]');
+  assert.equal(await dpHistory.locator('.lx-check-status-badge.is-conferido').count(),23);
+  assert.equal(await dpHistory.locator('.lx-check-status-badge.is-na').count(),21);
+  assert.equal(await dpHistory.locator('.lx-check-status-badge.is-pending').count(),0);
+  assert.equal(await dpHistory.locator('input, textarea, select').count(),0);
+  assert.ok((await dpHistory.locator('.lx-check-row').filter({has:page.locator('.lx-check-status-badge.is-na')}).locator('.lx-check-readonly-note').allTextContents()).every(note=>note.includes('não se aplica')));
   await load(page, 'sesmt');
   await page.getByRole('button', { name: 'Aprovação do RH', exact: true }).click();
   assert.equal(await page.locator('.lx-history-fieldset-teal .lx-readonly-item-pode-prosseguir strong').innerText(), 'Sim');
@@ -1014,7 +1022,7 @@ test('reprovação efetiva na Diretoria preserva o limite do histórico e seu re
   assert.match(await page.locator('.lx-view-shell:not(.lx-view-shell-history) .lx-history-stage-red').innerText(),/da Diretoria/);
 }));
 
-test('DP abre preenchido com 44 checks, preserva edições e conclui no cartão verde sem duplicar o checklist', { skip }, async () => session(async page => {
+test('DP abre com 44 checks pendentes, preserva edições e conclui no cartão verde sem duplicar o checklist', { skip }, async () => session(async page => {
   await page.clock.setFixedTime(new Date('2026-10-19T12:00:00.000Z'));
   await load(page,'dp');
   await page.evaluate(key=>{const saved=JSON.parse(localStorage.getItem(key));saved.form.cpf='987.654.321-00';saved.form.saldoFgts='18.450,75';localStorage.setItem(key,JSON.stringify(saved));},storageKey);
@@ -1022,7 +1030,9 @@ test('DP abre preenchido com 44 checks, preserva edições e conclui no cartão 
   const form=page.locator('.lx-view-shell:not(.lx-view-shell-history)');
   const empty=await form.locator('input[data-field]:not([type="radio"]), textarea[data-field], [data-check-note]').evaluateAll(nodes=>nodes.filter(node=>!node.value.trim()).map(node=>node.dataset.field || node.dataset.checkNote));
   assert.deepEqual(empty,[]);
-  assert.equal(await form.locator('[data-check]:checked').count(),44);
+  assert.equal(await form.locator('[data-pending]:checked').count(),44);
+  assert.equal(await page.locator('#checkCount').innerText(),'0');
+  assert.equal(await form.locator('[data-check-percent]').innerText(),'0%');
   assert.equal(await form.locator('[data-dp-reference] input[readonly]').count(),11);
   assert.equal(await form.locator('[data-dp-reference] input:not([readonly]), [data-dp-reference] textarea, [data-dp-reference] select').count(),0);
   assert.equal(await form.locator('[data-dp-reference] [data-field="saldoFgts"]').inputValue(),'R$ 18.450,75');
@@ -1030,7 +1040,7 @@ test('DP abre preenchido com 44 checks, preserva edições e conclui no cartão 
   assert.deepEqual(await form.locator('.lx-check-group-badge').allTextContents(),['24 itens','5 itens','15 itens']);
   assert.equal(await form.locator('[data-pending]').count(),44);
   assert.equal(await form.locator('input[type="text"][data-check-note]').count(),44);
-  assert.deepEqual(await form.locator('input[type="date"][data-check-date]').evaluateAll(nodes=>nodes.map(node=>node.value)),Array(44).fill('2026-10-16'));
+  assert.deepEqual(await form.locator('input[type="date"][data-check-date]').evaluateAll(nodes=>nodes.map(node=>node.value)),Array(44).fill(''));
   assert.equal(await form.locator('textarea[data-check-note], [data-field="rmEfetivado"], [data-field="rmObs"], .lx-readonly-item-responsavel, .lx-readonly-item-data-da-conclusao').count(),0);
   assert.doesNotMatch(await form.innerText(), /Efetivação Manual no TOTVS RM|Registrada ao concluir a atividade/);
   const conclusion=form.locator('[data-approval="dp"]');
@@ -1062,6 +1072,12 @@ test('DP abre preenchido com 44 checks, preserva edições e conclui no cartão 
     await conclusion.locator('..').screenshot({path:'/tmp/desligamento-decisao-dp-'+width+'.png'});
   }
   await page.setViewportSize({width:1280,height:844});
+  await click(page,'finish');
+  assert.match(await validationText(page),/44 item/);
+  await page.evaluate(()=>{
+    const ids=Array.from(document.querySelectorAll('[data-check]'),node=>node.dataset.check);
+    ids.forEach(id=>document.querySelector('[data-check="'+id+'"]').click());
+  });
   await form.locator('[data-check-group="documentos"] > summary').click();
   await radio(page,'checklistConcluido','Não');
   assert.equal(await form.locator('[data-check-group="documentos"]').getAttribute('open'),null,'O grupo permanece recolhido após alterar a decisão');
@@ -1201,7 +1217,8 @@ test('preenchimento do DP atualiza estados antigos e preserva os campos e checks
   assert.equal(await page.locator('input[data-check-date="documentos-0"]').inputValue(),'');
   assert.equal(saved.checks['documentos-0'].status,'');
   assert.equal(saved.checks['documentos-0'].note,'Aguardando conferência.');
-  assert.equal(await page.locator('[data-check]:checked').count(),42);
+  assert.equal(await page.locator('[data-check]:checked').count(),2);
+  assert.equal(await page.locator('[data-pending]:checked').count(),41);
   assert.equal(saved.history.length,0);
 }));
 
