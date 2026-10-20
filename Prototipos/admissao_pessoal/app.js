@@ -3,7 +3,8 @@
   const A = window.LonaxAdmission;
   const params = new URLSearchParams(location.search);
   const selected = params.get('id') || A.read().selected;
-  let state = params.has('origem') ? A.start(params.get('origem') === 'manual' ? 'Manual' : 'Processo Seletivo') : A.read().processes[selected] || A.start();
+  const entryOrigin = params.has('origem') ? params.get('origem') === 'manual' ? 'Manual' : 'Processo Seletivo' : !params.has('id') && params.get('etapa') === 'solicitacao' ? 'Manual' : !params.has('id') && params.get('etapa') === 'preparacao' ? 'Processo Seletivo' : null;
+  let state = entryOrigin ? A.start(entryOrigin) : A.read().processes[selected] || A.start();
   let stage = params.get('etapa') === 'nova_validacao' ? 'validacao_final' : A.stages.some(item => item.key === params.get('etapa')) ? params.get('etapa') : 'preparacao';
   const collectionTabs = new Map();
   let fieldSequence = 0;
@@ -28,13 +29,33 @@
     const defaults = A.fresh(state.id, state.origin);
     ['tae', 'rm', 'validation', 'notification', 'rmReview', 'functional'].forEach(key => { state[key] = { ...clone(defaults[key]), ...state[key] }; });
     state.infrastructure ??= clone(defaults.infrastructure);
+    if (!state.form.documentosAssinatura) {
+      state.form.documentosAssinatura = clone(defaults.form.documentosAssinatura);
+      state.form.documentosAssinatura.forEach(doc => { Object.assign(doc.signatarios[0], { nome: state.form.nome, email: state.form.email, cpf: state.form.cpf }); });
+    }
+    state.form.cargoDescricao ??= defaults.form.cargoDescricao;
+    if (state.origin === 'Manual' && !Object.hasOwn(state.form, 'vagaSelecionada')) {
+      const vacancy = A.vacancies.find(item => item.id === state.form.vaga) || A.vacancies[0];
+      Object.assign(state.form, { vagaSelecionada: vacancy.id, vaga: vacancy.id, requisicao: vacancy.requisicao, selecao: vacancy.selecao, candidato: vacancy.candidato });
+    }
+    state.form.documentosAssinatura.forEach(doc => { doc.signatarios ??= []; state.files['assinatura-' + doc.id] ??= clone(defaults.files['assinatura-' + doc.id] || [A.fixed('documento-admissional-1.pdf')]); });
+    if (state.origin === 'Manual' && state.current === 'preparacao') state.current = state.started ? 'coleta' : 'solicitacao';
+    Object.entries(state.decisions).forEach(([key, choice]) => {
+      if (isTreatment(key)) choice.value = treatmentDecisionValue(choice.value || 'approve');
+      else if (choice.value === 'cancel') choice.value = 'withdraw';
+      if (key === 'validacao_rm' && ['return', 'reject'].includes(choice.value)) choice.value = 'return_final';
+      if (key === 'assinaturas' && choice.value === 'return_validacao') choice.value = 'return_final';
+      if (key === 'coleta' && state.form.origem === 'Manual' && choice.value === 'return') choice.value = '';
+      if (key === 'validacao_final' && ['return', 'correction'].includes(choice.value)) choice.value = choice.value === 'correction' && choice.target === 'sesmt' ? 'return_sesmt' : 'return_coleta';
+      if (key === 'preparacao' && choice.value === 'return') choice.value = 'approve';
+    });
     if (state.current === 'nova_validacao') {
       state.current = 'validacao_final'; state.functional.active = true; state.validation.final = false; state.validation.rm = false;
       state.functional.note ||= 'Conferir a inconsistência identificada no cadastro do RM.';
     }
     if (state.started && state.current === 'integracao' && state.rm.status !== 'Em processamento') state.rm.authorized = true;
     ['solicitacaoObs', 'preparacaoObs', 'coletaObs'].forEach(key => { state.form[key] ??= defaults.form[key]; });
-    ['solicitacao', 'preparacao', 'coletaOutros', 'epi'].forEach(key => { state.files[key] ??= defaults.files[key]; });
+    ['solicitacao', 'preparacao', 'coleta', 'coletaOutros', 'epi'].forEach(key => { state.files[key] ??= defaults.files[key]; });
     ['utilizaEpi', 'epiObs', 'epis'].forEach(key => { state.medical[key] ??= clone(defaults.medical[key]); });
     if (params.get('cenario') === 'correcao-rm' && !state.started && stage === 'coleta') state.correction ??= { adjustments: 'Dados e documentos conferidos conforme a devolução do tratamento da integração.' };
     if (params.get('cenario') === 'correcao-rm' && !state.started && stage === 'coleta' && !state.tae.documents.some(doc => doc.fingerprint)) {
@@ -47,6 +68,15 @@
       ['dependentes', 'transportes', 'beneficios', 'beneficiarios'].forEach(key => { if (!state.form[key]?.length) state.form[key] = clone(defaults.form[key]); });
       state.exampleVersion = defaults.exampleVersion;
     }
+  }
+  function restoreEquipmentExamples() {
+    const defaults = A.fresh(state.id);
+    // Restaura somente nomes vazios ao abrir a página, sem recriar itens removidos.
+    [[state.infrastructure.equipamentos, defaults.infrastructure.equipamentos], [state.medical.epis, defaults.medical.epis]].forEach(([items, examples]) => {
+      items.forEach((item, index) => {
+        if (!String(item.tipo ?? '').trim()) item.tipo = (examples.find(example => example.id === item.id) || examples[index % examples.length]).tipo;
+      });
+    });
   }
   function save() { try { A.save(state); return true; } catch (_) { feedback('Não foi possível salvar os dados neste navegador.', true); return false; } }
   function go(key) { stage = key; errors = {}; history.pushState(null, '', href(key)); render(); window.scrollTo(0, 0); }
@@ -66,7 +96,7 @@
   function closeModal() { modalBox.classList.add('lx-hidden'); document.getElementById('modalMessage').innerHTML = ''; modalAction = null; if (previewURL) URL.revokeObjectURL(previewURL); previewURL = null; previousFocus?.focus(); }
   const icon = name => '<i class="fa-solid fa-' + name + '" aria-hidden="true"></i>';
   const button = (action, label, style = 'primary', attributes = '') => '<button type="button" class="lx-btn lx-btn-' + style + '" data-action="' + action + '" ' + attributes + '>' + label + '</button>';
-  const actions = (action, label) => '<div class="lx-actions">' + button('draft', icon('floppy-disk') + ' Salvar rascunho', 'secondary') + button(action, icon('paper-plane') + ' ' + label) + '</div>';
+  const actions = (action, label) => '<div class="lx-actions">' + button('draft', icon('floppy-disk') + ' Salvar Rascunho', 'secondary') + button(action, icon('paper-plane') + ' ' + label) + '</div>';
   const fieldset = (title, name, content, readonly = false, tone = 'blue') => '<fieldset class="' + (readonly ? 'lx-history-fieldset lx-history-fieldset-' + tone : 'lx-fieldset') + '"><legend>' + icon(name) + ' ' + esc(title) + '</legend>' + content + '</fieldset>';
   const section = (title, name, content, readonly = false) => readonly ? fieldset(title, name, content, true) : '<section class="lx-section lx-admission-section"><div class="lx-section-head"><div><span class="lx-section-icon">' + icon(name) + '</span><h2>' + esc(title) + '</h2></div></div><div class="lx-view-body">' + content + '</div></section>';
   const subsection = (title, content) => '<section class="lx-admission-subsection"><h3>' + esc(title) + '</h3>' + content + '</section>';
@@ -96,19 +126,41 @@
   }
   function panel(key, body, historic = false, description = '', unique = key) {
     const m = meta(key); const open = !historic || !!expanded[unique];
-    const badge = key === 'coleta' ? (tabs.length + (correctionContext() ? 1 : 0)) + ' blocos de informações' : key === 'finalizada' ? 'Concluída' : key === 'cancelada' ? 'Cancelada' : key === 'sesmt' ? 'SESMT' : ['enviar_assinatura', 'notificacao_ti'].includes(key) ? 'Automática' : 'RH / DP';
+    const badge = key === 'coleta' ? (tabs.length + (correctionContext() ? 1 : 0)) + ' Blocos de Informações' : key === 'finalizada' ? 'Concluída' : key === 'cancelada' ? 'Cancelada' : key === 'sesmt' ? 'SESMT' : ['enviar_assinatura', 'notificacao_ti'].includes(key) ? 'Automática' : 'RH / DP';
     return '<div class="lx-view-frame"><div class="lx-view-rail"></div><div class="lx-timeline-dot lx-dot-' + (historic ? 'green' : m.tone) + '">' + icon(m.icon) + '</div><section class="lx-view-shell' + (historic ? ' lx-view-shell-history' : '') + (open ? '' : ' lx-view-shell-collapsed') + '" data-stage="' + key + '"><div class="lx-view-head"><div><h2>' + (historic ? '<button type="button" class="lx-collapse-title" data-collapse="' + unique + '" aria-expanded="' + open + '"><span>' + esc(m.title) + '</span>' + icon('chevron-down') + '</button>' : esc(m.title)) + '</h2><p>' + esc(description || m.description) + '</p></div>' + (historic ? '' : '<span class="lx-pill"' + (key === 'coleta' ? ' data-step-count' : '') + '>' + esc(badge) + '</span>') + '</div><div class="lx-view-body">' + body + '</div></section></div>';
   }
   function attachmentButton(action, name, label, source, index) { return button(action, icon(name), name === 'trash' ? 'danger' : 'secondary', 'data-source="' + source + '" data-index="' + index + '" aria-label="' + label + '"').replace('class="lx-btn ', 'class="lx-btn-icon '); }
-  function attachments(group, edit = true, files = state.files[group] || []) {
+  function attachments(group, edit = true, files = state.files[group] || [], compact = false) {
     const source = views.push({ group, files, editable: edit && editable() }) - 1;
     const canEdit = edit && editable();
-    const accept = group === 'coletaOutros' ? '' : ' accept="application/pdf,image/png,image/jpeg,image/webp"';
-    return '<div class="lx-upload" data-file-group="' + group + '" data-wrap="files.' + group + '">' + (canEdit ? '<div class="lx-dropzone" data-drop="' + group + '">' + icon('cloud-arrow-up') + '<p>Arraste e solte seus arquivos aqui</p><span>ou</span>' + button('choose-file', 'Escolher arquivo', 'outline', 'data-group="' + group + '"') + '<input class="lx-file-input" type="file" data-upload="' + group + '"' + accept + ' multiple /></div>' : '') + '<div class="lx-attachment-list">' + (files.length ? files.map((file, index) => '<div class="lx-attachment-row"><div class="lx-attachment-info">' + icon('file-lines') + '<div><strong>' + esc(file.name) + '</strong><span>' + esc(file.by || A.owners.coleta) + ' • ' + esc(file.date) + ' • ' + Math.ceil(file.size / 1024) + ' KB</span></div></div><div class="lx-attachment-actions">' + attachmentButton('file', 'eye', 'Visualizar anexo', source, index) + attachmentButton('download', 'download', 'Baixar anexo', source, index) + (canEdit ? attachmentButton('delete-file', 'trash', 'Excluir anexo', source, index) : '') + '</div></div>').join('') : '<div class="lx-empty-list">Nenhum arquivo anexado.</div>') + '</div></div>';
+    const accept = group === 'coletaOutros' || group.startsWith('assinatura-') ? '' : ' accept="application/pdf,image/png,image/jpeg,image/webp"';
+    if (compact) {
+      const upload = canEdit ? button('choose-file', icon('cloud-arrow-up') + ' Escolher Arquivo', 'outline', 'data-group="' + group + '" data-drop="' + group + '"') + '<input class="lx-file-input" type="file" data-upload="' + group + '"' + accept + ' />' : '';
+      const list = files.length ? files.map((file, index) => '<div class="lx-attachment-row"><div class="lx-attachment-info">' + icon('file-lines') + '<div><strong title="' + esc(file.name) + '">' + esc(file.name) + '</strong><span>' + esc(file.by || A.owners.coleta) + ' • ' + esc(file.date) + ' • ' + Math.ceil(file.size / 1024) + ' KB</span></div></div><div class="lx-attachment-actions">' + attachmentButton('file', 'eye', 'Visualizar Anexo', source, index) + attachmentButton('download', 'download', 'Baixar Anexo', source, index) + (canEdit ? attachmentButton('delete-file', 'trash', 'Excluir Anexo', source, index) : '') + '</div></div>').join('') : '<div class="lx-empty-list">Nenhum arquivo anexado.</div>';
+      return '<div class="lx-upload lx-upload-inline' + (canEdit ? '' : ' is-readonly') + '" data-file-group="' + group + '" data-wrap="files.' + group + '">' + upload + '<div class="lx-attachment-list">' + list + '</div></div>';
+    }
+    return '<div class="lx-upload" data-file-group="' + group + '" data-wrap="files.' + group + '">' + (canEdit ? '<div class="lx-dropzone" data-drop="' + group + '">' + icon('cloud-arrow-up') + '<p>Arraste e solte seus arquivos aqui</p><span>ou</span>' + button('choose-file', 'Escolher Arquivo', 'outline', 'data-group="' + group + '"') + '<input class="lx-file-input" type="file" data-upload="' + group + '"' + accept + (group.startsWith('assinatura-') ? '' : ' multiple') + ' /></div>' : '') + '<div class="lx-attachment-list">' + (files.length ? files.map((file, index) => '<div class="lx-attachment-row"><div class="lx-attachment-info">' + icon('file-lines') + '<div><strong>' + esc(file.name) + '</strong><span>' + esc(file.by || A.owners.coleta) + ' • ' + esc(file.date) + ' • ' + Math.ceil(file.size / 1024) + ' KB</span></div></div><div class="lx-attachment-actions">' + attachmentButton('file', 'eye', 'Visualizar Anexo', source, index) + attachmentButton('download', 'download', 'Baixar Anexo', source, index) + (canEdit ? attachmentButton('delete-file', 'trash', 'Excluir Anexo', source, index) : '') + '</div></div>').join('') : '<div class="lx-empty-list">Nenhum arquivo anexado.</div>') + '</div></div>';
   }
   function additionalAttachments(readonly = false, files = state.files) {
     const list = files.coletaOutros || [];
-    return '<details class="lx-admission-group" data-group="coletaOutros"' + (groupsOpen.coletaOutros ? ' open' : '') + '><summary>' + icon('chevron-down') + '<strong>Outros</strong><span class="lx-status">' + list.length + (list.length === 1 ? ' arquivo' : ' arquivos') + '</span></summary><div class="lx-admission-group-body">' + attachments('coletaOutros', !readonly, list) + '</div></details>';
+    return '<details class="lx-admission-group" data-group="coletaOutros"' + (groupsOpen.coletaOutros ? ' open' : '') + '><summary>' + icon('chevron-down') + '<strong>Outros</strong><span class="lx-status">' + list.length + (list.length === 1 ? ' Arquivo' : ' Arquivos') + '</span></summary><div class="lx-admission-group-body">' + attachments('coletaOutros', !readonly, list) + '</div></details>';
+  }
+  function signatureDocuments(readonly = false, form = state.form, files = state.files) {
+    const documents = form.documentosAssinatura || [];
+    const removeButton = (action, label, attributes) => button(action, icon('trash'), 'danger', attributes + ' aria-label="' + esc(label) + '" title="' + esc(label) + '"').replace('class="lx-btn ', 'class="lx-btn-icon lx-admission-remove-icon ');
+    return section('Documentos para Assinatura Eletrônica', 'file-signature', '<div class="lx-admission-children" data-wrap="form.documentosAssinatura">' + (readonly ? '' : '<div class="lx-admission-list-toolbar">' + button('add-signature-document', icon('plus') + ' Adicionar Documento', 'primary') + '</div>') + documents.map((doc, index) => {
+      const prefix = 'form.documentosAssinatura.' + index;
+      const head = '<div class="lx-admission-child-head lx-admission-document-head"><strong>' + icon('file-signature') + ' Documento ' + (index + 1) + '</strong>' + (readonly ? '' : button('remove-signature-document', icon('trash') + ' Remover Documento', 'danger', 'data-document="' + index + '" aria-label="Remover Documento ' + (index + 1) + '"')) + '</div>';
+      const signers = '<div class="lx-admission-children lx-admission-document-signers" data-wrap="' + prefix + '.signatarios">' + (readonly ? '' : '<div class="lx-admission-list-toolbar">' + button('add-signer', icon('plus') + ' Adicionar Signatário', 'primary', 'data-document="' + index + '"') + '</div>') + (doc.signatarios || []).map((person, personIndex) => {
+        const personPrefix = prefix + '.signatarios.' + personIndex;
+        const defs = [simple('nome', 'Nome'), simple('email', 'E-mail', true, 'email'), { ...simple('cpf', 'CPF'), mask: 'cpf' }];
+        const controls = readonly ? formRow(defs, person, true, 3, personPrefix) : '<div class="lx-admission-form-row lx-admission-signer-fields">' + defs.slice(0, 2).map(def => field(def, personPrefix, person)).join('') + '<div class="lx-admission-signer-cpf">' + field(defs[2], personPrefix, person) + removeButton('remove-signer', 'Remover Signatário ' + (personIndex + 1) + ' do documento ' + (index + 1), 'data-document="' + index + '" data-person="' + personIndex + '"') + '</div></div>';
+        return '<div class="lx-child-table lx-admission-signer-card"><div class="lx-admission-child-head"><strong>Signatário ' + (personIndex + 1) + '</strong></div>' + controls + '</div>';
+      }).join('') + '</div>';
+      const name = readonly ? readGrid([['Nome do Documento', doc.nome, true]]) : field(simple('nome', 'Nome do Documento'), prefix, doc);
+      const documentContent = '<div class="lx-admission-document-file">' + head + '<div class="lx-admission-document-inline">' + name + attachments('assinatura-' + doc.id, !readonly, files['assinatura-' + doc.id] || [], true) + '</div></div>';
+      return '<div class="lx-child-table lx-admission-child-card" data-signature-document="' + esc(doc.id) + '"><div class="lx-admission-document-layout">' + documentContent + signers + '</div></div>';
+    }).join('') + '</div>', readonly);
   }
   function requester(readonly = false) {
     const defs = [
@@ -124,18 +176,17 @@
   }
   function preparation(readonly = false, form = state.form, files = state.files, area = stage, infraData = state.infrastructure) {
     const origin = form.origem;
-    const refs = ['vaga', 'requisicao', 'selecao', 'candidato'].map((key, index) => ({ key, label: ['ID da Vaga', 'Número da Requisição', 'ID do Processo de Seleção', 'ID / referência do candidato'][index], readonly: origin === 'Processo Seletivo' }));
+    const refs = ['vaga', 'requisicao', 'selecao', 'candidato'].map((key, index) => ({ key, label: ['ID da Vaga', 'Número da Requisição', 'ID do Processo de Seleção', 'ID / Referência do Candidato'][index], readonly: true })).filter(def => origin !== 'Manual' || def.key !== 'candidato');
     const D = A.definitions.hiring;
     const group = area === 'solicitacao' ? 'solicitacao' : 'preparacao';
-    const note = group + 'Obs';
     const hiring = formRow(D.slice(0, 4), form, readonly) + formRow(D.slice(4, 9), form, readonly) + formRow(D.slice(9, 15), form, readonly) + formRow(D.slice(15, 19), form, readonly) + fields(D.slice(19), 'form', form, readonly);
     return requester(readonly) + section('Dados da Admissão', 'user-plus',
-      radios('Origem da Admissão', 'form.origem', ['Processo Seletivo', 'Manual'], origin, readonly) +
+      (origin === 'Manual' && !readonly ? '<div class="lx-field" data-wrap="form.vagaSelecionada"><label for="admission-vacancy">Vagas em Aberto <b>*</b></label><select id="admission-vacancy" data-field="form.vagaSelecionada" aria-required="true"' + (!editable() ? ' disabled' : '') + '><option value="">Selecione...</option>' + A.vacancies.map(vacancy => '<option value="' + vacancy.id + '"' + (form.vagaSelecionada === vacancy.id ? ' selected' : '') + '>' + esc(vacancy.label) + '</option>').join('') + '</select></div>' : '') +
       formRow(refs, form, readonly) + subsection('Identificação do Candidato', formRow(A.definitions.identity, form, readonly)) +
       fieldset('Dados da Contratação', 'briefcase', hiring, readonly) +
       infrastructure(readonly, infraData) +
       fieldset('Upload de Arquivos', 'paperclip', attachments(group, !readonly, files[group] || []), readonly) +
-      fieldset('Observações', 'comment-dots', fields([{ key: note, label: 'Observações da ' + (group === 'solicitacao' ? 'solicitação' : 'preparação'), type: 'textarea', wide: true }], 'form', form, readonly), readonly), readonly);
+      (group === 'solicitacao' ? fieldset('Observações', 'comment-dots', fields([{ key: 'solicitacaoObs', label: 'Observações da Solicitação', type: 'textarea', wide: true }], 'form', form, readonly), readonly) : ''), readonly);
   }
   const simple = (key, label, required = true, type = 'text', options) => ({ key, label, required, type, ...(options ? { options } : {}) });
   function collectionSections(form) {
@@ -149,7 +200,7 @@
       { tab: 'documentos', title: 'CTPS', icon: 'address-book', defs: D.ctps },
       { tab: 'bancarios', title: 'Dados Bancários', icon: 'building-columns', defs: D.bank }
     ];
-    if (form.pcd === 'Sim') sections.push({ tab: 'pessoais', title: 'Pessoa com Deficiência', icon: 'universal-access', defs: [{ ...simple('pcdObs', 'Observações sobre a deficiência'), type: 'textarea', wide: true }] });
+    if (form.pcd === 'Sim') sections.push({ tab: 'pessoais', title: 'Pessoa com Deficiência', icon: 'universal-access', defs: [{ ...simple('pcdObs', 'Observações sobre a Deficiência'), type: 'textarea', wide: true }] });
     if (form.primeiroEmprego !== 'Sim') sections.push({ tab: 'documentos', title: 'PIS', icon: 'id-badge', defs: [simple('pis', 'Número do PIS')] });
     if (form.ctpsTipo === 'Física') sections.push({ tab: 'documentos', title: 'Dados da CTPS Física', icon: 'address-book', defs: D.ctpsPhysical });
     [['cnh', 'CNH', 'car', D.license], ['titulo', 'Título de Eleitor', 'id-card', D.voting], ['militar', 'Documento Militar', 'id-card', D.military], ['classe', 'Registro Profissional', 'id-card', D.professional]].forEach(([key, title, name, defs]) => { if (form[key] === 'Sim') sections.push({ tab: 'documentos', title, icon: name, defs }); });
@@ -163,21 +214,21 @@
   const tabs = [['pessoais', 'Dados Pessoais', 'user'], ['documentos', 'Documentos Pessoais', 'id-card'], ['bancarios', 'Dados Bancários', 'building-columns'], ['dependentes', 'Dependentes', 'users'], ['beneficios', 'Transporte e Benefícios', 'bus'], ['condicionais', 'Informações Condicionais', 'list-check'], ['anexos', 'Documentos da Admissão', 'paperclip']];
   function childDefinitions(scope) {
     return ({
-      epis: [{ ...simple('tipo', 'EPI'), options: A.catalog.epi, searchable: true }, { ...simple('quantidade', 'Quantidade', true, 'number'), integer: true }],
+      epis: [simple('tipo', 'EPI'), { ...simple('quantidade', 'Quantidade', true, 'number'), integer: true }],
       dependentes: [simple('nome', 'Nome'), { ...simple('cpf', 'CPF'), mask: 'cpf' }, simple('nascimento', 'Data de Nascimento', true, 'date'), simple('parentesco', 'Parentesco', true, 'text', ['Filha', 'Filho', 'Cônjuge', 'Companheiro(a)', 'Outro'])],
-      transportes: [simple('destino', 'Destino'), simple('linhaNumero', 'Número da Linha'), simple('linhaNome', 'Nome da Linha'), simple('empresa', 'Empresa de Transporte'), simple('cartao', 'Cartão'), simple('tarifa', 'Valor da Tarifa (R$)', true, 'money'), simple('viagens', 'Viagens por dia', true, 'number')],
-      beneficios: [simple('beneficio', 'Benefício', true, 'text', ['Assistência médica', 'Assistência odontológica', 'Alimentação']), simple('plano', 'Plano / modalidade'), simple('beneficiarios', 'Beneficiários')],
+      transportes: [simple('destino', 'Destino'), simple('linhaNumero', 'Número da Linha'), simple('linhaNome', 'Nome da Linha'), simple('empresa', 'Empresa de Transporte'), simple('cartao', 'Cartão'), simple('tarifa', 'Valor da Tarifa (R$)', true, 'money'), simple('viagens', 'Viagens por Dia', true, 'number')],
+      beneficios: [simple('beneficio', 'Benefício', true, 'text', ['Assistência médica', 'Assistência odontológica', 'Alimentação']), simple('plano', 'Plano / Modalidade'), simple('beneficiarios', 'Beneficiários')],
       beneficiarios: [simple('nome', 'Nome'), simple('nascimento', 'Data de Nascimento', true, 'date'), simple('parentesco', 'Parentesco'), simple('percentual', 'Percentual de Participação', true, 'number')]
     })[scope];
   }
   function childRows(scope, readonly = false, form = state.form, files = state.files, root = 'form') {
-    const names = { dependentes: 'dependente', transportes: 'trajeto', beneficios: 'benefício', beneficiarios: 'beneficiário', epis: 'EPI' };
+    const names = { dependentes: 'Dependente', transportes: 'Trajeto', beneficios: 'Benefício', beneficiarios: 'Beneficiário', epis: 'EPI' };
     const add = readonly ? '' : '<div class="lx-admission-list-toolbar">' + button('add-child', icon('plus') + ' Adicionar ' + names[scope], 'primary', 'data-scope="' + scope + '"') + '</div>';
     return '<div class="lx-admission-children" data-wrap="' + root + '.' + scope + '">' + add + (form[scope] || []).map((item, index) => {
       const prefix = root + '.' + scope + '.' + index;
       const defs = childDefinitions(scope);
       let content = scope === 'transportes' ? formRow(defs.slice(0, 4), item, readonly, 4, prefix) + formRow(defs.slice(4), item, readonly, 3, prefix) : formRow(defs, item, readonly, defs.length, prefix);
-      if (scope === 'dependentes') content += '<div class="lx-admission-child-options">' + [['ir', 'Dependência para IR?'], ['familia', 'Salário-família?'], ['medica', 'Assistência médica?'], ['odontologica', 'Assistência odontológica?'], ['pensao', 'Pensão?']].map(([key, label]) => radios(label, prefix + '.' + key, ['Sim', 'Não'], item[key], readonly)).join('') + '</div>';
+      if (scope === 'dependentes') content += '<div class="lx-admission-child-options">' + [['ir', 'Dependência para IR?'], ['familia', 'Salário-Família?'], ['medica', 'Assistência Médica?'], ['odontologica', 'Assistência Odontológica?'], ['pensao', 'Pensão?']].map(([key, label]) => radios(label, prefix + '.' + key, ['Sim', 'Não'], item[key], readonly)).join('') + '</div>';
       if (scope === 'beneficios') content = radios('Optante?', prefix + '.optante', ['Sim', 'Não'], item.optante, readonly) + (item.optante === 'Sim' ? content : fields(childDefinitions(scope).slice(0, 1), prefix, item, readonly));
       if (scope !== 'beneficiarios') content += fields([{ key: 'observacoes', label: 'Observações', type: 'textarea', wide: true }], prefix, item, readonly);
       if (scope === 'dependentes') content += attachments('dependente-' + item.id, !readonly, files['dependente-' + item.id] || []);
@@ -185,18 +236,16 @@
     }).join('') + '</div>';
   }
   function equipmentRows(scope, readonly, data, root, options) {
-    const label = scope === 'epis' ? 'EPI' : 'equipamento';
+    const label = scope === 'epis' ? 'EPI' : 'Equipamento';
     const add = readonly ? '' : button('add-child', icon('plus') + ' Adicionar ' + label, 'primary', 'data-scope="' + scope + '"');
     return '<div class="lx-child-table lx-origin-equipment-table" data-wrap="' + root + '.' + scope + '">' + add + (data[scope] || []).map((item, index) => {
       if (readonly) return '<div class="lx-child-row lx-admission-equipment-history">' + readGrid([[scope === 'epis' ? 'EPI' : 'Equipamento', item.tipo], ['Quantidade', item.quantidade], ['Observação', item.observacoes, true]]) + '</div>';
       const prefix = root + '.' + scope + '.' + index;
-      return '<div class="lx-child-row lx-origin-equipment-row lx-dismissal-origin-row" data-child-id="' + esc(item.id) + '">' + field({ key: 'tipo', label: scope === 'epis' ? 'EPI' : 'Equipamento', required: true, searchable: true, options }, prefix, item) + field({ ...simple('quantidade', 'Quantidade', true, 'number'), integer: true }, prefix, item) + '<div class="lx-item-observation">' + field({ key: 'observacoes', label: 'Observação', type: 'textarea' }, prefix, item) + '</div><button type="button" class="lx-btn-icon lx-btn-danger" data-action="remove-child" data-scope="' + scope + '" data-index="' + index + '" aria-label="Excluir ' + label + ' ' + (index + 1) + '">' + icon('trash') + '</button></div>';
+      return '<div class="lx-child-row lx-origin-equipment-row lx-dismissal-origin-row" data-child-id="' + esc(item.id) + '">' + field(simple('tipo', scope === 'epis' ? 'EPI' : 'Equipamento'), prefix, item) + field({ ...simple('quantidade', 'Quantidade', true, 'number'), integer: true }, prefix, item) + '<div class="lx-item-observation">' + field({ key: 'observacoes', label: 'Observação', type: 'textarea' }, prefix, item) + '</div><button type="button" class="lx-btn-icon lx-btn-danger" data-action="remove-child" data-scope="' + scope + '" data-index="' + index + '" aria-label="Excluir ' + label + ' ' + (index + 1) + '">' + icon('trash') + '</button></div>';
     }).join('') + '</div>';
   }
   function infrastructure(readonly = false, data = state.infrastructure) {
-    const inherited = state.form.origem === 'Processo Seletivo';
-    const locked = readonly || inherited;
-    return fieldset('Infraestrutura do Colaborador', 'laptop', radios('Necessita equipamentos?', 'infrastructure.necessita', ['Sim', 'Não'], data.necessita, locked) + (data.necessita === 'Sim' ? equipmentRows('equipamentos', locked, data, 'infrastructure', ['Notebook', 'Computador', 'Monitor', 'Celular', 'Telefone', 'Outros']) : '') + fields([{ key: 'observacoes', label: 'Observações da infraestrutura', type: 'textarea', wide: true }], 'infrastructure', data, locked), readonly);
+    return fieldset('Infraestrutura do Colaborador', 'laptop', radios('Necessita Equipamentos?', 'infrastructure.necessita', ['Sim', 'Não'], data.necessita, readonly) + (data.necessita === 'Sim' ? equipmentRows('equipamentos', readonly, data, 'infrastructure', ['Notebook', 'Computador', 'Monitor', 'Celular', 'Telefone', 'Outros']) : '') + fields([{ key: 'observacoes', label: 'Observações da Infraestrutura', type: 'textarea', wide: true }], 'infrastructure', data, readonly), readonly);
   }
   function collectionSectionFields(item, form, readonly) {
     if (item.title === 'CNH') return formRow(item.defs.slice(0, 3), form, readonly) + formRow(item.defs.slice(3), form, readonly);
@@ -209,25 +258,25 @@
     if (key === 'pessoais') {
       const D = A.definitions;
       const family = fields(A.definitions.identity.slice(2), 'form', form, readonly) + subsection('Filiação', formRow([simple('mae', 'Nome da Mãe'), simple('pai', 'Nome do Pai', false)], form, readonly));
-      content += radios('Pessoa com Deficiência?', 'form.pcd', ['Sim', 'Não'], form.pcd, readonly) + (form.pcd === 'Sim' ? fields([{ key: 'pcdObs', label: 'Observações sobre a deficiência', required: true, type: 'textarea', wide: true }], 'form', form, readonly) : '') +
-        formRow(D.personal.slice(0, 4), form, readonly) + formRow(D.personal.slice(4, 9), form, readonly) + formRow(D.personal.slice(9), form, readonly) +
+      content += formRow(D.personal.slice(0, 4), form, readonly) + formRow(D.personal.slice(4, 9), form, readonly) +
+        '<div class="lx-admission-form-row lx-admission-cols-4">' + (readonly ? D.personal.slice(9).map(def => '<div class="lx-history-stage-item"><span>' + esc(def.label) + '</span><strong>' + esc(display(form[def.key], def)) + '</strong></div>').join('') : D.personal.slice(9).map(def => field(def, 'form', form)).join('')) + radios('Pessoa com Deficiência?', 'form.pcd', ['Sim', 'Não'], form.pcd, readonly) + '</div>' + (form.pcd === 'Sim' ? fields([{ key: 'pcdObs', label: 'Observações sobre a Deficiência', required: true, type: 'textarea', wide: true }], 'form', form, readonly) : '') +
         fieldset('Contatos e Filiação', 'users', family, readonly) + block('Endereço', 'location-dot', D.address, readonly, form);
     }
     if (key === 'documentos') {
-      content += fieldset('Documentos aplicáveis', 'list-check', '<div class="lx-admission-options-grid">' + [['primeiroEmprego', 'Primeiro emprego / sem PIS?'], ['cnh', 'CNH necessária à contratação?'], ['titulo', 'Informar Título de Eleitor?'], ['militar', 'Informar Documento Militar?'], ['classe', 'Cargo exige registro profissional?']].map(([path, label]) => radios(label, 'form.' + path, ['Sim', 'Não'], form[path], readonly)).join('') + '</div>', readonly);
+      content += fieldset('Documentos Aplicáveis', 'list-check', '<div class="lx-admission-options-grid">' + [['primeiroEmprego', 'Primeiro Emprego / sem PIS?'], ['cnh', 'CNH Necessária à Contratação?'], ['titulo', 'Informar Título de Eleitor?'], ['militar', 'Informar Documento Militar?'], ['classe', 'Cargo Exige Registro Profissional?']].map(([path, label]) => radios(label, 'form.' + path, ['Sim', 'Não'], form[path], readonly)).join('') + '</div>', readonly);
       const identity = formRow(A.definitions.rg, form, readonly) + formRow([...A.definitions.ctps, ...(form.primeiroEmprego === 'Sim' ? [] : [simple('pis', 'Número do PIS')])], form, readonly) + (form.ctpsTipo === 'Física' ? formRow(A.definitions.ctpsPhysical, form, readonly) : '');
       content += fieldset('Documentos de Identidade', 'id-card', identity, readonly);
       content += '<div class="lx-admission-fieldset-grid">' + collectionSections(form).filter(item => item.tab === key && !['Documento de Identidade', 'CTPS', 'PIS', 'Dados da CTPS Física'].includes(item.title)).map(item => '<div' + (item.defs.length > 4 ? ' class="lx-span-all"' : '') + '>' + fieldset(item.title, item.icon, collectionSectionFields(item, form, readonly), readonly) + '</div>').join('') + '</div>';
     }
     if (key === 'bancarios') content += fields(A.definitions.bank, 'form', form, readonly);
-    if (key === 'dependentes') content += radios('Possui dependentes?', 'form.temDependentes', ['Sim', 'Não'], form.temDependentes, readonly) + (form.temDependentes === 'Sim' ? childRows('dependentes', readonly, form, files) : '');
+    if (key === 'dependentes') content += radios('Possui Dependentes?', 'form.temDependentes', ['Sim', 'Não'], form.temDependentes, readonly) + (form.temDependentes === 'Sim' ? childRows('dependentes', readonly, form, files) : '');
     if (key === 'beneficios') content += fieldset('Vale-Transporte', 'bus', radios('Deseja Vale-Transporte?', 'form.transporte', ['Sim', 'Não'], form.transporte, readonly) + (form.transporte === 'Sim' ? childRows('transportes', readonly, form, files) : ''), readonly) + fieldset('Benefícios Aplicáveis', 'heart', childRows('beneficios', readonly, form, files), readonly) + fieldset('Seguro de Vida', 'shield-heart', radios('Optante por Seguro de Vida?', 'form.seguro', ['Sim', 'Não'], form.seguro, readonly) + (form.seguro === 'Sim' ? childRows('beneficiarios', readonly, form, files) : ''), readonly);
     if (key === 'condicionais') {
       const reference = [simple('contrato', 'Tipo de Contrato', false), simple('nacionalidade', 'Nacionalidade', false)];
-      const conditions = readonly ? readGrid([['Tipo de Contrato', form.contrato], ['Nacionalidade', form.nacionalidade], ['Contrato com prazo?', form.prazo], ['Informar Representante Legal?', form.representante]], 'lx-admission-conditions-row') : '<div class="lx-admission-form-row lx-admission-cols-4 lx-admission-conditions-row">' + reference.map(def => field({ ...def, readonly: true }, 'form', form)).join('') + radios('Contrato com prazo?', 'form.prazo', ['Sim', 'Não'], form.prazo) + radios('Informar Representante Legal?', 'form.representante', ['Sim', 'Não'], form.representante) + '</div>';
+      const conditions = readonly ? readGrid([['Tipo de Contrato', form.contrato], ['Nacionalidade', form.nacionalidade], ['Contrato com Prazo?', form.prazo], ['Informar Representante Legal?', form.representante]], 'lx-admission-conditions-row') : '<div class="lx-admission-form-row lx-admission-cols-4 lx-admission-conditions-row">' + reference.map(def => field({ ...def, readonly: true }, 'form', form)).join('') + radios('Contrato com Prazo?', 'form.prazo', ['Sim', 'Não'], form.prazo) + radios('Informar Representante Legal?', 'form.representante', ['Sim', 'Não'], form.representante) + '</div>';
       content += fieldset('Condições da Contratação', 'list-check', conditions, readonly);
       content += collectionSections(form).filter(item => item.tab === key).map(item => item.title === 'Contrato com Prazo' ? fieldset(item.title, item.icon,
-        formRow(item.defs.filter(def => ['experiencia1', 'experiencia2', 'contratoFim', 'prazoTipo'].includes(def.key)), form, readonly) + fields(item.defs.filter(def => ['prazoMotivo', 'prazoObs'].includes(def.key)), 'form', form, readonly), readonly) : block(item.title, item.icon, item.defs, readonly, form)).join('');
+        formRow(item.defs.filter(def => ['experiencia1', 'experiencia2', 'contratoFim', 'prazoTipo'].includes(def.key)), form, readonly) + fields(item.defs.filter(def => def.key === 'prazoMotivo'), 'form', form, readonly), readonly) : block(item.title, item.icon, item.defs, readonly, form)).join('');
     }
     if (key === 'anexos') content += A.documents.map(doc => {
       const list = files[doc.group] || [];
@@ -245,32 +294,54 @@
     condicionais: 'Complete as informações específicas do tipo de contratação.',
     anexos: 'Confira e anexe os documentos recebidos do candidato.'
   };
-  function collection(readonly = false, form = state.form, files = state.files, correction = false, id = 'current') {
+  function collection(readonly = false, form = state.form, files = state.files, correction = false, id = 'current', infra = state.infrastructure) {
     const allTabs = correction ? [['contratacao', 'Dados da Admissão', 'briefcase'], ...tabs] : tabs;
     const selected = collectionTabs.get(id) || 'pessoais';
     const active = allTabs.some(([key]) => key === selected) ? selected : allTabs[0][0];
     const prefix = 'collection-' + slug(id);
-    return '<div class="lx-admission-horizontal" data-collection-id="' + esc(id) + '" data-collection-readonly="' + readonly + '"><div class="lx-admission-tabs" role="tablist" aria-label="Blocos da admissão' + (readonly ? ' — histórico' : '') + '">' + allTabs.map(([key, title, name], index) =>
+    return '<div class="lx-admission-horizontal" data-collection-id="' + esc(id) + '" data-collection-readonly="' + readonly + '"><div class="lx-admission-tabs" role="tablist" aria-label="Blocos da Admissão' + (readonly ? ' — histórico' : '') + '">' + allTabs.map(([key, title, name], index) =>
       (index ? '<span class="lx-admission-tab-connector" aria-hidden="true"></span>' : '') +
       '<button type="button" role="tab" class="lx-admission-tab' + (active === key ? ' is-active' : '') + '" id="' + prefix + '-tab-' + key + '" data-collection-tab="' + key + '" aria-selected="' + (active === key) + '" aria-controls="' + prefix + '-panel-' + key + '" tabindex="' + (active === key ? 0 : -1) + '"><span class="lx-admission-tab-icon">' + icon(name) + '</span><strong>' + esc(title) + '</strong><span class="lx-admission-tab-description">' + esc(tabDescriptions[key]) + '</span></button>'
-    ).join('') + '</div>' + allTabs.map(([key, title, name]) => '<section class="lx-section lx-admission-tab-panel" role="tabpanel" id="' + prefix + '-panel-' + key + '" aria-labelledby="' + prefix + '-tab-' + key + '" data-collection-block="' + key + '"' + (active === key ? '' : ' hidden') + '><div class="lx-section-head"><div><span class="lx-section-icon">' + icon(name) + '</span><h3>' + esc(title) + '</h3></div></div><div class="lx-admission-group-body"><p class="lx-admission-block-description">' + esc(tabDescriptions[key]) + '</p>' + (key === 'contratacao' ? preparation(readonly, form, files) : collectionPart(key, readonly, form, files)) + '</div></section>').join('') + '</div>';
+    ).join('') + '</div>' + allTabs.map(([key, title, name]) => {
+      const attrs = ' role="tabpanel" id="' + prefix + '-panel-' + key + '" aria-labelledby="' + prefix + '-tab-' + key + '" data-collection-block="' + key + '"' + (active === key ? '' : ' hidden');
+      const body = '<div class="lx-section-head"><div><span class="lx-section-icon">' + icon(name) + '</span><h3>' + esc(title) + '</h3></div></div><div class="lx-admission-group-body"><p class="lx-admission-block-description">' + esc(tabDescriptions[key]) + '</p>' + (key === 'contratacao' ? preparation(readonly, form, files, form.origem === 'Manual' ? 'solicitacao' : 'preparacao', infra) : collectionPart(key, readonly, form, files)) + '</div>';
+      if (key === 'anexos') return '<div class="lx-admission-tab-panel"' + attrs + '><section class="lx-section lx-admission-tab-panel lx-admission-section">' + body + '</section>' + signatureDocuments(readonly, form, files) + '</div>';
+      return '<section class="lx-section lx-admission-tab-panel"' + attrs + '>' + body + '</section>';
+    }).join('') + '</div>';
   }
+  function decisionTarget(key, value) {
+    if (key === 'coleta' && value === 'return') return state.form.origem === 'Manual' ? 'solicitacao' : 'preparacao';
+    if (key === 'validacao' && value === 'return') return 'coleta';
+    if (key === 'validacao_rm' && value === 'reject') return 'validacao_final';
+    return ({ return_sesmt: 'sesmt', return_coleta: 'coleta', return_rm: 'validacao_rm', return_assinaturas: 'assinaturas', return_final: 'validacao_final', return_validacao: 'validacao', return: key === 'tratamento' ? 'coleta' : 'validacao_final' })[value];
+  }
+  function isTreatment(key) { return ['tratamento', 'tratamento_tae', 'tratamento_ti'].includes(key); }
+  function treatmentDecisionValue(value) { return ({ approve: 'retry', reject: 'cancel', withdraw: 'cancel' })[value] || value; }
   function decisionOptions(key) {
-    const options = {
-      preparacao: [['approve', 'Não', 'Não houve desistência. Encaminhar para Coleta e Preenchimento.', 'approve'], ['cancel', 'Sim', 'Houve desistência. Encerrar como Admissão Cancelada.', 'reject'], ['return', 'Correção', 'Retornar à Solicitação de Admissão para ajustar os dados iniciais.', 'return']],
-      coleta: [['approve', 'Não', 'Não houve desistência. Encaminhar para Validação de Dados e Documentos.', 'approve'], ['cancel', 'Sim', 'Houve desistência. Encerrar como Admissão Cancelada.', 'reject'], ['return', 'Correção', 'Retornar à Preparação da Admissão para ajustar os dados da contratação.', 'return']],
-      validacao: [['approve', 'Sim', 'Dados e documentos completos. Encaminhar para Exame Admissional — SESMT.', 'approve'], ['return', 'Não', 'Retornar à Coleta e Preenchimento para correção / complementação e validar novamente.', 'return'], ['cancel', 'Desistência', 'Registrar a desistência do candidato e encerrar como Admissão Cancelada.', 'reject']],
-      validacao_final: [['approve', 'Sim', signaturesCurrent() ? 'De acordo. As assinaturas permanecem válidas. Integrar automaticamente o cadastro atualizado no RM.' : 'De acordo. Encaminhar os documentos para assinatura no TAE; após as assinaturas, integrar automaticamente no RM.', 'approve'], ['return', 'Não', 'Retornar à Coleta e Preenchimento para correção / complementação e depois à Validação Final.', 'return'], ['cancel', 'Desistência', 'Registrar a desistência do candidato e encerrar como Admissão Cancelada.', 'reject'], ['correction', 'Correção', 'Retornar ao Exame Admissional — SESMT ou à Validação de Dados e Documentos, conforme a pendência.', 'return']],
-      tratamento_tae: [['approve', 'Reprocessar envio ao TAE', 'Reenviar os documentos necessários para assinatura.', 'approve'], ['return', 'Retornar à Validação Final', 'Corrigir os dados e conferir os documentos impactados.', 'return']],
-      tratamento: [['approve', 'Reprocessar integração', 'Reenviar os dados e documentos utilizando o cadastro já retornado pelo TOTVS RM.', 'approve'], ['return_coleta', 'Retornar para Coleta e Preenchimento', 'Solicitar a correção dos dados e documentos da admissão.', 'return'], ['return_sesmt', 'Retornar para Exame Admissional', 'Solicitar a correção do exame, do ASO ou das informações de EPI.', 'return']],
-      assinaturas: [['approve', 'Assinaturas conferidas', 'Encaminhar os documentos assinados para inclusão ou atualização no TOTVS RM.', 'approve'], ['return', 'Retornar para correção', 'Conferir o envio ou o retorno da plataforma TAE.', 'return']],
-      validacao_rm: [['approve', 'Sim', 'Cadastro validado. Prosseguir para encerramento; a TI será notificada automaticamente quando houver equipamentos.', 'approve'], ['return', 'Não', 'Retornar diretamente à Validação Final para corrigir os dados e revisar os documentos impactados.', 'return'], ['cancel', 'Desistência', 'Registrar a desistência do candidato e encerrar como Admissão Cancelada.', 'reject']],
-      tratamento_ti: [['approve', 'Reprocessar notificação', 'Tentar novamente o envio da notificação à TI.', 'approve']]
-    };
-    const rows = options[key] || [];
-    return rows.some(option => option[0] === 'cancel') ? rows : [...rows, ['cancel', 'Cancelar Admissão', 'Encerrar a admissão com o motivo e a justificativa registrados.', 'reject']];
+    const correction = (value, description) => [value, 'Correção — ' + meta(decisionTarget(key, value)).title, description, 'return'];
+    const approved = (description, title = 'Aprovado') => ['approve', title, description, 'approve'];
+    const rejected = ['reject', 'Reprovado', 'Encerrar a admissão como reprovada, com justificativa registrada.', 'reject'];
+    const withdrawal = ['withdraw', 'Desistência', 'Registrar a desistência do candidato e encerrar a admissão.', 'reject'];
+    const reintegration = description => ['retry', 'Reintegração', description, 'approve'];
+    const cancellation = ['cancel', 'Cancelar', 'Encerrar o processo de admissão, com o motivo do cancelamento registrado.', 'reject'];
+    return ({
+      preparacao: [approved('Encaminhar para Coleta e Preenchimento.'), rejected, withdrawal],
+      coleta: [approved('Encaminhar para Validação de Dados e Documentos.'), rejected, ...(state.form.origem === 'Manual' ? [] : [correction('return', 'Enviar para Preparação da Admissão para corrigir os dados da contratação.')]), withdrawal],
+      validacao: [approved('Encaminhar para Exame Admissional — SESMT.'), rejected, correction('return', 'Enviar para Coleta e Preenchimento para corrigir os dados e documentos; depois, validar novamente.'), withdrawal],
+      validacao_final: [approved(signaturesCurrent() ? 'Integrar automaticamente os dados atualizados no RM e encaminhar para conferência do cadastro.' : 'Encaminhar os documentos para assinatura eletrônica; após as assinaturas, integrar no RM.'), rejected, correction('return_sesmt', 'Enviar para Exame Admissional — SESMT para corrigir o exame, o ASO ou os EPIs.'), correction('return_coleta', 'Enviar para Coleta e Preenchimento para corrigir os dados e documentos.'), withdrawal],
+      assinaturas: [approved('Assinaturas conferidas. Integrar automaticamente no RM e encaminhar para conferência do cadastro.'), rejected, correction('return_final', 'Enviar para Validação Final do RH / DP para revisar os dados e os documentos de assinatura.'), withdrawal],
+      validacao_rm: [approved('Prosseguir com a admissão; notificar automaticamente a TI quando houver equipamentos e concluir o processo.'), correction('return_final', 'Enviar para Validação Final do RH / DP para corrigir os dados e documentos da admissão.')],
+      tratamento: [reintegration('Executar novamente a integração com o TOTVS RM, preservando o cadastro e a Chapa já retornados.'), correction('return_coleta', 'Enviar para Coleta e Preenchimento para ajustar os dados e documentos.'), correction('return_sesmt', 'Enviar para Exame Admissional — SESMT para corrigir o exame, o ASO ou os EPIs.'), cancellation],
+      tratamento_tae: [reintegration('Reenviar os documentos para assinatura eletrônica ao TAE.'), correction('return_final', 'Enviar para Validação Final do RH / DP para conferir os dados e documentos antes do reenvio.'), correction('return_sesmt', 'Enviar para Exame Admissional — SESMT para corrigir o exame, o ASO ou os EPIs; depois, encaminhar para Validação Final do RH / DP.'), correction('return_validacao', 'Enviar para Validação de Dados e Documentos para conferir as informações e os anexos antes de prosseguir com a admissão.'), cancellation],
+      tratamento_ti: [reintegration('Reenviar a notificação à TI com os equipamentos previstos.'), correction('return_rm', 'Enviar para Validar Inclusão / Atualização no TOTVS RM para conferir o cadastro antes da notificação.'), correction('return_assinaturas', 'Enviar para Acompanhamento das Assinaturas para conferir os documentos assinados.'), correction('return_final', 'Enviar para Validação Final do RH / DP para revisar os dados da admissão e a infraestrutura.'), cancellation]
+    })[key] || [];
   }
-  function decisionData(key, record = null) { return record?.decision || state.decisions[key] || { value: 'approve', note: key === 'validacao_final' ? state.form.finais : 'Dados e documentos conferidos pelo RH / DP.' }; }
+  function decisionData(key, record = null) {
+    if (record?.decision) return record.decision;
+    const choice = { value: 'approve', note: key === 'validacao_final' ? state.form.finais : 'Dados e documentos conferidos pelo RH / DP.', ...state.decisions[key] };
+    if (isTreatment(key)) choice.value = treatmentDecisionValue(choice.value || 'approve');
+    return choice;
+  }
   function approvalChoices(options, selected, path, decisionKey = '') {
     const attribute = decisionKey ? 'data-decision="' + esc(decisionKey) + '"' : 'data-field="' + esc(path) + '"';
     return '<div class="lx-current-decision" data-wrap="' + esc(path) + '">' + options.map(([value, title, text, tone]) => '<label class="lx-decision-option lx-decision-' + tone + (selected === value ? ' lx-decision-option-selected' : '') + '"><input type="radio" name="' + slug(path) + '" ' + attribute + ' value="' + esc(value) + '"' + (selected === value ? ' checked' : '') + ' /><div><span>' + esc(title) + '</span><p>' + esc(text) + '</p></div></label>').join('') + '</div>';
@@ -278,45 +349,47 @@
   function decision(key, readonly = false, record = null, responsible = A.owners[key]) {
     const d = decisionData(key, record);
     const options = decisionOptions(key);
-    if (readonly) return fieldset('Decisão sobre a Solicitação', 'list-check', readGrid([['Decisão', d.value === 'approve' ? 'Solicitação aprovada' : d.value === 'cancel' ? 'Solicitação cancelada' : 'Solicitação devolvida para correção'], ['Responsável', responsible], ['Observação', d.note || 'Etapa aprovada sem ressalvas.']]), true, d.value === 'approve' ? 'green' : d.value === 'cancel' ? 'red' : 'orange');
+    if (readonly) return fieldset('Decisão sobre a Solicitação', 'list-check', readGrid([['Decisão', d.value === 'retry' ? 'Reintegração solicitada' : d.value === 'approve' ? 'Solicitação aprovada' : d.value === 'withdraw' ? 'Desistência registrada' : d.value === 'reject' ? key === 'validacao_rm' ? 'Cadastro reprovado — retorno à Validação Final' : 'Solicitação reprovada' : d.value === 'cancel' ? 'Solicitação cancelada' : 'Solicitação devolvida para correção'], ['Responsável', responsible], ['Observação', d.note || 'Etapa aprovada sem ressalvas.']]), true, ['approve', 'retry'].includes(d.value) ? 'green' : ['reject', 'withdraw', 'cancel'].includes(d.value) && key !== 'validacao_rm' ? 'red' : 'orange');
     const correction = d.value.startsWith('return') || d.value === 'correction';
-    const label = d.value === 'cancel' ? ['preparacao', 'coleta', 'validacao', 'validacao_final', 'validacao_rm'].includes(key) ? 'Registrar desistência e cancelar' : 'Cancelar admissão' : correction ? 'Retornar para correção' : ({ preparacao: 'Encaminhar para coleta', coleta: 'Encaminhar para validação', validacao: 'Enviar decisão', validacao_final: 'Enviar decisão', tratamento: 'Reprocessar integração', assinaturas: 'Encaminhar para integração', tratamento_tae: 'Reprocessar envio', validacao_rm: 'Enviar decisão', tratamento_ti: 'Reprocessar notificação' })[key];
+    const label = d.value === 'retry' ? 'Reintegrar' : d.value === 'cancel' ? 'Cancelar Admissão' : d.value === 'withdraw' ? 'Registrar Desistência' : d.value === 'reject' ? key === 'validacao_rm' ? 'Enviar para Nova Validação' : 'Reprovar Admissão' : correction ? 'Retornar para Correção' : ({ preparacao: 'Encaminhar para Coleta', coleta: 'Enviar para Validação de Dados e Documentos', validacao: 'Enviar Decisão', validacao_final: 'Enviar Decisão', assinaturas: 'Encaminhar para Integração', validacao_rm: 'Enviar Decisão' })[key];
     const action = ({ preparacao: 'prepare', coleta: 'collect', tratamento: 'retry', assinaturas: 'finish', tratamento_tae: 'retry-tae', validacao_rm: 'review-rm', tratamento_ti: 'retry-ti' })[key] || 'review';
-    const question = ({ preparacao: 'Houve desistência?', coleta: 'Houve desistência?', validacao: 'Dados e documentos completos?', validacao_final: 'De acordo?', validacao_rm: 'Cadastro validado?' })[key];
-    const destination = key === 'validacao_final' && d.value === 'correction' ? '<div class="lx-field lx-admission-gap" data-wrap="decisions.validacao_final.target"><label for="correction-target">Retornar para <b>*</b></label><select id="correction-target" data-field="decisions.validacao_final.target" aria-required="true"><option value="sesmt"' + (d.target !== 'validacao' ? ' selected' : '') + '>Exame Admissional — SESMT</option><option value="validacao"' + (d.target === 'validacao' ? ' selected' : '') + '>Validação de Dados e Documentos</option></select></div>' : '';
-    return fieldset('Decisão de Aprovação', 'clipboard-check', (question ? '<div class="lx-field lx-decision-question"><span>' + question + ' <b>*</b></span></div>' : '') + approvalChoices(options, d.value, 'decision.' + key, key) + destination + field({ key: 'note', label: d.value === 'approve' ? 'Comentários' : 'Justificativa / Comentários', type: 'textarea', required: d.value !== 'approve', wide: true }, 'decisions.' + key, d)) + actions(action, label);
+    return fieldset(isTreatment(key) ? 'Decisão do Tratamento' : 'Decisão de Aprovação', 'clipboard-check', approvalChoices(options, d.value, 'decision.' + key, key) + field({ key: 'note', label: key === 'preparacao' ? 'Observação da Preparação' : 'Observação', type: 'textarea', required: !['approve', 'retry'].includes(d.value), wide: true }, 'decisions.' + key, d)) + actions(action, label);
   }
   function validation(key) {
     if (key !== 'validacao_final' || !state.functional.active) return decision(key);
-    return fieldset(state.rm.employeeId ? 'Correção após Integração no RM' : 'Correção para Envio ao TAE', 'rotate-left', readGrid([['Inconsistência identificada', state.functional.note, true], ...(state.rm.employeeId ? [['Cadastro no RM', state.rm.employeeId], ['Chapa', state.rm.chapa]] : [])]) + field({ key: 'adjustments', label: 'Ajustes realizados', type: 'textarea', required: true }, 'functional')) + preparation() + collection(false, state.form, state.files, false, 'functional') + fieldset('Documentos Impactados pela Correção', 'file-signature', '<div data-signature-impact>' + signatureImpactSummary() + '</div><p class="lx-admission-block-description">A revisão considera os dados presentes em cada documento. Os documentos alterados serão gerados novamente e enviados ao TAE.</p>') + decision(key);
+    return fieldset(state.rm.employeeId ? 'Correção após Integração no RM' : 'Correção para Envio ao TAE', 'rotate-left', readGrid([['Inconsistência Identificada', state.functional.note, true], ...(state.rm.employeeId ? [['Cadastro no RM', state.rm.employeeId], ['Chapa', state.rm.chapa]] : [])]) + field({ key: 'adjustments', label: 'Ajustes Realizados', type: 'textarea', required: true }, 'functional')) + preparation() + collection(false, state.form, state.files, false, 'functional') + fieldset('Documentos Impactados pela Correção', 'file-signature', '<div data-signature-impact>' + signatureImpactSummary() + '</div><p class="lx-admission-block-description">A revisão considera os dados presentes em cada documento. Os documentos alterados serão gerados novamente e enviados ao TAE.</p>') + decision(key);
   }
   function exam(readonly = false, data = state.medical, files = state.files) {
-    const defs = [simple('encaminhamento', 'Data do encaminhamento', true, 'date'), simple('prevista', 'Data prevista do exame', true, 'date'), simple('realizacao', 'Data de realização', true, 'date')];
-    const result = readonly ? readGrid([['Resultado', data.resultado]]) : approvalChoices([['Apto', 'Apto', 'Encaminhar a admissão para validação final do RH / DP.', 'approve'], ['Inapto', 'Inapto', 'Encerrar a admissão conforme o resultado do exame admissional.', 'reject']], data.resultado, 'medical.resultado');
+    const defs = [simple('encaminhamento', 'Data do Encaminhamento', true, 'date'), simple('prevista', 'Data Prevista do Exame', true, 'date'), simple('realizacao', 'Data de Realização', true, 'date')];
+    const result = readonly ? readGrid([['Resultado', data.resultado]]) : approvalChoices([['Apto', 'Apto', 'Encaminhar a admissão para validação final do RH / DP.', 'approve'], ['Inapto', 'Inapto', 'Encerrar a admissão conforme o resultado do exame admissional.', 'reject'], ['Desistência', 'Desistência', 'Registrar a desistência do candidato e encerrar a admissão.', 'reject']], data.resultado, 'medical.resultado');
     const epi = fieldset('Equipamentos de Proteção Individual — EPI', 'helmet-safety', radios('Necessita EPI?', 'medical.utilizaEpi', ['Sim', 'Não'], data.utilizaEpi || 'Não', readonly) + (data.utilizaEpi === 'Sim' ? equipmentRows('epis', readonly, data, 'medical', A.catalog.epi) + attachments('epi', !readonly, files.epi || []) : '') + fields([{ key: 'epiObs', label: 'Observações de EPI', type: 'textarea', wide: true }], 'medical', data, readonly), readonly);
-    return block('Exame Admissional', 'stethoscope', defs, readonly, data, 'medical') + fieldset('Guia de Encaminhamento', 'file-medical', attachments('guia', !readonly, files.guia || []), readonly) + fieldset('ASO — Atestado de Saúde Ocupacional', 'file-circle-check', attachments('aso', !readonly, files.aso || []), readonly) + epi + fieldset('Resultado do Exame', 'clipboard-check', result + fields([{ key: 'observacao', label: 'Observações', type: 'textarea', required: true, wide: true }], 'medical', data, readonly), readonly) + (readonly ? '' : actions('exam', data.resultado === 'Inapto' ? 'Encerrar admissão' : correctionContext() ? 'Reenviar para ' + meta(correctionContext().returnTo).title : 'Encaminhar para validação final'));
+    return block('Exame Admissional', 'stethoscope', defs, readonly, data, 'medical') + fieldset('Guia de Encaminhamento', 'file-medical', attachments('guia', !readonly, files.guia || []), readonly) + fieldset('ASO — Atestado de Saúde Ocupacional', 'file-circle-check', attachments('aso', !readonly, files.aso || []), readonly) + epi + fieldset('Resultado do Exame', 'clipboard-check', result + fields([{ key: 'observacao', label: 'Observações', type: 'textarea', required: true, wide: true }], 'medical', data, readonly), readonly) + (readonly ? '' : actions('exam', data.resultado === 'Desistência' ? 'Registrar Desistência' : data.resultado === 'Inapto' ? 'Encerrar Admissão' : correctionContext() ? 'Reenviar para ' + meta(correctionContext().returnTo).title : 'Encaminhar para Validação Final'));
   }
   function effectiveRM() { return preview() && ['validacao_rm', 'nova_validacao', 'notificacao_ti', 'tratamento_ti', 'finalizada'].includes(stage) && state.rm.status === 'Não iniciada' ? { ...state.rm, status: 'Integrada com sucesso', attempts: 1, employeeId: 'RM-001475', chapa: '001475', at: '16/10/2026, 10:00:00', message: 'Colaborador incluído e documentos assinados disponibilizados no TOTVS RM.' } : state.rm; }
-  function rmSummary(rm, readonly = false) { return fieldset('Integração da Admissão', 'arrows-rotate', readGrid([['Status da Integração', rm.status], ['Operação executada', rm.operation], ['Data / Hora', rm.at], ['Identificador do funcionário no RM', rm.employeeId], ['Chapa gerada', rm.chapa], ['Mensagem de retorno', rm.message, true], ...(rm.error ? [['Detalhes do erro', rm.error, true]] : [])]), readonly); }
+  function rmSummary(rm, readonly = false) { return fieldset('Integração da Admissão', 'arrows-rotate', readGrid([['Status da Integração', rm.status], ['Data / Hora', rm.at || state.created], ...(rm.chapa ? [['Chapa', rm.chapa]] : []), ['Mensagem de Retorno', rm.message, true], ...(rm.error ? [['Detalhes do Erro', rm.error, true]] : [])]), readonly); }
   function treatment() {
-    const rm = state.rm.status === 'Erro' ? state.rm : { ...state.rm, status: 'Erro', attempts: 1, at: '16/10/2026, 10:00:00', message: 'Não foi possível concluir o envio dos documentos.', error: 'O serviço de documentos do RM não respondeu. Confira o retorno e solicite novo processamento.' };
-    return rmSummary(rm) + block('Tratamento do Retorno', 'comment-dots', [{ key: 'treatmentNote', label: 'Observações do tratamento', value: '', type: 'textarea', wide: true }], false, { treatmentNote: state.treatment?.treatmentNote ?? 'Retorno analisado. Reprocessar o envio utilizando os identificadores já retornados pelo RM.' }, 'treatment') + decision('tratamento');
+    const rm = { ...state.rm, status: 'Erro', at: state.rm.at || (preview() ? '16/10/2026, 10:00:00' : state.created), message: state.rm.message || 'Não foi possível concluir o envio dos documentos.', error: state.rm.error || 'O serviço de documentos do RM não respondeu. Confira o retorno e solicite novo processamento.' };
+    return rmSummary(rm) + decision('tratamento');
   }
   function signatureContent(tae, readonly = false) {
     const complete = signed(tae);
     const status = complete ? 'Assinado' : tae.documents.find(doc => ['Rejeitado', 'Cancelado', 'Erro'].includes(doc.status))?.status || (['Erro', 'Rejeitado', 'Cancelado', 'Não enviado', 'Em processamento'].includes(tae.status) ? tae.status : 'Pendente');
-    return fieldset('Envio para Assinatura Fluig / TAE', 'paper-plane', readGrid([['Origem dos documentos', 'Fluig'], ['Plataforma de Assinatura', 'TAE'], ['Data de envio', tae.sentAt], ['Responsável pelo acompanhamento', 'Juliana Costa'], ['Status dos documentos', status]], 'lx-signing-summary-grid'), readonly) + tae.documents.map(doc => fieldset(doc.name, 'file-signature', readGrid([['Documento', doc.file.name], ['Plataforma', 'TAE'], ['Protocolo do documento', doc.protocol], ['Data do envio', doc.sentAt], ['Última atualização', doc.updatedAt || doc.completedAt || doc.sentAt], ['Status do documento', doc.status === 'Assinado' ? 'Assinado' : ['Rejeitado', 'Cancelado', 'Erro', 'Não enviado'].includes(doc.status) ? doc.status : 'Pendente']], 'lx-signing-summary-grid') + '<div class="lx-signature-tracking">' + doc.signers.map(signer => '<article class="lx-signing-person"><div class="lx-admission-child-head"><strong>' + esc(signer.role) + '</strong><span class="lx-signing-status' + (signer.status === 'Assinado' ? ' is-signed' : '') + '">' + icon(signer.status === 'Assinado' ? 'circle-check' : 'clock') + ' ' + esc(signer.status) + '</span></div>' + readGrid([['Nome', signer.name], ['E-mail', signer.email], ['Assinou o documento?', signer.status === 'Assinado' ? 'Sim' : 'Não'], ['Data da assinatura', signer.date || 'Aguardando assinatura']], 'lx-signing-person-grid') + '</article>').join('') + '</div>' + attachments('tae-' + doc.id, false, [doc.file]), readonly)).join('') + fieldset('Observações do Acompanhamento', 'comment-dots', readonly ? readGrid([['Observações', tae.observation, true]]) : field({ key: 'observation', label: 'Observações', type: 'textarea', wide: true }, 'tae'), readonly);
+    return fieldset('Envio para Assinatura Fluig / TAE', 'paper-plane', readGrid([['Origem dos Documentos', 'Fluig'], ['Plataforma de Assinatura', 'TAE'], ['Data de Envio', tae.sentAt], ['Responsável pelo Acompanhamento', 'Juliana Costa'], ['Status dos Documentos', status]], 'lx-signing-summary-grid lx-signing-overview-grid'), readonly) + tae.documents.map(doc => fieldset(doc.name, 'file-signature', readGrid([['Documento', doc.file.name], ['Plataforma', 'TAE'], ['Protocolo do Documento', doc.protocol], ['Data do Envio', doc.sentAt], ['Última Atualização', doc.updatedAt || doc.completedAt || doc.sentAt], ['Status do Documento', doc.status === 'Assinado' ? 'Assinado' : ['Rejeitado', 'Cancelado', 'Erro', 'Não enviado'].includes(doc.status) ? doc.status : 'Pendente']], 'lx-signing-summary-grid') + '<div class="lx-signature-tracking">' + doc.signers.map(signer => '<article class="lx-signing-person"><div class="lx-admission-child-head"><strong>' + esc(signer.role) + '</strong><span class="lx-signing-status' + (signer.status === 'Assinado' ? ' is-signed' : '') + '">' + icon(signer.status === 'Assinado' ? 'circle-check' : 'clock') + ' ' + esc(signer.status) + '</span></div>' + readGrid([['Nome', signer.name], ['E-mail', signer.email], ['Assinou o Documento?', signer.status === 'Assinado' ? 'Sim' : 'Não'], ['Data da Assinatura', signer.date || 'Aguardando assinatura']], 'lx-signing-person-grid') + '</article>').join('') + '</div>' + attachments('tae-' + doc.id, false, [doc.file]), readonly)).join('') + fieldset('Observações do Acompanhamento', 'comment-dots', readonly ? readGrid([['Observações', tae.observation, true]]) : field({ key: 'observation', label: 'Observações', type: 'textarea', wide: true }, 'tae'), readonly);
   }
-  function effectiveTAE() { return preview() ? { ...clone(state.tae), status: 'Enviado', sentAt: '16/10/2026, 10:00:00', documents: A.signatures(params.get('cenario') === 'assinado' || ['integracao', 'tratamento', 'validacao_rm', 'nova_validacao', 'notificacao_ti', 'tratamento_ti', 'finalizada'].includes(stage), state.form.nome) } : state.tae; }
+  function effectiveTAE() { return preview() ? { ...clone(state.tae), status: 'Enviado', sentAt: '16/10/2026, 10:00:00', documents: A.documentSignatures(state.form, state.files, params.get('cenario') === 'assinado' || ['integracao', 'tratamento', 'validacao_rm', 'notificacao_ti', 'tratamento_ti', 'finalizada'].includes(stage)) } : state.tae; }
   function signatures() { return signatureContent(effectiveTAE()) + decision('assinaturas'); }
-  function taeSummary(tae = state.tae, readonly = false) { return fieldset('Envio de Documentos — Fluig / TAE', 'paper-plane', readGrid([['Origem dos documentos', 'Fluig'], ['Plataforma de Assinatura', 'TAE'], ['Status do envio', tae.status], ['Data / Hora', tae.sentAt], ['Mensagem de retorno', tae.message, true], ...(tae.error ? [['Detalhes do erro', tae.error, true]] : [])]), readonly); }
+  function taeSummary(tae = state.tae, readonly = false) { return fieldset('Envio de Documentos — Fluig / TAE', 'paper-plane', readGrid([['Origem dos Documentos', 'Fluig'], ['Plataforma de Assinatura', 'TAE'], ['Status do Envio', tae.status], ['Data / Hora', tae.attemptedAt || tae.sentAt || state.created], ['Mensagem do Envio', tae.message || 'Não foi possível concluir o envio dos documentos para assinatura no TAE.', true], ...(tae.error ? [['Detalhes do Erro', tae.error, true]] : [])]), readonly); }
   function sendSignatures() {
-    const tae = preview() && stage === 'tratamento_tae' ? { ...state.tae, status: 'Erro', error: 'A plataforma TAE não confirmou o recebimento dos documentos.' } : state.tae;
+    const tae = preview() && stage === 'tratamento_tae' ? { ...state.tae, status: 'Erro', attemptedAt: state.tae.attemptedAt || '16/10/2026, 10:00:00', message: 'Não foi possível concluir o envio dos documentos para assinatura no TAE.', error: 'A plataforma TAE não confirmou o recebimento dos documentos.' } : state.tae;
     return taeSummary(tae) + decision(stage);
   }
-  function rmValidation() { return rmSummary(effectiveRM()) + fieldset('Conferência do Cadastro no RM', 'user-check', readGrid([['Nome', state.form.nome], ['CPF', state.form.cpf], ['Empresa / Coligada', state.form.empresa], ['Filial / Unidade', state.form.filial], ['Data de Admissão', A.date(state.form.admissao)], ['Cargo', state.form.cargo], ['Função', state.form.funcao], ['Salário', A.money(state.form.salario)]]) + field({ key: 'note', label: 'Observações da conferência', type: 'textarea', wide: true }, 'rmReview')) + decision('validacao_rm'); }
+  function rmEmployee(form, rm, readonly = false) {
+    const data = rm.returnedData || form;
+    return fieldset('Conferência do Cadastro no RM', 'user-check', readGrid([['Colaborador', data.nome], ['Chapa', rm.chapa], ['Data de Admissão', A.date(data.admissao)], ['Cargo', data.cargo], ['Função', data.funcao], ['Nível / Step', data.nivel], ['Setor / Seção', data.secao], ['Centro de Custo', data.centro], ['Descrição do Cargo', data.cargoDescricao || form.cargoDescricao, true]], 'lx-admission-rm-grid') + readGrid([['Sexo', data.sexo], ['Pessoa com Deficiência', data.pcd || form.pcd], ['Tipo de Contrato', data.contrato], ['Escala', data.escala], ['Horário', data.horario]], 'lx-admission-rm-details'), readonly);
+  }
+  function rmValidation() { return rmEmployee(state.form, effectiveRM()) + decision('validacao_rm'); }
   function notificationSummary(data = state.notification, readonly = false, infra = state.infrastructure, form = state.form) {
-    return fieldset('Notificação de Infraestrutura à TI', 'envelope', readGrid([['Status do envio', data.status], ['Destinatário', data.to], ['Data do envio', data.at], ['Protocolo', data.protocol], ['Colaborador', form.nome], ['Cargo / Função', form.cargo + ' / ' + form.funcao], ['Área', form.secao], ['Gestor', form.gestor], ['Data prevista de início', A.date(form.admissao)], ['Equipamentos previstos', (infra.equipamentos || []).map(item => item.quantidade + ' × ' + item.tipo + (item.observacoes ? ' — ' + item.observacoes : '')).join('; '), true], ['Observações', infra.observacoes, true], ...(data.error ? [['Detalhes do erro', data.error, true]] : [])]), readonly);
+    return fieldset('Notificação de Infraestrutura à TI', 'envelope', readGrid([['Status do Envio', data.status], ['Destinatário', data.to], ['Data do Envio', data.at], ['Protocolo', data.protocol], ['Colaborador', form.nome], ['Cargo / Função', form.cargo + ' / ' + form.funcao], ['Área', form.secao], ['Gestor', form.gestor], ['Data Prevista de Início', A.date(form.admissao)], ['Equipamentos Previstos', (infra.equipamentos || []).map(item => item.quantidade + ' × ' + item.tipo + (item.observacoes ? ' — ' + item.observacoes : '')).join('; '), true], ['Observações', infra.observacoes, true], ...(data.error ? [['Detalhes do Erro', data.error, true]] : [])]), readonly);
   }
   function notificationView() {
     const data = preview() && stage === 'tratamento_ti' ? { ...state.notification, status: 'Erro', error: 'O serviço de e-mail não confirmou o envio da notificação à TI.' } : state.notification;
@@ -338,10 +411,11 @@
   }
   function correctionPanel() {
     const context = correctionContext(); if (!context) return '';
-    return fieldset('Correção da Solicitação', 'rotate-left', readGrid([['Etapa que solicitou a correção', meta(context.from).title], ['Responsável', context.responsible || A.owners[context.from]], ['Data da devolução', context.date], ['Observação', context.note, true]]) + field({ key: 'adjustments', label: 'Descreva os ajustes realizados', required: true, type: 'textarea', wide: true }, 'correction', state.correction || { adjustments: '' }));
+    return fieldset('Correção da Solicitação', 'rotate-left', readGrid([['Etapa que Solicitou a Correção', meta(context.from).title], ['Responsável', context.responsible || A.owners[context.from]], ['Data da Devolução', context.date], ['Observação', context.note, true]]) + field({ key: 'adjustments', label: 'Descreva os Ajustes Realizados', required: true, type: 'textarea', wide: true }, 'correction', state.correction || { adjustments: '' }));
   }
   function previousStages(key) {
-    const base = ['solicitacao', 'preparacao', 'coleta', 'validacao', 'sesmt', 'validacao_final', 'enviar_assinatura', 'assinaturas', 'integracao', 'validacao_rm', 'notificacao_ti'];
+    const base = [state.form.origem === 'Manual' ? 'solicitacao' : 'preparacao', 'coleta', 'validacao', 'sesmt', 'validacao_final', 'enviar_assinatura', 'assinaturas', 'integracao', 'validacao_rm'];
+    if (stage === 'tratamento_ti' || state.infrastructure.necessita === 'Sim' && state.infrastructure.equipamentos.length) base.push('notificacao_ti');
     if (key === 'coleta' && correctionContext()) return base.slice(0, base.indexOf('integracao') + 1).concat('tratamento');
     if (key === 'complementacao') return base.slice(0, base.indexOf(state.correction?.returnTo || 'validacao') + 1);
     if (key === 'tratamento') return base.slice(0, base.indexOf('integracao') + 1);
@@ -352,7 +426,7 @@
     return base.slice(0, Math.max(0, base.indexOf(key)));
   }
   function exampleRecord(key) {
-    const data = { form: clone(state.form), files: clone(state.files), infrastructure: clone(state.infrastructure), notification: { ...clone(state.notification), status: 'Enviada', at: state.created, protocol: 'TI-ADM-2026-0043' }, medical: { ...clone(state.medical), approved: true }, rm: { ...effectiveRM(), status: 'Integrada com sucesso', employeeId: 'RM-001475', chapa: '001475', attempts: 1, message: 'Admissão integrada com sucesso.', at: state.created }, tae: { ...clone(state.tae), status: 'Enviado', sentAt: state.created, documents: A.signatures(true, state.form.nome) }, decision: { value: 'approve', note: 'Etapa aprovada sem ressalvas.' } };
+    const data = { form: clone(state.form), files: clone(state.files), infrastructure: clone(state.infrastructure), notification: { ...clone(state.notification), status: 'Enviada', at: state.created, protocol: 'TI-ADM-2026-0043' }, medical: { ...clone(state.medical), approved: true }, rm: { ...effectiveRM(), status: 'Integrada com sucesso', employeeId: 'RM-001475', chapa: '001475', attempts: 1, message: 'Admissão integrada com sucesso.', at: state.created }, tae: { ...clone(state.tae), status: 'Enviado', sentAt: state.created, documents: A.documentSignatures(state.form, state.files, true) }, decision: { value: 'approve', note: 'Etapa aprovada sem ressalvas.' } };
     if (stage === 'tratamento_tae' && key === 'enviar_assinatura') Object.assign(data.tae, { status: 'Erro', error: 'A plataforma TAE não confirmou o recebimento dos documentos.' });
     if (stage === 'tratamento_ti' && key === 'notificacao_ti') Object.assign(data.notification, { status: 'Erro', error: 'O serviço de e-mail não confirmou o envio.' });
     if (key === 'preparacao') data.decision.note = 'Etapa aprovada sem ressalvas.';
@@ -368,16 +442,16 @@
     switch (record.area) {
       case 'solicitacao': return preparation(true, d.form, d.files, 'solicitacao', d.infrastructure || { origem: 'Não informada', necessita: 'Não', equipamentos: [] });
       case 'preparacao': return preparation(true, d.form, d.files, 'preparacao', d.infrastructure || { origem: 'Não informada', necessita: 'Não', equipamentos: [] }) + decision('preparacao', true, { ...d, decision: d.decision || { value: 'approve', note: record.note || 'Etapa aprovada sem ressalvas.' } }, record.responsible);
-      case 'coleta': case 'complementacao': return (record.note ? fieldset('Ajustes realizados', 'comment-dots', readGrid([['Observações', record.note, true]]), true) : '') + collection(true, d.form, d.files, record.area === 'complementacao', 'history-' + record.id) + (record.area === 'coleta' ? fieldset('Observações', 'comment-dots', readGrid([['Observações da coleta', d.form.coletaObs, true]]), true) + decision('coleta', true, evidence, record.responsible) : '');
+      case 'coleta': case 'complementacao': return (record.note ? fieldset('Ajustes Realizados', 'comment-dots', readGrid([['Observações', record.note, true]]), true) : '') + collection(true, d.form, d.files, record.area === 'complementacao' || d.returnRequest?.target === 'coleta', 'history-' + record.id, d.infrastructure) + (record.area === 'coleta' ? decision('coleta', true, evidence, record.responsible) : '');
       case 'validacao': return decision(record.area, true, evidence, record.responsible);
-      case 'validacao_final': return (d.functional?.active ? fieldset('Ajustes da Validação Final', 'rotate-left', readGrid([['Inconsistência identificada', d.functional.note, true], ['Ajustes realizados', d.functional.adjustments, true]]), true) + preparation(true, d.form, d.files, record.area, d.infrastructure) + collection(true, d.form, d.files, false, 'history-' + record.id) : '') + decision(record.area, true, evidence, record.responsible);
+      case 'validacao_final': return (d.functional?.active ? fieldset('Ajustes da Validação Final', 'rotate-left', readGrid([['Inconsistência Identificada', d.functional.note, true], ['Ajustes Realizados', d.functional.adjustments, true]]), true) + preparation(true, d.form, d.files, record.area, d.infrastructure) + collection(true, d.form, d.files, false, 'history-' + record.id) : '') + decision(record.area, true, evidence, record.responsible);
       case 'sesmt': return exam(true, d.medical, d.files);
       case 'integracao': return rmSummary(d.rm, true);
       case 'tratamento': return rmSummary(d.rm, true) + decision(record.area, true, evidence, record.responsible);
       case 'assinaturas': return signatureContent(d.tae, true) + decision('assinaturas', true, evidence, record.responsible);
       case 'enviar_assinatura': return taeSummary(d.tae, true);
       case 'tratamento_tae': return taeSummary(d.tae, true) + decision(record.area, true, evidence, record.responsible);
-      case 'validacao_rm': return rmSummary(d.rm, true) + readGrid([['Observações da conferência', d.rmReview?.note || record.note, true]]) + decision(record.area, true, evidence, record.responsible);
+      case 'validacao_rm': return rmEmployee(d.form, d.rm, true) + decision(record.area, true, evidence, record.responsible);
       case 'notificacao_ti': case 'tratamento_ti': return notificationSummary(d.notification, true, d.infrastructure, d.form);
       default: return readGrid([['Movimentação', record.action], ['Observações', record.note || '—', true]]);
     }
@@ -386,7 +460,7 @@
     if (stage === 'solicitacao' && !state.started) return '';
     const previous = previousStages(stage);
     const records = state.started ? state.history.filter(record => stage === state.current || ['finalizada', 'cancelada'].includes(stage) || previous.includes(record.area)) : previous.map(key => exampleRecord(key));
-    return records.filter(record => record.area !== 'nova_validacao').map(record => panel(record.area, recordBody(record), true, record.date + ' - ' + record.responsible + ' - ' + (record.area === 'sesmt' ? 'SESMT' : meta(record.area).automatic ? 'Automática' : 'RH / DP') + ' · ' + record.action, 'history-' + record.id)).join('');
+    return records.filter(record => record.area !== 'nova_validacao' && !record.area.startsWith('tratamento') && (!meta(record.area).automatic || record.area === 'notificacao_ti') && !(record.area === 'solicitacao' && state.form.origem !== 'Manual') && !(record.area === 'preparacao' && state.form.origem === 'Manual')).map(record => panel(record.area, recordBody(record), true, record.date + ' - ' + record.responsible + ' - ' + (record.area === 'sesmt' ? 'SESMT' : meta(record.area).automatic ? 'Automática' : 'RH / DP') + ' · ' + record.action, 'history-' + record.id)).join('');
   }
   function render() {
     views.length = 0;
@@ -395,20 +469,20 @@
       stage = ({ integracao: 'validacao_rm', enviar_assinatura: 'assinaturas', notificacao_ti: 'finalizada' })[stage];
       history.replaceState(null, '', href(stage));
     }
-    document.getElementById('statusLabel').textContent = stage === 'finalizada' ? 'Admitido' : stage === 'cancelada' ? 'Admissão Cancelada' : stage === 'solicitacao' && !state.started ? 'Em preenchimento' : A.status(state);
+    document.getElementById('statusLabel').textContent = stage === 'finalizada' ? 'Admitido' : stage === 'cancelada' ? 'Admissão Cancelada' : stage === 'solicitacao' && !state.started ? 'Em Preenchimento' : A.status(state);
     if (!app) {
-      const entries = A.stages.filter(item => item.key !== 'complementacao' && !item.automatic).flatMap(item => item.key === 'coleta' ? [item, { ...item, title: 'Coleta e Preenchimento — Correção', icon: 'rotate-left', tone: 'orange', scenario: 'correcao-rm', description: 'Corrigir os dados após devolução pelo Tratamento da Integração TOTVS RM.' }] : [item]);
-      document.getElementById('stageNav').innerHTML = entries.map(item => '<a class="lx-stage-card" href="' + href(item.key, item.scenario ? '&cenario=' + item.scenario : '') + '"><span class="lx-stage-icon lx-dot-' + item.tone + '">' + icon(item.icon) + '</span><div><h3>' + esc(item.navTitle || item.title) + '</h3><p>' + esc(item.description) + '</p></div></a>').join('');
+      const entries = A.stages.filter(item => item.key !== 'complementacao' && !item.automatic).flatMap(item => item.key === 'coleta' ? [item, { ...item, title: 'Correção de Admissão', icon: 'rotate-left', tone: 'orange', scenario: 'correcao-rm', description: 'Corrigir os dados após devolução pelo Tratamento da Integração TOTVS RM.' }] : [item]);
+      document.getElementById('stageNav').innerHTML = entries.map(item => '<a class="lx-stage-card" href="' + href(item.key, item.key === 'solicitacao' ? '&origem=manual' : item.key === 'preparacao' ? '&origem=selecao' : item.scenario ? '&cenario=' + item.scenario : '') + '"><span class="lx-stage-icon lx-dot-' + item.tone + '">' + icon(item.icon) + '</span><div><h3>' + esc(item.navTitle || item.title) + '</h3><p>' + esc(item.description) + '</p></div></a>').join('');
       return;
     }
     let body = '';
     const returned = state.returnRequest?.target === stage ? '<div class="lx-alert">' + icon('rotate-left') + '<div><strong>Correção solicitada em ' + esc(meta(state.returnRequest.from).title) + '</strong><p>' + esc(state.returnRequest.note) + '</p></div></div>' : '';
-    if (stage === 'solicitacao') body = returned + preparation() + actions('submit-request', 'Encaminhar para preparação');
+    if (stage === 'solicitacao') body = returned + preparation() + actions('submit-request', 'Encaminhar para Coleta e Preenchimento');
     if (stage === 'preparacao') body = returned + preparation() + decision('preparacao');
-    if (stage === 'coleta') body = correctionPanel() + collection(false, state.form, state.files, !!correctionContext()) + fieldset('Observações', 'comment-dots', field({ key: 'coletaObs', label: 'Observações da coleta', type: 'textarea', wide: true }, 'form')) + (correctionContext() ? actions('return-integration', 'Reenviar para ' + meta(correctionContext().returnTo).title) : decision('coleta'));
+    if (stage === 'coleta') body = correctionPanel() + collection(false, state.form, state.files, !!correctionContext()) + decision('coleta');
     if (stage === 'complementacao') {
       state.correction ??= { returnTo: 'validacao', note: 'Complementar o comprovante de residência e confirmar os dados bancários.', adjustments: 'Comprovante atualizado e dados bancários conferidos com o candidato.', before: clone(state.form) };
-      body = fieldset('Pendência para Complementação', 'comment-dots', readGrid([['Etapa que solicitou', meta(state.correction.returnTo).title], ['Parecer / Observação', state.correction.note, true]])) + collection(false, state.form, state.files, true) + fieldset('Ajustes Realizados', 'pen-to-square', field({ key: 'adjustments', label: 'Descreva a complementação', required: true, type: 'textarea', wide: true }, 'correction')) + actions('correct', 'Reenviar para Validação');
+      body = fieldset('Pendência para Complementação', 'comment-dots', readGrid([['Etapa que Solicitou', meta(state.correction.returnTo).title], ['Parecer / Observação', state.correction.note, true]])) + collection(false, state.form, state.files, true) + fieldset('Ajustes Realizados', 'pen-to-square', field({ key: 'adjustments', label: 'Descreva a Complementação', required: true, type: 'textarea', wide: true }, 'correction')) + actions('correct', 'Reenviar para Validação');
     }
     if (['validacao', 'validacao_final'].includes(stage)) body = returned + validation(stage);
     if (stage === 'sesmt') body = correctionPanel() + exam();
@@ -420,7 +494,6 @@
     if (stage === 'finalizada') body = ending();
     if (stage === 'cancelada') body = ending(true);
     app.innerHTML = renderHistory() + (meta(stage).automatic ? '<p class="lx-admission-block-description" role="status">Processando o encaminhamento da admissão...</p>' : panel(stage, body));
-    keepActiveTabVisible();
     applyErrors();
     if (state.current === 'integracao' && state.started && (state.rm.authorized || state.rm.status === 'Em processamento')) queueIntegration();
     if (state.started && state.current === 'enviar_assinatura' && (state.tae.authorized || state.tae.status === 'Em processamento')) queueTAE();
@@ -467,7 +540,8 @@
   }
   function validatePreparation() {
     [...A.definitions.identity, ...A.definitions.hiring].forEach(def => requireField(def));
-    if (state.form.origem === 'Processo Seletivo') ['vaga', 'requisicao', 'selecao', 'candidato'].forEach(key => requireField(simple(key, key)));
+    ['vaga', 'requisicao', 'selecao', ...(state.form.origem === 'Manual' ? [] : ['candidato'])].forEach(key => requireField(simple(key, key)));
+    if (state.form.origem === 'Manual') requireField(simple('vagaSelecionada', 'Vagas em Aberto', true, 'text', A.vacancies.map(item => item.id)));
     if (state.infrastructure.necessita === 'Sim') {
       if (!state.infrastructure.equipamentos.length) errors['infrastructure.equipamentos'] = 'Adicione ao menos um equipamento.';
       state.infrastructure.equipamentos.forEach((item, index) => ['tipo', 'quantidade'].forEach(key => requireField(simple(key, key, true, key === 'quantidade' ? 'number' : 'text'), 'infrastructure.equipamentos.' + index)));
@@ -486,6 +560,14 @@
     }
     state.form.beneficios.forEach((item, index) => childDefinitions('beneficios').filter(def => item.optante === 'Sim' || def.key === 'beneficio').forEach(def => requireField(def, 'form.beneficios.' + index)));
     A.documents.forEach(doc => { if (!state.files[doc.group]?.length) errors['files.' + doc.group] = 'Anexe o documento recebido do candidato.'; });
+    if (!state.form.documentosAssinatura.length) errors['form.documentosAssinatura'] = 'Adicione ao menos um documento para assinatura.';
+    state.form.documentosAssinatura.forEach((doc, index) => {
+      const prefix = 'form.documentosAssinatura.' + index;
+      requireField(simple('nome', 'Nome do Documento'), prefix);
+      if (!state.files['assinatura-' + doc.id]?.length) errors['files.assinatura-' + doc.id] = 'Anexe o documento para assinatura.';
+      if (!doc.signatarios.length) errors[prefix + '.signatarios'] = 'Adicione ao menos um signatário.';
+      doc.signatarios.forEach((person, personIndex) => [simple('nome', 'Nome'), simple('email', 'E-mail', true, 'email'), { ...simple('cpf', 'CPF'), mask: 'cpf' }].forEach(def => requireField(def, prefix + '.signatarios.' + personIndex)));
+    });
   }
   function validateMedical() {
     ['encaminhamento', 'prevista', 'realizacao', 'resultado', 'observacao'].forEach(path => requireField(simple(path, path), 'medical'));
@@ -516,7 +598,7 @@
     applyErrors();
     const first = app.querySelector('.lx-view-shell:not(.lx-view-shell-history) .lx-error');
     if (first) {
-      const block = first.closest('[data-collection-block]'); if (block) openCollectionBlock(block.dataset.collectionBlock);
+      const block = first.closest('[data-collection-block]'); if (block) selectCollectionTab(block.dataset.collectionBlock, block.closest('[data-collection-id]'));
       let parent = first.parentElement; while (parent) { if (parent.tagName === 'DETAILS') parent.open = true; parent = parent.parentElement; }
       first.scrollIntoView({ behavior: 'smooth', block: 'center' });
       const control = first.querySelector('input:not([type="hidden"]):not([readonly]), select, textarea:not([readonly]), button'); control?.focus({ preventScroll: true });
@@ -524,21 +606,21 @@
     return true;
   }
   function clearError(path) { if (Object.hasOwn(errors, path)) { delete errors[path]; if (app) applyErrors(); } }
-  function requestCancellation(reason = '') {
+  function requestCancellation(reason = '', decisionValue = 'reject') {
     if (reason) state.cancellation.motivo = reason;
-    modal('Cancelar admissão?', cancellationForm(), () => {
+    modal('Cancelar Admissão?', cancellationForm(), () => {
       if (!state.cancellation.motivo || !state.cancellation.justificativa.trim()) return;
       adoptPreview(); state.cancellation.responsible = A.owners[stage]; state.cancellation.date = A.now();
-      log(stage, 'Admissão cancelada', state.cancellation.justificativa, { value: 'cancel', note: state.cancellation.justificativa });
+      log(stage, decisionValue === 'cancel' ? 'Admissão cancelada' : decisionValue === 'withdraw' ? 'Desistência registrada' : 'Admissão reprovada', state.cancellation.justificativa, { value: decisionValue, note: state.cancellation.justificativa });
       state.current = 'cancelada'; save(); go('cancelada');
-    }, 'Cancelar admissão', 'ban');
+    }, 'Cancelar Admissão', 'ban');
   }
   function signed(tae) { return tae.documents.length > 0 && tae.documents.every(doc => doc.status === 'Assinado' && doc.completedAt && doc.signers.length > 0 && doc.signers.every(signer => signer.status === 'Assinado' && signer.date)); }
   function integrationPayload() {
     const form = state.form;
     const definitions = [...A.definitions.identity, ...A.definitions.hiring, ...collectionSections(form).flatMap(section => section.defs)];
     const data = Object.fromEntries(definitions.map(def => [def.key, clone(form[def.key] ?? '')]));
-    return { ...data, solicitacao: state.id, revisao: state.revision, origem: form.origem, vaga: form.vaga, requisicao: form.requisicao, selecao: form.selecao, candidato: form.candidato, pcd: form.pcd, primeiroEmprego: form.primeiroEmprego,
+    return { ...data, cargoDescricao: form.cargoDescricao, solicitacao: state.id, revisao: state.revision, origem: form.origem, vaga: form.vaga, requisicao: form.requisicao, selecao: form.selecao, candidato: form.candidato, pcd: form.pcd, primeiroEmprego: form.primeiroEmprego,
       dependentes: form.temDependentes === 'Sim' ? clone(form.dependentes) : [], transportes: form.transporte === 'Sim' ? clone(form.transportes) : [],
       beneficios: form.beneficios.map(item => item.optante === 'Sim' ? clone(item) : { id: item.id, beneficio: item.beneficio, optante: 'Não' }), beneficiariosSeguro: form.seguro === 'Sim' ? clone(form.beneficiarios) : [] };
   }
@@ -549,20 +631,20 @@
     const select = keys => Object.fromEntries(keys.map(key => [key, payload[key] ?? '']));
     const hiringKeys = A.definitions.hiring.filter(def => def.type !== 'textarea').map(def => def.key);
     const personalKeys = [...A.definitions.personal, ...A.definitions.address, ...A.definitions.term, ...A.definitions.legal].map(def => def.key);
-    if (id === 'tae-0') return JSON.stringify(select([...new Set([...hiringKeys, ...personalKeys, 'cpf', 'email'])]));
-    if (id === 'tae-2') return JSON.stringify(select(['nome', 'cpf', 'admissao', 'empresa', 'filial', 'dependentes', 'beneficios', 'transportes', 'beneficiariosSeguro']));
-    return JSON.stringify(payload);
+    const doc = state.form.documentosAssinatura.find(item => item.id === id);
+    const data = id === 'tae-0' ? select([...new Set([...hiringKeys, ...personalKeys, 'cpf', 'email'])]) : id === 'tae-2' ? select(['nome', 'cpf', 'admissao', 'empresa', 'filial', 'dependentes', 'beneficios', 'transportes', 'beneficiariosSeguro']) : payload;
+    return JSON.stringify({ data, nome: doc?.nome || '', signatarios: doc?.signatarios || [], arquivos: (state.files['assinatura-' + id] || []).map(file => ({ id: file.id, name: file.name })) });
   }
-  function impactedDocuments() { return state.tae.documents.filter(doc => !doc.fingerprint || doc.fingerprint !== documentFingerprint(doc.id)).map(doc => doc.id); }
-  function signatureImpactSummary() { const impacted = impactedDocuments(); return readGrid(state.tae.documents.map(doc => [doc.name, impacted.includes(doc.id) ? 'Regenerar e coletar novas assinaturas' : 'Assinaturas preservadas'])); }
-  function signaturesCurrent() { return signed(state.tae) && !impactedDocuments().length; }
+  function impactedDocuments() { return state.form.documentosAssinatura.filter(item => { const doc = state.tae.documents.find(doc => doc.id === item.id); return !doc?.fingerprint || doc.fingerprint !== documentFingerprint(item.id); }).map(doc => doc.id); }
+  function signatureImpactSummary() { const impacted = impactedDocuments(); return readGrid(state.form.documentosAssinatura.map(doc => [doc.nome, impacted.includes(doc.id) ? 'Regenerar e coletar novas assinaturas' : 'Assinaturas preservadas'])); }
+  function signaturesCurrent() { return signed(state.tae) && state.tae.documents.length === state.form.documentosAssinatura.length && !impactedDocuments().length; }
   function admissionReady() { return state.validation.dados && state.validation.final && state.medical.approved && state.medical.resultado === 'Apto' && state.files.aso?.length && (state.medical.utilizaEpi !== 'Sim' || state.medical.epis.length > 0); }
   function queueTAE() {
     if (serviceTimer || state.current !== 'enviar_assinatura' || (!state.tae.authorized && state.tae.status !== 'Em processamento')) return;
     if (!admissionReady()) { feedback('Conclua as validações e o exame admissional antes do envio ao TAE.', true); return; }
     const revision = state.revision;
     if (state.tae.status !== 'Em processamento') {
-      Object.assign(state.tae, { status: 'Em processamento', authorized: false, error: '', message: 'Documentos em preparação para envio ao TAE.', attempts: state.tae.attempts + 1 }); save();
+      Object.assign(state.tae, { status: 'Em processamento', authorized: false, error: '', attemptedAt: A.now(), message: 'Documentos em preparação para envio ao TAE.', attempts: state.tae.attempts + 1 }); save();
     }
     serviceTimer = setTimeout(() => {
       serviceTimer = null;
@@ -571,15 +653,15 @@
         if (state.tae.failNext) { state.tae.failNext = false; throw new Error('A plataforma TAE não confirmou o recebimento dos documentos. Confira o retorno e reprocesse o envio.'); }
         const ledger = JSON.parse(localStorage.getItem(A.TAE_STORE) || '{}');
         const envelopes = ledger[state.id] ||= {};
-        const templates = A.signatures(false, state.form.nome);
-        state.tae.documents = state.tae.documents.map(doc => {
+        const templates = A.documentSignatures(state.form, state.files);
+        state.tae.documents = templates.map(template => {
+          const doc = state.tae.documents.find(item => item.id === template.id) || template;
           const fingerprint = documentFingerprint(doc.id);
           if (doc.fingerprint === fingerprint && doc.protocol && !['Rejeitado', 'Cancelado', 'Erro', 'Não enviado'].includes(doc.status)) return doc;
           const existing = envelopes[doc.id];
           if (existing?.fingerprint === fingerprint && !['Rejeitado', 'Cancelado', 'Erro'].includes(doc.status) && !['Rejeitado', 'Cancelado', 'Erro'].includes(existing.status)) return clone(existing);
-          const template = templates.find(item => item.id === doc.id);
           const stamp = A.now();
-          const sent = { ...template, fingerprint, revision, status: 'Em assinatura', protocol: 'TAE-' + state.id + '-' + doc.id + '-R' + revision + '-' + state.tae.attempts, sentAt: stamp, updatedAt: stamp, completedAt: '', signers: template.signers.map((signer, index) => ({ ...signer, email: index === 0 ? state.form.email : signer.email, status: 'Pendente', date: '' })), file: { ...template.file, id: doc.id + '-R' + revision, date: stamp, by: 'Fluig / TAE' } };
+          const sent = { ...template, fingerprint, revision, status: 'Em assinatura', protocol: 'TAE-' + state.id + '-' + doc.id + '-R' + revision + '-' + state.tae.attempts, sentAt: stamp, updatedAt: stamp, completedAt: '', signers: template.signers.map(signer => ({ ...signer, status: 'Pendente', date: '' })), file: { ...template.file, date: stamp, by: 'Fluig / TAE' } };
           envelopes[doc.id] = clone(sent); return sent;
         });
         localStorage.setItem(A.TAE_STORE, JSON.stringify(ledger));
@@ -587,8 +669,8 @@
         log('enviar_assinatura', 'Documentos enviados ao TAE', state.tae.message);
         state.current = 'assinaturas'; state.decisions.assinaturas = { value: 'approve', note: 'Acompanhar o retorno dos signatários no TAE.' }; save(); go(state.current);
       } catch (error) {
-        Object.assign(state.tae, { status: 'Erro', authorized: false, error: error.message || 'Não foi possível registrar o retorno do TAE.' });
-        log('enviar_assinatura', 'Erro no envio ao TAE', state.tae.error); state.current = 'tratamento_tae'; save(); go(state.current);
+        Object.assign(state.tae, { status: 'Erro', authorized: false, message: 'Não foi possível concluir o envio dos documentos para assinatura no TAE.', error: error.message || 'Não foi possível registrar o retorno do TAE.' });
+        log('enviar_assinatura', 'Erro no Envio ao TAE', state.tae.error); state.current = 'tratamento_tae'; save(); go(state.current);
       }
     }, 650);
     if (app && stage === 'enviar_assinatura') render();
@@ -653,11 +735,11 @@
           log('integracao', 'Erro na integração', state.rm.error); state.current = 'tratamento'; save(); go('tratamento');
         } else {
           employee.data = integrationPayload(); employee.documents = state.tae.documents.map(doc => ({ id: doc.file.id, name: doc.file.name, protocol: doc.protocol, revision: doc.revision, status: doc.status, completedAt: doc.completedAt })); ledger[state.id] = employee; localStorage.setItem(A.RM_STORE, JSON.stringify(ledger));
-          Object.assign(state.rm, { status: 'Integrada com sucesso', operation: updating ? 'Atualizar colaborador existente e documentos assinados' : 'Incluir colaborador e documentos assinados', message: updating ? 'Cadastro existente atualizado e documentos assinados disponibilizados no TOTVS RM.' : 'Colaborador incluído e documentos assinados disponibilizados no TOTVS RM.', error: '', payloadFingerprint: JSON.stringify(integrationPayload()) });
+          Object.assign(state.rm, { status: 'Integrada com sucesso', operation: updating ? 'Atualizar colaborador existente e documentos assinados' : 'Incluir colaborador e documentos assinados', message: updating ? 'Cadastro existente atualizado e documentos assinados disponibilizados no TOTVS RM.' : 'Colaborador incluído e documentos assinados disponibilizados no TOTVS RM.', error: '', payloadFingerprint: JSON.stringify(integrationPayload()), returnedData: clone(employee.data) });
           state.validation.rm = false;
           log('integracao', 'Integração concluída', state.rm.message); state.decisions.validacao_rm = { value: 'approve', note: 'Conferir o cadastro incluído ou atualizado no TOTVS RM.' }; state.returnRequest = null; state.current = 'validacao_rm'; save(); go(state.current);
         }
-      } catch (_) { state.rm.status = 'Erro'; state.rm.error = 'Não foi possível registrar o retorno da integração neste navegador.'; state.current = 'tratamento'; save(); go('tratamento'); }
+      } catch (_) { Object.assign(state.rm, { status: 'Erro', message: 'Não foi possível concluir a integração da admissão.', error: 'Não foi possível registrar o retorno da integração neste navegador.' }); state.current = 'tratamento'; save(); go('tratamento'); }
     }, 650);
     if (app && stage === 'integracao') render();
   }
@@ -666,17 +748,17 @@
     if (key === 'file' || key === 'download') {
       const file = views[Number(node.dataset.source)]?.files[Number(node.dataset.index)];
       if (file) {
-        if (key === 'download') modal('Baixar anexo', '<p>' + esc(file.name) + '</p>', () => openFile(file, true), 'Baixar', 'download');
+        if (key === 'download') modal('Baixar Anexo', '<p>' + esc(file.name) + '</p>', () => openFile(file, true), 'Baixar', 'download');
         else await openFile(file);
       }
       return;
     }
-    if (key === 'draft') { modal('Salvar rascunho?', '<p>Os dados preenchidos serão mantidos para continuar a atividade.</p>', () => { save(); feedback('Rascunho salvo.'); }, 'Salvar', 'floppy-disk'); return; }
+    if (key === 'draft') { modal('Salvar Rascunho?', '<p>Os dados preenchidos serão mantidos para continuar a atividade.</p>', () => { save(); feedback('Rascunho salvo.'); }, 'Salvar', 'floppy-disk'); return; }
     if (!allowed()) return;
     if (key === 'choose-file') { app.querySelector('[data-upload="' + node.dataset.group + '"]')?.click(); return; }
     if (key === 'delete-file') {
       const source = views[Number(node.dataset.source)], file = source?.files[Number(node.dataset.index)];
-      if (file && source.editable) modal('Excluir anexo?', '<p>' + esc(file.name) + '</p>', () => { state.files[source.group] = state.files[source.group].filter(item => item.id !== file.id); (state.fileEvents ??= []).push({ action: 'Anexo excluído', id: file.id, name: file.name, date: A.now(), responsible: A.owners[stage] }); save(); render(); }, 'Excluir', 'trash');
+      if (file && source.editable) modal('Excluir Anexo?', '<p>' + esc(file.name) + '</p>', () => { state.files[source.group] = state.files[source.group].filter(item => item.id !== file.id); (state.fileEvents ??= []).push({ action: 'Anexo excluído', id: file.id, name: file.name, date: A.now(), responsible: A.owners[stage] }); save(); render(); }, 'Excluir', 'trash');
       return;
     }
     if (key === 'add-child') {
@@ -686,183 +768,131 @@
       added?.scrollIntoView({ behavior: 'smooth', block: 'center' }); added?.querySelector('input:not([type="hidden"]):not([readonly]), select, textarea')?.focus({ preventScroll: true });
       return;
     }
-    if (key === 'remove-child') { const scope = node.dataset.scope; modal('Remover item?', '<p>Confirme a remoção deste registro.</p>', () => { (scope === 'epis' ? state.medical : scope === 'equipamentos' ? state.infrastructure : state.form)[scope].splice(Number(node.dataset.index), 1); save(); render(); }, 'Remover', 'trash'); return; }
+    if (key === 'remove-child') { const scope = node.dataset.scope; modal('Remover Item?', '<p>Confirme a remoção deste registro.</p>', () => { (scope === 'epis' ? state.medical : scope === 'equipamentos' ? state.infrastructure : state.form)[scope].splice(Number(node.dataset.index), 1); save(); render(); }, 'Remover', 'trash'); return; }
+    if (key === 'add-signature-document') {
+      const doc = clone(A.fresh('example').form.documentosAssinatura[0]); doc.id = 'doc-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6); doc.nome = 'Documento Complementar de Admissão';
+      doc.signatarios[0] = { id: 'candidato-' + doc.id, nome: state.form.nome, email: state.form.email, cpf: state.form.cpf };
+      state.form.documentosAssinatura.push(doc); state.files['assinatura-' + doc.id] = [A.fixed('documento-admissional-1.pdf', 'Juliana Costa', doc.id)]; save(); render(); return;
+    }
+    if (key === 'add-signer') {
+      const doc = state.form.documentosAssinatura[Number(node.dataset.document)];
+      doc.signatarios.push({ id: 'signer-' + Date.now(), nome: 'Eduardo Martins', email: 'eduardo.martins@exemplo.com', cpf: '123.456.789-09' }); save(); render(); return;
+    }
+    if (['remove-signature-document', 'remove-signer'].includes(key)) {
+      modal('Remover Registro?', '<p>Confirme a remoção deste registro.</p>', () => { const index = Number(node.dataset.document); if (key === 'remove-signer') state.form.documentosAssinatura[index].signatarios.splice(Number(node.dataset.person), 1); else state.form.documentosAssinatura.splice(index, 1); save(); render(); }, 'Remover', 'trash'); return;
+    }
     if (key === 'cancel') { requestCancellation(); return; }
     errors = {};
     if (key === 'submit-request') {
       validatePreparation(); if (fail()) return;
-      modal('Encaminhar solicitação?', '<p>Os dados da admissão serão encaminhados para conferência na Preparação da Admissão.</p>', () => {
+      modal('Encaminhar Solicitação?', '<p>A admissão manual seguirá diretamente para Coleta e Preenchimento.</p>', () => {
         adoptPreview(); log('solicitacao', state.returnRequest ? 'Solicitação corrigida' : 'Solicitação registrada', state.form.solicitacaoObs);
-        state.returnRequest = null; state.decisions.preparacao = { value: 'approve', note: 'Dados iniciais recebidos para conferência.' }; state.current = 'preparacao'; save(); go('preparacao');
-      }, 'Encaminhar', 'paper-plane');
-    }
-    if (key === 'prepare' || key === 'collect') {
-      const d = decisionData(stage);
-      if (d.value !== 'approve' && !d.note?.trim()) errors['decisions.' + stage + '.note'] = 'Informe a justificativa.';
-      if (d.value === 'approve') { if (key === 'prepare') validatePreparation(); else validateCollection(); }
-      if (fail()) return;
-      if (d.value === 'cancel') { state.cancellation.justificativa = d.note; requestCancellation('Candidato desistiu'); return; }
-      const target = d.value === 'return' ? key === 'prepare' ? 'solicitacao' : 'preparacao' : key === 'prepare' ? 'coleta' : 'validacao';
-      modal(d.value === 'return' ? 'Retornar para correção?' : 'Encaminhar admissão?', '<p>A admissão seguirá para ' + esc(meta(target).title) + '.</p>', () => {
-        adoptPreview(); log(stage, d.value === 'return' ? 'Correção solicitada' : key === 'prepare' ? 'Preparação concluída' : 'Dados e documentos registrados', d.note, d);
-        state.returnRequest = d.value === 'return' ? { from: stage, target, note: d.note } : null;
-        if (d.value === 'return') state.revision++;
-        state.decisions[target] = { value: 'approve', note: 'Dados recebidos para conferência do RH / DP.' }; state.reviews[target] = {};
-        state.current = target; save(); go(target);
-      }, d.value === 'return' ? 'Retornar para correção' : 'Encaminhar', d.value === 'return' ? 'rotate-left' : 'paper-plane');
+        state.returnRequest = null; state.current = 'coleta'; state.decisions.coleta = { value: 'approve', note: 'Dados recebidos para coleta e preenchimento.' }; save(); go(state.current);
+      }, 'Encaminhar', 'paper-plane'); return;
     }
     if (key === 'correct') {
-      validateCollection(); requireField(simple('adjustments', 'Descreva a complementação'), 'correction');
-      if (fail()) return;
-      modal('Enviar para validação?', '<p>Os dados e documentos serão encaminhados para conferência do RH / DP.</p>', () => {
-        const target = state.correction?.returnTo || 'validacao';
-        adoptPreview(); state.revision++; state.validation.final = false;
-        log('complementacao', 'Complementação realizada', state.correction?.adjustments || '');
-        state.decisions[target] = { value: 'approve', note: 'Complementação recebida para nova conferência do RH / DP.' }; state.reviews[target] = {};
-        state.current = target; save(); go(target);
-      }, 'Enviar', 'paper-plane');
-    }
-    if (key === 'return-integration') {
-      const context = correctionContext(); if (!context) return;
-      validateCollection(); requireField(simple('adjustments', 'Descreva os ajustes realizados'), 'correction'); if (fail()) return;
-      modal('Reenviar correção?', '<p>A solicitação retornará para ' + esc(meta(context.returnTo).title) + '.</p>', () => {
-        adoptPreview(); state.revision++;
-        log('coleta', 'Correção registrada', state.correction.adjustments, { value: 'approve', note: state.correction.adjustments });
-        state.returnRequest = null; state.correction = null; state.decisions[context.returnTo] = { value: 'approve', note: 'Dados e documentos corrigidos e conferidos para reprocessamento.' };
-        state.current = ['integracao', 'tratamento'].includes(context.returnTo) && impactedDocuments().length ? 'validacao_final' : context.returnTo;
-        if (state.current === 'validacao_final') state.validation.final = false;
-        if (state.current === 'integracao') { state.rm.status = 'Não iniciada'; state.rm.authorized = true; }
-        save(); go(state.current);
-      }, 'Reenviar', 'paper-plane');
-      return;
-    }
-    if (key === 'review') {
-      const final = stage === 'validacao_final';
-      const d = clone(decisionData(stage));
-      d.value ||= 'approve';
-      if (d.value !== 'approve' && !d.note?.trim()) errors['decisions.' + stage + '.note'] = 'Informe a justificativa / comentários.';
-      if (final && d.value === 'correction') { d.target ||= 'sesmt'; if (!['sesmt', 'validacao'].includes(d.target)) errors['decisions.' + stage + '.target'] = 'Selecione a etapa que deve realizar a correção.'; }
-      if (d.value === 'approve') {
-        validateCollection();
-        if (final && state.functional.active) requireField(simple('adjustments', 'Ajustes realizados'), 'functional');
-        if (final && !preview() && (!state.validation.dados || !state.medical.approved || state.medical.resultado !== 'Apto' || !state.files.aso?.length)) errors['decision.' + stage] = 'A validação final exige dados validados e o ASO com resultado Apto.';
-      }
-      if (fail()) return;
-      if (d.value === 'cancel') { state.cancellation.justificativa = d.note; requestCancellation('Candidato desistiu'); return; }
-      const returning = ['return', 'correction'].includes(d.value);
-      const target = returning ? d.value === 'correction' ? d.target : 'coleta' : final ? signaturesCurrent() ? 'integracao' : 'enviar_assinatura' : 'sesmt';
-      modal('Enviar decisão?', '<p>' + (returning ? 'A admissão retornará para ' + esc(meta(target).title) + ' para correção / complementação.' : final ? signaturesCurrent() ? 'As assinaturas permanecem válidas. A integração no RM será executada automaticamente.' : 'Os documentos necessários serão gerados e enviados pelo Fluig ao TAE para assinatura.' : 'A admissão seguirá para o Exame Admissional — SESMT.') + '</p>', () => {
-        if (state.started && state.current !== stage) return;
-        adoptPreview(); log(stage, returning ? 'Correção / complementação solicitada' : final ? 'Validação final aprovada' : 'Dados e documentos validados', d.note, d);
-        if (returning) {
-          state.returnRequest = { from: stage, target, returnTo: stage, note: d.note, responsible: A.owners[stage], date: A.now() };
-          state.correction = { returnTo: stage, note: d.note, adjustments: '', before: clone(state.form) }; state.revision++; state.validation.final = false; state.validation.rm = false;
-          if (stage === 'validacao' || target === 'validacao') state.validation.dados = false;
-          if (target === 'sesmt') state.medical.approved = false;
-          state.decisions[target] = { value: 'approve', note: 'Conferir os ajustes solicitados: ' + d.note }; state.current = target;
-        }
-        else if (final) {
-          state.validation.final = true; state.validation.rm = false; state.rm.authorized = false; state.functional.active = false;
-          state.current = signaturesCurrent() ? 'integracao' : 'enviar_assinatura';
-          if (state.current === 'integracao') Object.assign(state.rm, { status: 'Não iniciada', authorized: true });
-          if (state.current === 'enviar_assinatura') Object.assign(state.tae, { status: 'Não enviado', authorized: true });
-          state.returnRequest = null;
-        }
-        else { state.validation.dados = true; state.returnRequest = null; state.current = 'sesmt'; }
-        save(); go(state.current);
-      }, 'Enviar decisão', 'paper-plane');
+      const context = { returnTo: state.correction?.returnTo || 'validacao' };
+      validateCollection(); requireField(simple('adjustments', 'Descreva os Ajustes Realizados'), 'correction'); if (fail()) return;
+      const target = ['integracao', 'tratamento'].includes(context.returnTo) && impactedDocuments().length ? 'validacao_final' : context.returnTo;
+      modal('Reenviar Correção?', '<p>A solicitação retornará para ' + esc(meta(target).title) + '.</p>', () => {
+        adoptPreview(); state.revision++; log(stage, 'Correção registrada', state.correction.adjustments, { value: 'approve', note: state.correction.adjustments });
+        state.returnRequest = null; state.correction = null; state.decisions[target] = { value: 'approve', note: 'Ajustes recebidos para conferência.' };
+        state.current = target; if (target === 'validacao_final') state.validation.final = false;
+        if (target === 'validacao') { state.validation.dados = false; state.validation.final = false; state.validation.rm = false; state.rm.authorized = false; }
+        if (target === 'integracao') Object.assign(state.rm, { status: 'Não iniciada', authorized: true });
+        save(); go(target);
+      }, 'Reenviar', 'paper-plane'); return;
     }
     if (key === 'exam') {
-      const context = correctionContext();
-      validateMedical();
-      if (context) requireField(simple('adjustments', 'Descreva os ajustes realizados'), 'correction');
+      if (state.medical.resultado === 'Desistência') {
+        requireField(simple('observacao', 'Justificativa da Desistência'), 'medical'); if (fail()) return;
+        state.cancellation.justificativa = state.medical.observacao; requestCancellation('Candidato desistiu', 'withdraw'); return;
+      }
+      const context = correctionContext(); validateMedical();
+      if (context) requireField(simple('adjustments', 'Descreva os Ajustes Realizados'), 'correction');
       if (!preview() && !state.validation.dados) errors['medical.resultado'] = 'Valide os dados e documentos antes da análise do SESMT.';
       if (fail()) return;
-      modal('Enviar análise do SESMT?', '<p>' + (state.medical.resultado === 'Inapto' ? 'O resultado Inapto encerrará a admissão.' : 'O resultado Apto encaminhará a admissão para validação final.') + '</p>', () => {
+      modal('Enviar Análise do SESMT?', '<p>' + (state.medical.resultado === 'Inapto' ? 'O resultado Inapto encerrará a admissão.' : 'A admissão seguirá para Validação Final do RH / DP.') + '</p>', () => {
         adoptPreview(); state.medical.approved = state.medical.resultado === 'Apto'; log('sesmt', context ? 'Exame corrigido — ' + state.medical.resultado : 'Resultado ' + state.medical.resultado, state.medical.observacao);
         if (!state.medical.approved) { state.cancellation = { motivo: 'Inapto no exame admissional', justificativa: state.medical.observacao, responsible: A.owners.sesmt, date: A.now() }; state.current = 'cancelada'; }
         else state.current = context ? context.returnTo : 'validacao_final';
-        if (context) { state.returnRequest = null; state.correction = null; state.decisions[context.returnTo] = { value: 'approve', note: 'Exame admissional e informações de EPI corrigidos pelo SESMT.' }; }
+        if (context) { state.returnRequest = null; state.correction = null; state.decisions[context.returnTo] = { value: 'approve', note: 'Exame, ASO e EPIs corrigidos pelo SESMT.' }; }
         save(); go(state.current);
-      }, 'Enviar análise', 'paper-plane');
+      }, 'Enviar Análise', 'paper-plane'); return;
     }
-    if (['retry-tae', 'review-rm', 'retry-ti'].includes(key)) {
-      const source = stage, d = decisionData(source);
-      if (d.value !== 'approve' && !d.note?.trim()) errors['decisions.' + source + '.note'] = 'Informe a justificativa.';
-      if (d.value === 'cancel') { if (fail()) return; state.cancellation.justificativa = d.note; requestCancellation(source === 'validacao_rm' ? 'Candidato desistiu' : ''); return; }
-      if (d.value === 'approve' && key === 'retry-tae') {
-        validateCollection();
-        if (!preview() && !admissionReady()) errors['decision.' + source] = 'Conclua as validações e o ASO Apto antes de enviar ao TAE.';
-      }
-      if (key === 'review-rm' && !preview() && (state.rm.status !== 'Integrada com sucesso' || !state.rm.employeeId || state.rm.payloadFingerprint !== JSON.stringify(integrationPayload()) || !signaturesCurrent())) errors['decision.' + source] = 'Confira a integração dos dados atuais e os documentos assinados antes de validar o cadastro.';
-      if (key === 'retry-ti' && !preview() && !state.validation.rm) errors['decision.' + source] = 'Valide o cadastro no RM antes de notificar a TI.';
+    if (!['prepare', 'collect', 'review', 'review-rm', 'retry-tae', 'retry-ti', 'retry', 'finish'].includes(key)) return;
+    const source = stage, d = clone(decisionData(source));
+    if (!decisionOptions(source).some(option => option[0] === d.value)) errors['decision.' + source] = 'Selecione uma decisão.';
+    if (!['approve', 'retry'].includes(d.value) && !d.note?.trim()) errors['decisions.' + source + '.note'] = 'Informe a observação.';
+    if (['reject', 'withdraw', 'cancel'].includes(d.value) && !(source === 'validacao_rm' && d.value === 'reject')) {
+      if (fail()) return; state.cancellation.justificativa = d.note;
+      requestCancellation(d.value === 'withdraw' ? 'Candidato desistiu' : 'Contratação cancelada', d.value); return;
+    }
+    const target = decisionTarget(source, d.value);
+    if (target) {
       if (fail()) return;
-      modal('Enviar decisão?', '<p>' + (d.value === 'return' ? 'A admissão retornará diretamente à Validação Final para correção dos dados e revisão dos documentos assinados.' : 'Confirme o encaminhamento da atividade.') + '</p>', () => {
+      modal('Retornar para Correção?', '<p>A admissão seguirá para ' + esc(meta(target).title) + '.</p>', () => {
         if (state.started && state.current !== source) return;
-        adoptPreview();
-        log(source, d.value === 'return' ? 'Retorno à Validação Final' : 'Atividade concluída', d.note || (source === 'validacao_rm' ? state.rmReview.note : ''), d);
-        if (key === 'review-rm') {
-          if (d.value === 'return') {
-            state.functional.active = true; state.functional.note = d.note; state.validation.final = false; state.validation.rm = false; state.rm.authorized = false; state.revision++;
-            state.current = 'validacao_final'; state.decisions.validacao_final = { value: 'approve', note: 'Conferir as informações corrigidas e os documentos impactados.' };
-          }
-          else {
-            state.validation.rm = true; state.functional.active = false;
-            if (state.infrastructure.necessita === 'Sim' && state.infrastructure.equipamentos.length) { state.notification.status = 'Não enviada'; state.notification.authorized = true; state.current = 'notificacao_ti'; }
-            else { completeAdmission(); return; }
-          }
-        } else if (d.value === 'return') {
-          state.functional.active = true; state.functional.note = d.note; state.validation.final = false; state.validation.rm = false; state.rm.authorized = false; state.revision++;
-          state.current = 'validacao_final'; state.decisions.validacao_final = { value: 'approve', note: 'Revisão das informações corrigidas e dos documentos impactados.' };
-        } else if (key === 'retry-tae') {
-          Object.assign(state.tae, { status: 'Não enviado', authorized: true }); state.current = 'enviar_assinatura';
-        } else { Object.assign(state.notification, { status: 'Não enviada', authorized: true }); state.current = 'notificacao_ti'; }
-        save(); go(state.current);
-      }, 'Confirmar', 'paper-plane');
-      return;
+        adoptPreview(); log(source, 'Correção solicitada', d.note, d);
+        state.revision++; state.validation.rm = false; state.rm.authorized = false;
+        const returnTo = source === 'tratamento_tae' && target === 'sesmt' ? 'validacao_final' : source;
+        state.returnRequest = { from: source, target, returnTo, note: d.note, responsible: A.owners[source], date: A.now() };
+        state.correction = { returnTo, note: d.note, adjustments: '', before: clone(state.form) };
+        if (['coleta', 'sesmt', 'validacao', 'validacao_final', 'solicitacao', 'preparacao'].includes(target)) state.validation.final = false;
+        if (target === 'sesmt') state.medical.approved = false;
+        if (target === 'validacao') state.validation.dados = false;
+        if (target === 'coleta' && source === 'validacao') state.validation.dados = false;
+        if (target === 'validacao_final') { state.functional.active = true; state.functional.note = d.note; state.returnRequest = null; state.correction = null; }
+        state.decisions[target] = { value: 'approve', note: 'Conferir os ajustes solicitados: ' + d.note }; state.current = target; save(); go(target);
+      }, 'Retornar para Correção', 'rotate-left'); return;
     }
-    if (['retry', 'finish'].includes(key)) {
-      const source = stage, d = decisionData(source);
-      if (d.value !== 'approve' && !d.note?.trim()) errors['decisions.' + source + '.note'] = 'Informe a justificativa.';
-      if (d.value === 'approve' && key !== 'finish') {
-        validateCollection();
-        if (!preview() && (!state.validation.dados || !state.validation.final || !state.medical.approved || state.medical.resultado !== 'Apto' || !state.files.aso?.length)) errors['decision.' + source] = 'Confira as validações e o ASO Apto antes de enviar a admissão ao RM.';
-        if (!preview() && !signaturesCurrent()) errors['decision.' + source] = 'Conclua as assinaturas dos documentos atuais antes da integração com o RM.';
-      }
-      if (fail()) return;
-      if (d.value === 'cancel') { state.cancellation.justificativa = d.note; requestCancellation(); return; }
-      if (d.value.startsWith('return')) {
-        const target = source === 'assinaturas' ? 'tratamento_tae' : d.value === 'return_sesmt' ? 'sesmt' : 'coleta';
-        modal('Retornar para correção?', '<p>A solicitação retornará para ' + esc(meta(target).title) + '.</p>', () => {
-          if (state.started && state.current !== source) return;
-          adoptPreview(); log(source, 'Correção solicitada', d.note, d);
-          if (integrationTimer) { clearTimeout(integrationTimer); integrationTimer = null; state.rm.status = 'Não iniciada'; }
-          state.rm.authorized = false;
-          state.returnRequest = { from: source, target, returnTo: source, note: d.note, responsible: A.owners[source], date: A.now() };
-          state.correction = { returnTo: source, note: d.note, adjustments: '', before: clone(state.form) };
-          if (target === 'tratamento_tae') state.decisions.tratamento_tae = { value: 'approve', note: d.note };
-          state.current = target; save(); go(target);
-        }, 'Retornar para correção', 'rotate-left');
-        return;
-      }
-      if (key === 'retry') {
-        modal('Reprocessar integração?', '<p>Os dados e documentos serão enviados automaticamente ao TOTVS RM, preservando o cadastro já retornado para esta solicitação.</p>', () => {
-          if (state.started && state.current !== source) return;
-          adoptPreview();
-          const note = source === 'tratamento' ? state.treatment?.treatmentNote || d.note : d.note;
-          if (source === 'tratamento') log('tratamento', 'Reprocessamento solicitado', note, { ...d, note });
-          state.rm.status = 'Não iniciada'; state.rm.authorized = true; state.current = 'integracao'; state.returnRequest = null; save(); go('integracao');
-        }, 'Reprocessar', 'arrows-rotate');
-        return;
-      }
+    if (['prepare', 'collect', 'review', 'retry-tae', 'retry'].includes(key)) {
+      if (key === 'prepare') validatePreparation(); else validateCollection();
     }
+    if (key === 'collect' && correctionContext()) requireField(simple('adjustments', 'Descreva os Ajustes Realizados'), 'correction');
+    if (key === 'review' && source === 'validacao_final') {
+      if (state.functional.active) requireField(simple('adjustments', 'Ajustes Realizados'), 'functional');
+      if (!preview() && (!state.validation.dados || !state.medical.approved || state.medical.resultado !== 'Apto' || !state.files.aso?.length)) errors['decision.' + source] = 'A validação final exige dados validados e ASO com resultado Apto.';
+    }
+    if (['retry-tae', 'retry'].includes(key) && !preview() && !admissionReady()) errors['decision.' + source] = 'Confira as validações e o ASO Apto antes do reprocessamento.';
+    if (key === 'retry' && !preview() && !signaturesCurrent()) errors['decision.' + source] = 'Conclua as assinaturas dos documentos atualizados antes da integração com o RM.';
     if (key === 'finish') {
-      const tae = effectiveTAE();
-      if (!signed(tae)) errors['tae.observation'] = 'Aguarde a conclusão das assinaturas de todos os documentos no TAE.';
-      if (!preview() && (!admissionReady() || (signed(tae) && !signaturesCurrent()))) errors['tae.observation'] = 'Confira as validações, o ASO Apto e as assinaturas dos documentos atualizados.';
-      if (fail()) return;
-      modal('Encaminhar para integração?', '<p>Os documentos assinados e os dados da admissão serão integrados automaticamente no TOTVS RM. Em seguida, o RH / DP conferirá o cadastro.</p>', () => { adoptPreview(); log('assinaturas', 'Assinaturas concluídas', decisionData('assinaturas').note || state.tae.observation, { value: 'approve', note: decisionData('assinaturas').note }); state.current = 'integracao'; state.rm.status = 'Não iniciada'; state.rm.authorized = true; state.validation.rm = false; save(); go(state.current); }, 'Encaminhar', 'arrows-rotate');
+      if (!signed(effectiveTAE())) errors['tae.observation'] = 'Aguarde a conclusão das assinaturas de todos os documentos no TAE.';
+      else if (!preview() && (!admissionReady() || !signaturesCurrent())) errors['tae.observation'] = 'Confira as validações, o ASO Apto e as assinaturas dos documentos atualizados.';
     }
+    if (key === 'review-rm' && !preview() && (state.rm.status !== 'Integrada com sucesso' || !state.rm.employeeId || state.rm.payloadFingerprint !== JSON.stringify(integrationPayload()) || !signaturesCurrent())) errors['decision.' + source] = 'Confira a integração dos dados atuais e as assinaturas antes de aprovar o cadastro.';
+    if (key === 'retry-ti' && !preview() && (!state.validation.rm || !signaturesCurrent() || state.rm.payloadFingerprint !== JSON.stringify(integrationPayload()))) errors['decision.' + source] = 'Valide o cadastro atual no RM antes de notificar a TI.';
+    if (fail()) return;
+    const description = decisionOptions(source).find(option => option[0] === d.value)?.[2] || 'Confirmar o encaminhamento.';
+    modal('Enviar Decisão?', '<p>' + esc(description) + '</p>', () => {
+      if (state.started && state.current !== source) return;
+      const correctingCollection = key === 'collect' && !!correctionContext();
+      adoptPreview();
+      if (correctingCollection) state.revision++;
+      log(source, correctingCollection ? 'Correção registrada' : d.value === 'retry' ? 'Reintegração solicitada' : key === 'finish' ? 'Assinaturas conferidas' : 'Solicitação aprovada', correctingCollection ? state.correction.adjustments : d.note, d);
+      state.returnRequest = null; state.correction = null;
+      if (key === 'prepare') state.current = 'coleta';
+      if (key === 'collect') { state.validation.dados = false; state.validation.final = false; state.validation.rm = false; state.rm.authorized = false; state.current = 'validacao'; }
+      if (key === 'review') {
+        if (source === 'validacao') { state.validation.dados = true; state.current = 'sesmt'; }
+        else {
+          state.validation.final = true; state.validation.rm = false; state.functional.active = false;
+          state.current = signaturesCurrent() ? 'integracao' : 'enviar_assinatura';
+          if (state.current === 'integracao') Object.assign(state.rm, { status: 'Não iniciada', authorized: true });
+          else Object.assign(state.tae, { status: 'Não enviado', authorized: true });
+        }
+      }
+      if (key === 'finish' || key === 'retry') { state.current = 'integracao'; state.validation.rm = false; Object.assign(state.rm, { status: 'Não iniciada', authorized: true }); }
+      if (key === 'retry-tae') { state.current = 'enviar_assinatura'; Object.assign(state.tae, { status: 'Não enviado', authorized: true }); }
+      if (key === 'review-rm') {
+        state.validation.rm = true; state.functional.active = false;
+        if (state.infrastructure.necessita === 'Sim' && state.infrastructure.equipamentos.length) { state.current = 'notificacao_ti'; Object.assign(state.notification, { status: 'Não enviada', authorized: true }); }
+        else { completeAdmission(); return; }
+      }
+      if (key === 'retry-ti') { state.current = 'notificacao_ti'; Object.assign(state.notification, { status: 'Não enviada', authorized: true }); }
+      if (!['enviar_assinatura', 'integracao', 'notificacao_ti', 'finalizada'].includes(state.current)) state.decisions[state.current] = { value: 'approve', note: 'Dados recebidos para conferência.' };
+      save(); go(state.current);
+    }, 'Confirmar', 'paper-plane');
   }
   function openCollectionBlock(key) {
     selectCollectionTab(key, app?.querySelector('[data-collection-id="current"]'));
@@ -875,16 +905,6 @@
       node.classList.toggle('is-active', active); node.setAttribute('aria-selected', String(active)); node.tabIndex = active ? 0 : -1;
     });
     root.querySelectorAll('[role="tabpanel"][data-collection-block]').forEach(node => { node.hidden = node.dataset.collectionBlock !== key; });
-    keepActiveTabVisible(root);
-  }
-  function keepActiveTabVisible(root = app) {
-    root?.querySelectorAll('.lx-admission-tabs').forEach(nav => {
-      const active = nav.querySelector('[aria-selected="true"]');
-      if (!active || !nav.getClientRects().length) return;
-      const bounds = nav.getBoundingClientRect(), item = active.getBoundingClientRect();
-      if (item.left < bounds.left) nav.scrollLeft -= bounds.left - item.left;
-      else if (item.right > bounds.right) nav.scrollLeft += item.right - bounds.right;
-    });
   }
   function mask(value, kind) {
     const digits = value.replace(/\D/g, '');
@@ -901,6 +921,11 @@
     if (!editable()) return;
     if (input.dataset.field) {
       const path = input.dataset.field;
+      if (path === 'form.vagaSelecionada') {
+        const vacancy = A.vacancies.find(item => item.id === input.value);
+        Object.assign(state.form, { vagaSelecionada: input.value, vaga: vacancy?.id || '', requisicao: vacancy?.requisicao || '', selecao: vacancy?.selecao || '', candidato: vacancy?.candidato || '' });
+        clearError(path); save(); render(); return;
+      }
       if (path === 'form.origem') { state.origin = input.value; state.form.origem = input.value; errors = {}; save(); render(); return; }
       if (input.dataset.mask) input.value = mask(input.value, input.dataset.mask);
       set(path, input.value); clearError(path);
@@ -926,11 +951,12 @@
   }
   async function upload(group, files) {
     if (!allowed()) return;
-    for (const file of Array.from(files)) {
+    for (const file of (group.startsWith('assinatura-') ? Array.from(files).slice(0, 1) : Array.from(files))) {
       if (file.size > 10 * 1024 * 1024) { feedback('Use arquivos de até 10 MB.', true); continue; }
-      if (group !== 'coletaOutros' && !['application/pdf', 'image/png', 'image/jpeg', 'image/webp'].includes(file.type)) { feedback('Use arquivos PDF ou imagem de até 10 MB.', true); continue; }
+      if (group !== 'coletaOutros' && !group.startsWith('assinatura-') && !['application/pdf', 'image/png', 'image/jpeg', 'image/webp'].includes(file.type)) { feedback('Use arquivos PDF ou imagem de até 10 MB.', true); continue; }
       try {
         const id = Date.now() + '-' + Math.random().toString(36).slice(2); await fileRequest('readwrite', store => store.put(file, id));
+        if (group.startsWith('assinatura-')) state.files[group] = [];
         (state.files[group] ??= []).push({ id, name: file.name, size: file.size, type: file.type, by: A.owners[stage] || A.owners.coleta, date: A.now(), origin: stage === 'sesmt' ? 'SESMT' : 'RH / DP' });
         state.fileEvents ??= []; state.fileEvents.push({ action: 'Anexo incluído', id, name: file.name, date: A.now(), responsible: A.owners[stage] });
       } catch (_) { feedback('Não foi possível salvar o anexo neste navegador.', true); }
@@ -944,7 +970,7 @@
       else { const blob = await fileRequest('readonly', store => store.get(file.id)); if (!blob) throw new Error('missing'); url = URL.createObjectURL(blob); }
       if (download) { const link = document.createElement('a'); link.href = url; link.download = file.name; link.click(); if (!file.url) setTimeout(() => URL.revokeObjectURL(url), 1000); }
       else {
-        const content = file.type === 'application/pdf' ? '<iframe class="lx-attachment-frame" title="Visualização do anexo" src="' + esc(url) + '"></iframe>' : (file.type || '').startsWith('image/') ? '<img class="lx-file-image" alt="' + esc(file.name) + '" src="' + esc(url) + '" />' : readGrid([['Arquivo', file.name], ['Tipo', file.type || 'Não informado'], ['Tamanho', Math.ceil(file.size / 1024) + ' KB']]) + '<p>Pré-visualização indisponível para este formato. Utilize o botão de download do anexo.</p>';
+        const content = file.type === 'application/pdf' ? '<iframe class="lx-attachment-frame" title="Visualização do Anexo" src="' + esc(url) + '"></iframe>' : (file.type || '').startsWith('image/') ? '<img class="lx-file-image" alt="' + esc(file.name) + '" src="' + esc(url) + '" />' : readGrid([['Arquivo', file.name], ['Tipo', file.type || 'Não informado'], ['Tamanho', Math.ceil(file.size / 1024) + ' KB']]) + '<p>Pré-visualização indisponível para este formato. Utilize o botão de download do anexo.</p>';
         modal(file.name, '<div class="lx-attachment-preview">' + content + '</div>', null, 'Fechar', 'eye', true); if (!file.url) previewURL = url;
       }
     } catch (_) { feedback('Anexo indisponível neste navegador.', true); }
@@ -1000,7 +1026,6 @@
     }
   });
   window.addEventListener('popstate', () => { stage = new URLSearchParams(location.search).get('etapa') || 'preparacao'; errors = {}; render(); });
-  window.addEventListener('resize', () => keepActiveTabVisible());
   window.addEventListener('storage', event => { if (event.key === A.STORE) { const incoming = A.read().processes[state.id]; if (incoming) { state = incoming; completeDefaults(); render(); } } });
-  completeDefaults(); if (params.get('etapa') === 'nova_validacao') history.replaceState(null, '', href(stage)); save(); render();
+  completeDefaults(); restoreEquipmentExamples(); if (params.get('etapa') === 'nova_validacao') history.replaceState(null, '', href(stage)); save(); render();
 })();

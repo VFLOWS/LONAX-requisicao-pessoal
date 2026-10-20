@@ -531,7 +531,7 @@
       '<button class="lx-btn lx-btn-primary" type="button" data-action="add-equipment"><i class="fa-solid fa-plus"></i> Adicionar equipamento</button>' +
       state.form.equipamentos.map(function (item, index) {
         return '<div class="lx-child-row" data-equipment-index="' + index + '">' +
-          singleSelect("Equipamento", "equipamento", item.equipamento, rm.equipamentos, true, "equipment", index) +
+          field("Equipamento", "equipamento", item.equipamento, false, true, "equipment", index) +
           field("Quantidade", "quantidade", item.quantidade, false, true, "equipment", index, "number") +
           field("Observação", "observacao", item.observacao, false, true, "equipment", index) +
           '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-equipment" data-index="' + index + '" aria-label="Excluir equipamento"><i class="fa-solid fa-trash"></i></button>' +

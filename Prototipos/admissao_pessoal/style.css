@@ -59,6 +59,9 @@ a.lx-btn { display: inline-flex; align-items: center; justify-content: center; t
 .lx-admission-block-description { margin: 0 0 16px; font-size: 12px; color: var(--lx-muted); line-height: 1.5; }
 .lx-admission-read-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .lx-admission-reference-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.lx-admission-rm-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.lx-admission-rm-details { grid-template-columns: repeat(5, minmax(0, 1fr)); margin-top: 14px; }
+.lx-admission-tab-panel > .lx-admission-section:first-child { margin-top: 0; }
 .lx-admission-options-grid > .lx-admission-read-grid,
 .lx-admission-child-options > .lx-admission-read-grid { grid-template-columns: minmax(0, 1fr); }
 .lx-admission-requester-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -67,6 +70,19 @@ a.lx-btn { display: inline-flex; align-items: center; justify-content: center; t
 .lx-admission-list-toolbar > .lx-btn { width: 100%; }
 .lx-admission-child-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; color: var(--lx-blue-dark); font-size: 13px; }
 .lx-admission-child-head > strong { display: flex; align-items: center; gap: 8px; }
+.lx-admission-document-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
+.lx-admission-document-file { display: grid; gap: 10px; min-width: 0; align-content: start; }
+.lx-admission-document-inline { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); align-items: end; gap: 12px; min-width: 0; }
+.lx-admission-document-head { justify-content: space-between; gap: 8px; }
+.lx-admission-document-head > .lx-btn { margin-left: auto; }
+.lx-admission-remove-icon { width: 32px; height: 32px; padding: 0; }
+.lx-admission-document-file > .lx-upload { margin-top: 0; }
+.lx-admission-document-signers { min-width: 0; margin-top: 0; padding-top: 16px; border-top: 1px solid var(--lx-line); }
+.lx-admission-document-signers .lx-admission-form-row { margin-top: 0; gap: 10px; }
+.lx-admission-signer-card { gap: 6px; }
+.lx-admission-signer-fields { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1.2fr); }
+.lx-admission-signer-cpf { display: grid; grid-template-columns: minmax(0, 1fr) 32px; align-items: end; gap: 8px; min-width: 0; }
+.lx-admission-signer-cpf > .lx-btn-icon { margin-bottom: 5px; }
 .lx-admission-conditions-row { grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: start; }
 .lx-admission-conditions-row .lx-radio-options { min-height: 42px; align-items: center; }
 /* O fundo reforça a cor do ícone da guia; os componentes seguem o tema compartilhado. */
@@ -79,8 +95,9 @@ a.lx-btn { display: inline-flex; align-items: center; justify-content: center; t
 [data-collection-tab="condicionais"] { --lx-guide-accent: #6663a6; --lx-guide-background: #545188; --lx-guide-history-background: #666489; }
 [data-collection-tab="anexos"] { --lx-guide-accent: #9b526d; --lx-guide-background: #7f4359; --lx-guide-history-background: #835b6a; }
 .lx-admission-horizontal { min-width: 0; margin-bottom: 20px; }
-.lx-admission-tabs { display: flex; align-items: flex-start; overflow-x: auto; max-width: 100%; padding: 3px 2px 14px; }
-.lx-admission-tab { display: flex; flex: 1 0 110px; flex-direction: column; align-items: flex-start; gap: 8px; min-width: 0; min-height: 94px; padding: 12px 10px; border: 2px solid transparent; border-radius: var(--lx-radius); background: var(--lx-guide-background); color: var(--lx-white); text-align: left; font: inherit; cursor: pointer; }
+.lx-fieldset + .lx-admission-horizontal { margin-top: 16px; }
+.lx-admission-tabs { display: flex; align-items: flex-start; max-width: 100%; padding: 6px 6px 14px; }
+.lx-admission-tab { display: flex; flex: 1 1 0; flex-direction: column; align-items: flex-start; gap: 8px; min-width: 0; min-height: 94px; padding: 12px 10px; border: 2px solid transparent; border-radius: var(--lx-radius); background: var(--lx-guide-background); color: var(--lx-white); text-align: left; overflow-wrap: anywhere; font: inherit; cursor: pointer; }
 .lx-admission-tab > strong { font-size: 11px; line-height: 1.5; }
 .lx-admission-horizontal[data-collection-readonly="true"] .lx-admission-tab { background: var(--lx-guide-history-background); }
 .lx-admission-tab-icon { display: grid; place-items: center; width: 28px; height: 28px; border-radius: var(--lx-radius); background: var(--lx-white); color: var(--lx-guide-accent); font-size: 13px; }
@@ -102,6 +119,7 @@ a.lx-btn { display: inline-flex; align-items: center; justify-content: center; t
 .lx-signing-person { min-width: 0; padding: 12px 14px; border: 1px solid var(--lx-line); border-radius: var(--lx-radius); background: var(--lx-blue-soft); }
 .lx-signing-person .lx-signing-person-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 12px; }
 .lx-signing-summary-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.lx-signing-overview-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .lx-signing-status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: var(--lx-radius); background: var(--lx-orange-soft); color: #8f430f; font-size: 11px; font-weight: 700; line-height: 1.45; }
 .lx-signing-status.is-signed { background: var(--lx-green-soft); color: #146245; }
 .lx-origin-equipment-table { display: grid; gap: 10px; margin-top: 14px; }
@@ -112,6 +130,14 @@ a.lx-btn { display: inline-flex; align-items: center; justify-content: center; t
 .lx-admission-equipment-history { grid-template-columns: 1fr; }
 .lx-origin-equipment-table + .lx-admission-read-grid { margin-top: 14px; }
 .lx-upload { min-width: 0; margin-top: 12px; }
+.lx-upload-inline { display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: center; gap: 12px; margin-top: 0; }
+.lx-upload-inline > .lx-btn-outline { border: 1px solid var(--lx-blue); background: var(--lx-blue-soft); }
+.lx-upload-inline.is-readonly { grid-template-columns: minmax(0, 1fr); }
+.lx-upload-inline .lx-attachment-list { margin-top: 0; }
+.lx-upload-inline .lx-attachment-row { min-height: 44px; padding: 4px 8px; gap: 8px; }
+.lx-upload-inline .lx-btn-icon { width: 32px; height: 32px; }
+.lx-upload-inline .lx-attachment-info > i { width: 24px; height: 24px; flex-basis: 24px; }
+.lx-upload-inline > .lx-error-message { grid-column: 1 / -1; }
 .lx-attachment-info > div { min-width: 0; }
 .lx-upload.lx-error { padding: 8px; border: 1px solid var(--lx-red); border-radius: var(--lx-radius); }
 .lx-error > .lx-error-message { display: block; margin-top: 4px; }
@@ -124,6 +150,9 @@ a.lx-btn { display: inline-flex; align-items: center; justify-content: center; t
 .lx-file-image { width: 100%; height: 100%; object-fit: contain; }
 .lx-dropzone:focus-within, :focus-visible { outline: 3px solid #4a8de4; outline-offset: 3px; }
 @media (max-width: 940px) {
+  .lx-admission-signer-cpf { grid-column: 1 / -1; }
+  .lx-admission-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .lx-admission-tab-connector { display: none; }
   .lx-signing-summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .lx-admission-child-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .lx-admission-read-grid, .lx-admission-requester-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -131,6 +160,7 @@ a.lx-btn { display: inline-flex; align-items: center; justify-content: center; t
   .lx-admission-conditions-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 720px) {
+  .lx-admission-document-inline, .lx-upload-inline { grid-template-columns: minmax(0, 1fr); }
   .lx-signing-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .lx-signing-person .lx-signing-person-grid { grid-template-columns: 1fr; }
   .lx-dismissal-origin-row { grid-template-columns: minmax(0, 1fr); }
@@ -141,4 +171,7 @@ a.lx-btn { display: inline-flex; align-items: center; justify-content: center; t
   .lx-radio-options { column-gap: 20px; }
   .lx-admission-read-grid, .lx-admission-requester-grid { grid-template-columns: 1fr; }
   .lx-attachment-info span { white-space: normal; overflow-wrap: anywhere; }
+}
+@media (max-width: 520px) {
+  .lx-admission-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

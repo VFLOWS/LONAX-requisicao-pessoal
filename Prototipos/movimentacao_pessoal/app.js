@@ -644,14 +644,14 @@
 
   function renderEquipmentsEditor() {
     return '<div class="lx-child-table"><button class="lx-btn lx-btn-primary" type="button" data-action="add-equipment"><i class="fa-solid fa-plus"></i> Adicionar equipamento</button>' + state.form.equipamentos.map(function (item, index) {
-      return '<div class="lx-child-row">' + singleSelect("Equipamento", "equipamento", item.equipamento, rm.equipamentos, true, "equipment", index) + field("Quantidade", "quantidade", item.quantidade, false, true, "equipment", index, "number") + textareaScoped("Observação", "observacao", item.observacao, false, "equipment", index) + '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-equipment" data-index="' + index + '" aria-label="Excluir equipamento"><i class="fa-solid fa-trash"></i></button></div>';
+      return '<div class="lx-child-row">' + field("Equipamento", "equipamento", item.equipamento, false, true, "equipment", index) + field("Quantidade", "quantidade", item.quantidade, false, true, "equipment", index, "number") + textareaScoped("Observação", "observacao", item.observacao, false, "equipment", index) + '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-equipment" data-index="' + index + '" aria-label="Excluir equipamento"><i class="fa-solid fa-trash"></i></button></div>';
     }).join("") + '</div>';
   }
   function renderOriginEquipmentsEditor() {
     if (state.form.usaEquipamentoAtual !== "Sim") return "";
     return '<div class="lx-child-table lx-origin-equipment-table"><button class="lx-btn lx-btn-primary" type="button" data-action="add-origin-equipment"><i class="fa-solid fa-plus"></i> Adicionar equipamento</button>' + state.form.equipamentosOrigem.map(function (item, index) {
       return '<div class="lx-child-row lx-origin-equipment-row">' +
-        singleSelect("Equipamento", "equipamento", item.equipamento, rm.equipamentos, true, "originEquipment", index) +
+        field("Equipamento", "equipamento", item.equipamento, false, true, "originEquipment", index) +
         field("Quantidade", "quantidade", item.quantidade, false, true, "originEquipment", index, "text") +
         textareaScoped("Destino do Equipamento", "observacao", item.observacao, false, "originEquipment", index) +
         '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-origin-equipment" data-index="' + index + '" aria-label="Excluir equipamento"><i class="fa-solid fa-trash"></i></button>' +

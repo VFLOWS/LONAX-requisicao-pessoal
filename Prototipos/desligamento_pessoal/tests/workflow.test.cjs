@@ -60,6 +60,8 @@ async function review(page, area, value = 'approve', note = 'Dados conferidos pe
   await click(page, 'decide'); await confirm(page);
 }
 async function pick(page, key, value) {
+  const item = /^item-(infraItems|epiItems)-(\d+)$/.exec(key);
+  if (item) { await page.locator('input[data-item="' + item[1] + '"][data-index="' + item[2] + '"][data-prop="tipo"]').fill(value); return; }
   const control = page.locator('[data-single-select][data-key="' + key + '"]');
   await control.locator('.lx-single-select-control').click();
   await control.locator('[data-select-option="' + value + '"]').click();

@@ -156,6 +156,26 @@ a {
   background: #f8fbff;
 }
 
+.lx-stage-shell > .lx-section-head {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.lx-prototypes-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  max-width: 100%;
+  margin-left: auto;
+  text-align: center;
+  text-decoration: none;
+}
+
+.lx-prototypes-back > i {
+  flex-shrink: 0;
+}
+
 button.lx-section-head {
   width: 100%;
   border: 0;

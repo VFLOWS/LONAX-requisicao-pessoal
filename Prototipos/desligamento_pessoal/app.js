@@ -204,7 +204,12 @@
   Object.values(state.checks).forEach(item => {
     if (['conferido', 'na'].includes(item?.status) && item.date == null) item.date = checklistExampleDate;
   });
-  ['infraItems', 'epiItems'].forEach(scope => state.form[scope].forEach(item => { if (item.quantidade == null) item.quantidade = '1'; }));
+  const equipmentExamples = requestExamples();
+  // Restaura somente nomes vazios ao abrir a página, sem recriar itens removidos.
+  ['infraItems', 'epiItems'].forEach(scope => state.form[scope].forEach((item, index) => {
+    if (item.quantidade == null) item.quantidade = '1';
+    if (!String(item.tipo ?? '').trim()) item.tipo = equipmentExamples[scope][index % equipmentExamples[scope].length].tipo;
+  }));
   if (!Array.isArray(state.form.rmStability)) state.form.rmStability = JSON.parse(JSON.stringify(stabilityExamples[state.form.employee] || []));
   // Acrescenta os detalhes dos exemplos a rascunhos existentes, preservando os registros do histórico.
   state.form.rmStability.forEach(record => {
@@ -436,7 +441,7 @@
       const attrs = ' data-item="' + scope + '" data-index="' + i + '"';
       if (editable) {
         return '<div class="lx-child-row lx-origin-equipment-row lx-dismissal-origin-row">' +
-          singleSelect(itemName, 'item-' + scope + '-' + i, epi ? epiTypes : equipmentTypes, true, item.tipo, attrs + ' data-prop="tipo"') +
+          '<label class="lx-field"><span>' + itemName + ' <b>*</b></span><input type="text"' + attrs + ' data-prop="tipo" value="' + escape(item.tipo || '') + '" /></label>' +
           '<label class="lx-field"><span>Quantidade <b>*</b></span><input type="number" min="1" step="1"' + attrs + ' data-prop="quantidade" value="' + escape(item.quantidade || '') + '" /></label>' +
           '<label class="lx-field lx-item-observation"><span>Observação</span><textarea' + attrs + ' data-prop="descricao">' + escape(item.descricao) + '</textarea></label>' +
           '<button type="button" class="lx-btn-icon lx-btn-danger" data-action="delete-item" data-scope="' + scope + '" data-index="' + i + '" aria-label="Excluir ' + (epi ? 'EPI' : 'equipamento') + ' ' + (i + 1) + '"><i class="fa-solid fa-trash"></i></button></div>';

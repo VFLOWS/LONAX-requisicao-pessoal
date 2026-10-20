@@ -790,7 +790,7 @@
     return '<div class="lx-child-table lx-origin-equipment-table"><button class="lx-btn lx-btn-primary" type="button" data-action="add-current-equipment"><i class="fa-solid fa-plus"></i> Adicionar equipamento</button>' +
       state.form.equipamentosOrigem.map(function (item, index) {
         return '<div class="lx-child-row lx-career-equipment-row lx-career-current-equipment-row">' +
-          singleSelect("Equipamento", "equipamento", item.equipamento, rm.equipamentos, true, "currentEquipment", index) +
+          field("Equipamento", "equipamento", item.equipamento, true, false, "text", "currentEquipment", index) +
           field("Quantidade", "quantidade", item.quantidade, true, true, "text", "currentEquipment", index) +
           textareaScoped("Destino do Equipamento", "destino", item.destino, true, "currentEquipment", index) +
           '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-current-equipment" data-index="' + index + '" aria-label="Excluir equipamento"><i class="fa-solid fa-trash"></i></button>' +
@@ -802,7 +802,7 @@
     return '<div class="lx-child-table"><button class="lx-btn lx-btn-primary" type="button" data-action="add-required-equipment"><i class="fa-solid fa-plus"></i> Adicionar equipamento</button>' +
       state.form.equipamentosNecessarios.map(function (item, index) {
         return '<div class="lx-child-row lx-career-equipment-row lx-career-required-equipment-row">' +
-          singleSelect("Equipamento", "equipamento", item.equipamento, rm.equipamentos, true, "requiredEquipment", index) +
+          field("Equipamento", "equipamento", item.equipamento, true, false, "text", "requiredEquipment", index) +
           field("Quantidade", "quantidade", item.quantidade, true, false, "number", "requiredEquipment", index) +
           textareaScoped("Observações", "observacao", item.observacao, false, "requiredEquipment", index) +
           '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-required-equipment" data-index="' + index + '" aria-label="Excluir equipamento"><i class="fa-solid fa-trash"></i></button>' +
@@ -916,6 +916,11 @@
     else if (scope === "requiredEquipment") state.form.equipamentosNecessarios[index][name] = value;
     else { state.form[name] = value; applyAutoFill(name, value); }
     state.errors = {};
+    if (scope === "currentEquipment" || scope === "requiredEquipment") {
+      var equipmentField = node.closest(".lx-field");
+      if (equipmentField) { equipmentField.classList.remove("lx-error"); var message = equipmentField.querySelector(".lx-error-message"); if (message) message.remove(); }
+      return;
+    }
     if (name === "novoSalario" && event.type === "input") {
       node.value = value;
       syncEnquadramentoFields();
