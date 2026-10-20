@@ -1,0 +1,144 @@
+@import url("../movimentacao_pessoal/style.css");
+
+/* A base visual é compartilhada com os outros processos Lonax. */
+.lx-fieldset + .lx-fieldset { margin-top: 16px; }
+.lx-fieldset > .lx-field, .lx-fieldset > .lx-grid-3, .lx-fieldset > .lx-grid-2 { margin-top: 12px; }
+.lx-field label, .lx-field > span { color: var(--lx-blue-dark); font-size: 11px; font-weight: 700; }
+.lx-field label b { color: var(--lx-orange); }
+.lx-field { min-width: 0; }
+.lx-tag { min-width: 0; }
+.lx-single-select { min-width: 0; width: 100%; }
+.lx-tag button { flex: 0 0 14px; }
+.lx-field .lx-select-value { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: inherit; font: inherit; }
+.lx-span-all { grid-column: 1 / -1; }
+.lx-admission-gap { margin-top: 14px; }
+.lx-radio-options { grid-template-columns: repeat(2, max-content); gap: 8px 28px; }
+.lx-radio-options:has(input[value="Inapto"]) { grid-template-columns: repeat(2, max-content); }
+.lx-radio-options:has(input[value="Processo Seletivo"]) { grid-template-columns: repeat(2, max-content); }
+.lx-radio-option input { margin: 0; flex: 0 0 16px; }
+.lx-radio-option { cursor: pointer; }
+.lx-fieldset { background: #fbfdff; }
+.lx-field-counter { display: block; text-align: right; color: var(--lx-muted); font-size: 11px; }
+.lx-field-counter > span { color: inherit; font: inherit; }
+.lx-admission-section + .lx-admission-section { margin-top: 16px; }
+.lx-admission-section .lx-section-head { margin-bottom: 0; }
+.lx-admission-form-row { display: grid; gap: 12px; align-items: end; margin-top: 14px; }
+.lx-admission-form-row.lx-admission-cols-1 { grid-template-columns: minmax(0, 1fr); }
+.lx-admission-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.lx-admission-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.lx-admission-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.lx-admission-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.lx-admission-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.lx-admission-form-row .lx-single-select-control input { min-width: 0; }
+.lx-admission-history-row { align-items: start; }
+.lx-admission-subsection { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--lx-line); min-width: 0; }
+.lx-admission-subsection:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.lx-admission-subsection > h3 { margin: 0 0 12px; color: var(--lx-blue-dark); font-size: 12px; font-weight: 700; }
+.lx-admission-subsection + .lx-fieldset { margin-top: 20px; }
+.lx-admission-form-row + .lx-grid-3, .lx-admission-form-row + .lx-admission-read-grid { margin-top: 14px; }
+a.lx-btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+.lx-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.lx-actions { flex-wrap: wrap; }
+.lx-admission-fieldset-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; margin-top: 16px; align-items: start; }
+.lx-admission-fieldset-grid > div { min-width: 0; }
+.lx-admission-fieldset-grid .lx-fieldset, .lx-admission-fieldset-grid .lx-history-fieldset { margin-top: 0; height: 100%; }
+.lx-admission-options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 16px 20px; }
+.lx-admission-form-row + .lx-fieldset { margin-top: 20px; }
+.lx-current-decision + .lx-field, .lx-current-decision + .lx-grid-3 { margin-top: 16px; }
+.lx-decision-question { margin-bottom: 12px; }
+[hidden] { display: none !important; }
+.lx-admission-group { min-width: 0; margin: 12px 0; overflow: hidden; border: 1px solid var(--lx-line); border-radius: var(--lx-radius); background: var(--lx-white); }
+.lx-admission-group > summary { display: flex; align-items: center; gap: 10px; padding: 12px 14px; list-style: none; cursor: pointer; background: var(--lx-blue-soft); color: var(--lx-blue-dark); font-size: 13px; }
+.lx-admission-group > summary::-webkit-details-marker { display: none; }
+.lx-admission-group > summary > strong { flex: 1; min-width: 0; }
+.lx-admission-group > summary > i { transition: transform .15s; }
+.lx-admission-group:not([open]) > summary > i { transform: rotate(-90deg); }
+.lx-admission-group-body { padding: 12px; border-top: 1px solid var(--lx-line); }
+.lx-admission-group-body > .lx-history-fieldset:first-child { margin-top: 0; }
+.lx-admission-child-card { background: var(--lx-white); }
+.lx-admission-block-description { margin: 0 0 16px; font-size: 12px; color: var(--lx-muted); line-height: 1.5; }
+.lx-admission-read-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.lx-admission-reference-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.lx-admission-options-grid > .lx-admission-read-grid,
+.lx-admission-child-options > .lx-admission-read-grid { grid-template-columns: minmax(0, 1fr); }
+.lx-admission-requester-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.lx-admission-children { display: grid; gap: 12px; margin-top: 12px; }
+.lx-admission-list-toolbar { display: flex; justify-content: flex-start; }
+.lx-admission-list-toolbar > .lx-btn { width: 100%; }
+.lx-admission-child-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; color: var(--lx-blue-dark); font-size: 13px; }
+.lx-admission-child-head > strong { display: flex; align-items: center; gap: 8px; }
+.lx-admission-conditions-row { grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: start; }
+.lx-admission-conditions-row .lx-radio-options { min-height: 42px; align-items: center; }
+/* O fundo reforça a cor do ícone da guia; os componentes seguem o tema compartilhado. */
+[data-collection-tab="contratacao"] { --lx-guide-accent: #3b537f; --lx-guide-background: #304468; --lx-guide-history-background: #4e5c74; }
+[data-collection-tab="pessoais"] { --lx-guide-accent: #315da8; --lx-guide-background: #284c8a; --lx-guide-history-background: #49618a; }
+[data-collection-tab="documentos"] { --lx-guide-accent: #7754a5; --lx-guide-background: #624587; --lx-guide-history-background: #6f5c89; }
+[data-collection-tab="bancarios"] { --lx-guide-accent: #24745f; --lx-guide-background: #1e5f4e; --lx-guide-history-background: #426e62; }
+[data-collection-tab="dependentes"] { --lx-guide-accent: #3a7893; --lx-guide-background: #306279; --lx-guide-history-background: #4e707f; }
+[data-collection-tab="beneficios"] { --lx-guide-accent: #9b6528; --lx-guide-background: #7f5321; --lx-guide-history-background: #836544; }
+[data-collection-tab="condicionais"] { --lx-guide-accent: #6663a6; --lx-guide-background: #545188; --lx-guide-history-background: #666489; }
+[data-collection-tab="anexos"] { --lx-guide-accent: #9b526d; --lx-guide-background: #7f4359; --lx-guide-history-background: #835b6a; }
+.lx-admission-horizontal { min-width: 0; margin-bottom: 20px; }
+.lx-admission-tabs { display: flex; align-items: flex-start; overflow-x: auto; max-width: 100%; padding: 3px 2px 14px; }
+.lx-admission-tab { display: flex; flex: 1 0 110px; flex-direction: column; align-items: flex-start; gap: 8px; min-width: 0; min-height: 94px; padding: 12px 10px; border: 2px solid transparent; border-radius: var(--lx-radius); background: var(--lx-guide-background); color: var(--lx-white); text-align: left; font: inherit; cursor: pointer; }
+.lx-admission-tab > strong { font-size: 11px; line-height: 1.5; }
+.lx-admission-horizontal[data-collection-readonly="true"] .lx-admission-tab { background: var(--lx-guide-history-background); }
+.lx-admission-tab-icon { display: grid; place-items: center; width: 28px; height: 28px; border-radius: var(--lx-radius); background: var(--lx-white); color: var(--lx-guide-accent); font-size: 13px; }
+.lx-admission-tab.is-active { border-color: var(--lx-guide-accent); box-shadow: 0 2px 6px #173f8617; }
+.lx-admission-tab:focus-visible { outline-color: var(--lx-guide-accent); }
+.lx-admission-tab-description { font-size: 10px; line-height: 1.5; color: #e1edff; }
+.lx-admission-tab:not(.is-active) .lx-admission-tab-description { display: none; }
+.lx-admission-tab-connector { flex: 0 0 22px; margin-top: 27px; border-top: 2px dotted #9bb7d8; }
+.lx-admission-tab-panel { min-width: 0; }
+.lx-admission-tab-panel > .lx-section-head { border-radius: var(--lx-radius) var(--lx-radius) 0 0; background: var(--lx-white); }
+.lx-admission-tab-panel .lx-section-head h3 { margin: 0; color: var(--lx-blue-dark); font-size: 14px; }
+.lx-admission-tab-panel .lx-fieldset, .lx-admission-tab-panel .lx-history-fieldset { background: var(--lx-white); }
+.lx-admission-tab-panel > .lx-admission-group-body { padding: 14px; border-top: 0; border-radius: 0 0 var(--lx-radius) var(--lx-radius); background: var(--lx-white); }
+.lx-admission-child-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 12px; }
+.lx-status { display: inline-flex; align-items: center; justify-content: center; padding: 4px 8px; border-radius: var(--lx-radius); background: var(--lx-blue-soft); color: var(--lx-blue-dark); font-size: 11px; line-height: 1.45; }
+.lx-status.is-done { background: var(--lx-green-soft); color: #146245; }
+.lx-status.is-pending { background: var(--lx-orange-soft); color: #8f430f; }
+.lx-signature-tracking { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+.lx-signing-person { min-width: 0; padding: 12px 14px; border: 1px solid var(--lx-line); border-radius: var(--lx-radius); background: var(--lx-blue-soft); }
+.lx-signing-person .lx-signing-person-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 12px; }
+.lx-signing-summary-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.lx-signing-status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: var(--lx-radius); background: var(--lx-orange-soft); color: #8f430f; font-size: 11px; font-weight: 700; line-height: 1.45; }
+.lx-signing-status.is-signed { background: var(--lx-green-soft); color: #146245; }
+.lx-origin-equipment-table { display: grid; gap: 10px; margin-top: 14px; }
+.lx-origin-equipment-table > .lx-btn { width: 100%; }
+.lx-dismissal-origin-row .lx-item-observation { grid-column: 1 / -2; }
+.lx-dismissal-origin-row .lx-field { margin: 0; }
+.lx-dismissal-origin-row input[type="number"] { min-width: 0; width: 100%; }
+.lx-admission-equipment-history { grid-template-columns: 1fr; }
+.lx-origin-equipment-table + .lx-admission-read-grid { margin-top: 14px; }
+.lx-upload { min-width: 0; margin-top: 12px; }
+.lx-attachment-info > div { min-width: 0; }
+.lx-upload.lx-error { padding: 8px; border: 1px solid var(--lx-red); border-radius: var(--lx-radius); }
+.lx-error > .lx-error-message { display: block; margin-top: 4px; }
+.lx-radio-field.lx-error { padding: 8px; border: 1px solid var(--lx-red); border-radius: var(--lx-radius); background: var(--lx-red-soft); }
+.lx-feedback { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 120; width: max-content; max-width: calc(100% - 32px); padding: 14px 20px; border-radius: var(--lx-radius); background: var(--lx-blue-dark); color: white; box-shadow: 0 8px 24px #142b4c33; }
+.lx-feedback-error { background: #992727; }
+.lx-modal { max-height: calc(100dvh - 36px); overflow-y: auto; }
+.lx-modal-message .lx-field { margin-top: 12px; }
+.lx-attachment-preview { min-height: 260px; height: min(60vh, 600px); }
+.lx-file-image { width: 100%; height: 100%; object-fit: contain; }
+.lx-dropzone:focus-within, :focus-visible { outline: 3px solid #4a8de4; outline-offset: 3px; }
+@media (max-width: 940px) {
+  .lx-signing-summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .lx-admission-child-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lx-admission-read-grid, .lx-admission-requester-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lx-admission-form-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lx-admission-conditions-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .lx-signing-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lx-signing-person .lx-signing-person-grid { grid-template-columns: 1fr; }
+  .lx-dismissal-origin-row { grid-template-columns: minmax(0, 1fr); }
+  .lx-dismissal-origin-row .lx-item-observation { grid-column: auto; }
+  .lx-dismissal-origin-row > .lx-btn-icon { margin-top: 0; }
+  .lx-signature-tracking, .lx-admission-child-options, .lx-admission-form-row, .lx-admission-conditions-row { grid-template-columns: 1fr; }
+  .lx-admission-tab-description { display: none; }
+  .lx-radio-options { column-gap: 20px; }
+  .lx-admission-read-grid, .lx-admission-requester-grid { grid-template-columns: 1fr; }
+  .lx-attachment-info span { white-space: normal; overflow-wrap: anywhere; }
+}
