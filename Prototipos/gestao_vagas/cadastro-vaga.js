@@ -34,9 +34,9 @@
     { icon: "fa-users", label: "Equipe" }, { icon: "fa-magnifying-glass", label: "Análise" },
     { icon: "fa-file-lines", label: "Documentação" }, { icon: "fa-file-signature", label: "Assinatura" },
     { icon: "fa-calendar-days", label: "Agendamento" }, { icon: "fa-briefcase", label: "Experiência" },
-    { icon: "fa-laptop", label: "Teste técnico" }, { icon: "fa-graduation-cap", label: "Escolaridade" },
-    { icon: "fa-shield-halved", label: "Segurança" }, { icon: "fa-helmet-safety", label: "Teste prático" },
-    { icon: "fa-stethoscope", label: "Exame médico" }, { icon: "fa-handshake", label: "Proposta" },
+    { icon: "fa-laptop", label: "Teste Técnico" }, { icon: "fa-graduation-cap", label: "Escolaridade" },
+    { icon: "fa-shield-halved", label: "Segurança" }, { icon: "fa-helmet-safety", label: "Teste Prático" },
+    { icon: "fa-stethoscope", label: "Exame Médico" }, { icon: "fa-handshake", label: "Proposta" },
     { icon: "fa-chart-simple", label: "Indicadores" }, { icon: "fa-bullseye", label: "Competências" },
     { icon: "fa-phone", label: "Contato" }, { icon: "fa-video", label: "Videoconferência" },
     { icon: "fa-building", label: "Área" }, { icon: "fa-flag-checkered", label: "Conclusão" }
@@ -63,10 +63,10 @@
   }
 
   function selectionBuilder() {
-    return '<div class="sl-selection-toolbar">' + action("openStageDialog", "Adicionar etapa", "fa-plus") + '</div>' +
-      '<div class="sl-selection-builder"><div><div class="sl-selection-heading"><h3>Etapas da seleção</h3><span id="selectionCount" role="status" aria-live="polite"></span></div><div class="sl-selection-stage-list" id="selectionStageList">' + steps.map(function (step, index) {
+    return '<div class="sl-selection-toolbar">' + action("openStageDialog", "Adicionar Etapa", "fa-plus") + '</div>' +
+      '<div class="sl-selection-builder"><div><div class="sl-selection-heading"><h3>Etapas da Seleção</h3><span id="selectionCount" role="status" aria-live="polite"></span></div><div class="sl-selection-stage-list" id="selectionStageList">' + steps.map(function (step, index) {
         return stageRow(step, index, state.steps.indexOf(step.id) !== -1);
-      }).join("") + '</div><span class="sl-sr-only" id="selectionOrderFeedback" role="status" aria-live="polite"></span></div><div class="sl-selection-preview"><div class="sl-selection-heading"><h3>Fluxo da seleção</h3><i class="fa-solid fa-diagram-project" aria-hidden="true"></i></div><div id="selectionPreview"></div></div></div>';
+      }).join("") + '</div><span class="sl-sr-only" id="selectionOrderFeedback" role="status" aria-live="polite"></span></div><div class="sl-selection-preview"><div class="sl-selection-heading"><h3>Fluxo da Seleção</h3><i class="fa-solid fa-diagram-project" aria-hidden="true"></i></div><div id="selectionPreview"></div></div></div>';
   }
 
   function stageRow(step, index, active) {
@@ -77,7 +77,7 @@
   }
 
   function stageIconChoices() {
-    return '<div class="sl-stage-icon-grid" role="radiogroup" aria-label="Ícone da etapa">' + stageIcons.map(function (item, index) {
+    return '<div class="sl-stage-icon-grid" role="radiogroup" aria-label="Ícone da Etapa">' + stageIcons.map(function (item, index) {
       return '<label class="sl-stage-icon-choice" title="' + SL.escapeHtml(item.label) + '"><input type="radio" name="stageIcon" value="' + item.icon + '" aria-label="' + SL.escapeHtml(item.label) + '"' + (index === 0 ? ' checked' : '') + ' /><i class="fa-solid ' + item.icon + '" aria-hidden="true"></i></label>';
     }).join("") + '</div>';
   }
@@ -139,79 +139,79 @@
 
   function render() {
     var fields = [
-      SL.infoSection({ title: "Requisição de origem", icon: "fa-file-signature", tone: "blue", bodyHtml:
-        input("requisitionNumber", "Requisição de Pessoal aprovada", { type: "select", required: true, options: [{ value: "", label: "Selecione uma requisição aprovada" }].concat(DB.requisitions.map(function (item) { return { value: item.number, label: item.number + " - " + item.role + " - " + item.positions + (item.positions === 1 ? " posição" : " posições") }; })) }) +
+      SL.infoSection({ title: "Requisição de Origem", icon: "fa-file-signature", tone: "blue", bodyHtml:
+        input("requisitionNumber", "Requisição de Pessoal Aprovada", { type: "select", required: true, options: [{ value: "", label: "Selecione uma requisição aprovada" }].concat(DB.requisitions.map(function (item) { return { value: item.number, label: item.number + " - " + item.role + " - " + item.positions + (item.positions === 1 ? " posição" : " posições") }; })) }) +
         '<div class="sl-origin-presentation" id="requisitionPresentation"></div>'
       }),
-      SL.infoSection({ title: "Dados da posição", icon: "fa-briefcase", tone: "green", bodyHtml: '<div id="positionPresentation"></div>' }),
-      formSection("Dados do recrutamento", "fa-users", "purple", [
-        input("title", "Título da vaga", { required: true, wide: true, attrs: { maxlength: 180 } }),
-        origin("code", "Código da vaga", { value: existing ? existing.code : "Gerado ao cadastrar" }),
-        origin("openingDate", "Data de abertura", { type: "date", value: existing ? existing.openingDate : DB.today() }),
-        input("macrostatus", "Status da vaga", { type: "select", required: true, value: state.status || (state.published ? "Em recrutamento" : "Aguardando publicação"), options: options(DB.statuses) }),
+      SL.infoSection({ title: "Dados da Posição", icon: "fa-briefcase", tone: "green", bodyHtml: '<div id="positionPresentation"></div>' }),
+      formSection("Dados do Recrutamento", "fa-users", "purple", [
+        input("title", "Título da Vaga", { required: true, wide: true, attrs: { maxlength: 180 } }),
+        origin("code", "Código da Vaga", { value: existing ? existing.code : "Gerado ao cadastrar" }),
+        origin("openingDate", "Data de Abertura", { type: "date", value: existing ? existing.openingDate : DB.today() }),
+        input("macrostatus", "Status da Vaga", { type: "select", required: true, value: state.status || (state.published ? "Em recrutamento" : "Aguardando publicação"), options: options(DB.statuses) }),
         input("modality", "Modalidade", { required: true, type: "select", options: options(["Presencial", "Híbrido", "Remoto"]) }),
-        input("recruiter", "Responsável pelo recrutamento", { required: true, type: "select", options: options(["Carla Mendes", "Renato Silva", "Ricardo Nunes"]) }),
-        input("admissionOwner", "Responsável pela admissão", { required: true, type: "select", options: options(["Renato Silva", "Carla Mendes", "Ricardo Nunes"]) }),
-        input("address", "Local de trabalho", { wide: true, attrs: { maxlength: 250 } }),
-        input("notes", "Observações do recrutamento", { type: "textarea", wide: true })
+        input("recruiter", "Responsável pelo Recrutamento", { required: true, type: "select", options: options(["Carla Mendes", "Renato Silva", "Ricardo Nunes"]) }),
+        input("admissionOwner", "Responsável pela Admissão", { required: true, type: "select", options: options(["Renato Silva", "Carla Mendes", "Ricardo Nunes"]) }),
+        input("address", "Local de Trabalho", { wide: true, attrs: { maxlength: 250 } }),
+        input("notes", "Observações do Recrutamento", { type: "textarea", wide: true })
       ]),
-      SL.infoSection({ title: "Configuração do processo seletivo", icon: "fa-diagram-project", tone: "blue", bodyHtml:
+      SL.infoSection({ title: "Configuração do Processo Seletivo", icon: "fa-diagram-project", tone: "blue", bodyHtml:
         selectionBuilder() + '<p class="sl-form-error sl-hidden" id="stepsError" role="alert"></p>'
       }),
       SL.infoSection({ title: "Publicação na Sólides", icon: "fa-bullhorn", tone: "purple", bodyHtml:
-        '<div class="sl-publication-choice"><span>Vaga publicada na Sólides?</span><div><label><input type="radio" name="published" value="yes"' + (state.published ? ' checked' : '') + ' /> Sim</label><label><input type="radio" name="published" value="no"' + (!state.published ? ' checked' : '') + ' /> Não</label></div></div>' +
+        '<div class="sl-publication-choice"><span>Vaga Publicada na Sólides?</span><div><label><input type="radio" name="published" value="yes"' + (state.published ? ' checked' : '') + ' /> Sim</label><label><input type="radio" name="published" value="no"' + (!state.published ? ' checked' : '') + ' /> Não</label></div></div>' +
         '<div class="sl-form-grid sl-publication-fields" id="publicationFields">' +
-          input("reference", "Código / referência Sólides", { attrs: { maxlength: 80 } }) +
-          input("url", "Link da vaga na Sólides", { type: "url", attrs: { placeholder: "https://lonax.vagas.solides.com.br/vaga/...", maxlength: 500 } }) +
-          input("publicationDate", "Data de publicação", { type: "date", attrs: { max: DB.today() } }) +
-          input("publicationNotes", "Observação da publicação", { type: "textarea", wide: true }) +
+          input("reference", "Código / Referência Sólides", { attrs: { maxlength: 80 } }) +
+          input("url", "Link da Vaga na Sólides", { type: "url", attrs: { placeholder: "https://lonax.vagas.solides.com.br/vaga/...", maxlength: 500 } }) +
+          input("publicationDate", "Data de Publicação", { type: "date", attrs: { max: DB.today() } }) +
+          input("publicationNotes", "Observação da Publicação", { type: "textarea", wide: true }) +
         '</div>'
       }),
       '<p class="sl-form-error sl-hidden" id="vacancyError" role="alert"></p>',
       '<div class="sl-form-actions sl-vacancy-actions">' +
         action("cancelVacancy", "Cancelar", "fa-xmark") +
-        action("saveDraft", "Salvar rascunho", "fa-floppy-disk") +
-        SL.button({ label: existing ? "Salvar alterações" : "Cadastrar vaga", icon: "fa-check", type: "submit" }) +
+        action("saveDraft", "Salvar Rascunho", "fa-floppy-disk") +
+        SL.button({ label: existing ? "Salvar alterações" : "Cadastrar Vaga", icon: "fa-check", type: "submit" }) +
       '</div>'
     ];
     document.getElementById("cadastroVagaApp").innerHTML = SL.pageSection({
-      title: existing ? "Cadastro da vaga " + existing.code : "Cadastro de vaga",
+      title: existing ? "Cadastro da Vaga " + existing.code : "Cadastro de Vaga",
       description: "Dados da posição aprovada e configuração do recrutamento e seleção.",
       icon: "fa-briefcase", iconClass: "sl-section-icon-candidates",
       className: "sl-vacancy-registration",
-      actionsHtml: '<a class="sl-secondary-button" href="dashboard.html"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Painel de vagas</a>',
+      actionsHtml: '<a class="sl-secondary-button" href="dashboard.html"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Painel de Vagas</a>',
       bodyHtml: '<form id="cadastroVagaForm" class="sl-cadastro-vaga-form" novalidate>' + fields.join("") + '</form><p class="sl-vacancy-feedback" id="draftFeedback" role="status">' + (draft ? 'Rascunho recuperado.' : '') + '</p>'
     }) + SL.dialog({
-      id: "vacancyConfirm", title: existing ? "Confirmar alterações" : "Confirmar cadastro da vaga",
+      id: "vacancyConfirm", title: existing ? "Confirmar alterações" : "Confirmar Cadastro da Vaga",
       description: "Confira a posição e as informações do recrutamento.",
       bodyHtml: '<div id="vacancyReview"></div>',
       actionsHtml: action("backVacancyConfirm", "Voltar", "fa-arrow-left") + action("finishVacancy", "Confirmar", "fa-check", "sl-primary-button")
     }) + SL.dialog({
-      id: "vacancyStage", title: "Adicionar etapa da seleção", icon: "fa-diagram-project", className: "sl-stage-dialog",
-      bodyHtml: '<div class="sl-stage-form">' + SL.formField({ name: "stageName", label: "Nome da etapa", required: true, attrs: { maxlength: 80, autocomplete: "off" } }) + '<div><span class="sl-stage-icon-label">Ícone da etapa</span>' + stageIconChoices() + '</div><div class="sl-stage-icon-preview" id="stageIconPreview"></div></div>',
-      actionsHtml: action("cancelStageDialog", "Cancelar", "fa-xmark") + action("confirmStageDialog", "Adicionar etapa", "fa-plus", "sl-primary-button")
+      id: "vacancyStage", title: "Adicionar Etapa da Seleção", icon: "fa-diagram-project", className: "sl-stage-dialog",
+      bodyHtml: '<div class="sl-stage-form">' + SL.formField({ name: "stageName", label: "Nome da Etapa", required: true, attrs: { maxlength: 80, autocomplete: "off" } }) + '<div><span class="sl-stage-icon-label">Ícone da Etapa</span>' + stageIconChoices() + '</div><div class="sl-stage-icon-preview" id="stageIconPreview"></div></div>',
+      actionsHtml: action("cancelStageDialog", "Cancelar", "fa-xmark") + action("confirmStageDialog", "Adicionar Etapa", "fa-plus", "sl-primary-button")
     }) + SL.dialog({
-      id: "vacancyDraft", title: "Salvar rascunho", icon: "fa-floppy-disk",
+      id: "vacancyDraft", title: "Salvar Rascunho", icon: "fa-floppy-disk",
       className: "sl-vacancy-dialog-compact",
       description: "O preenchimento será salvo para continuar depois. A vaga ainda não será cadastrada.",
       bodyHtml: '<div id="vacancyDraftReview"></div>',
-      actionsHtml: action("backVacancyDraft", "Voltar", "fa-arrow-left") + action("confirmVacancyDraft", "Salvar rascunho", "fa-floppy-disk", "sl-primary-button")
+      actionsHtml: action("backVacancyDraft", "Voltar", "fa-arrow-left") + action("confirmVacancyDraft", "Salvar Rascunho", "fa-floppy-disk", "sl-primary-button")
     }) + SL.dialog({
-      id: "vacancyDraftSuccess", title: "Rascunho salvo", icon: "fa-circle-check",
+      id: "vacancyDraftSuccess", title: "Rascunho Salvo", icon: "fa-circle-check",
       className: "sl-vacancy-dialog-compact",
       description: "As informações foram salvas. Você poderá retomar o preenchimento depois.",
-      actionsHtml: action("continueVacancyDraft", "Continuar preenchendo", "fa-pen-to-square", "sl-primary-button")
+      actionsHtml: action("continueVacancyDraft", "Continuar Preenchendo", "fa-pen-to-square", "sl-primary-button")
     }) + SL.dialog({
-      id: "vacancyCancel", title: "Cancelar cadastro", icon: "fa-triangle-exclamation",
+      id: "vacancyCancel", title: "Cancelar Cadastro", icon: "fa-triangle-exclamation",
       className: "sl-vacancy-dialog-compact",
       description: "Ao cancelar, as informações deste preenchimento não serão salvas e serão perdidas. O rascunho deste cadastro, se houver, também será descartado.",
-      actionsHtml: action("backVacancyCancel", "Continuar preenchendo", "fa-arrow-left") + action("discardVacancy", "Confirmar cancelamento", "fa-xmark", "sl-primary-button")
+      actionsHtml: action("backVacancyCancel", "Continuar Preenchendo", "fa-arrow-left") + action("discardVacancy", "Confirmar Cancelamento", "fa-xmark", "sl-primary-button")
     }) + SL.dialog({
-      id: "vacancySuccess", title: "Vaga cadastrada", icon: "fa-circle-check",
+      id: "vacancySuccess", title: "Vaga Cadastrada", icon: "fa-circle-check",
       description: "O registro da vaga foi salvo.",
       bodyHtml: '<div id="vacancySuccessData"></div>',
-      actionsHtml: '<a class="sl-secondary-button" id="openSavedVacancy" href="detalhe-vaga.html"><i class="fa-solid fa-briefcase" aria-hidden="true"></i> Visualizar vaga</a><a class="sl-primary-button" href="dashboard.html"><i class="fa-solid fa-table-list" aria-hidden="true"></i> Ir ao painel</a>'
-    }) + '<section class="sl-confirm-backdrop sl-hidden" id="vacancyLoading" role="status" aria-live="polite"><div class="sl-result-panel"><div class="sl-loading-box"><span class="sl-loader"></span><h3>Salvando vaga</h3><p>Registrando a posição e as etapas de seleção.</p></div></div></section>';
+      actionsHtml: '<a class="sl-secondary-button" id="openSavedVacancy" href="detalhe-vaga.html"><i class="fa-solid fa-briefcase" aria-hidden="true"></i> Visualizar Vaga</a><a class="sl-primary-button" href="dashboard.html"><i class="fa-solid fa-table-list" aria-hidden="true"></i> Ir ao Painel</a>'
+    }) + '<section class="sl-confirm-backdrop sl-hidden" id="vacancyLoading" role="status" aria-live="polite"><div class="sl-result-panel"><div class="sl-loading-box"><span class="sl-loader"></span><h3>Salvando Vaga</h3><p>Registrando a posição e as etapas de seleção.</p></div></div></section>';
     bind();
     updateOrigin();
     updatePublication(false);
@@ -225,20 +225,20 @@
     document.getElementById("requisitionPresentation").innerHTML = SL.infoGrid([
       { label: "Solicitante", value: value("requester") },
       { label: "Aprovado pelo RH", value: value("approvedBy") },
-      { label: "Data da aprovação", value: date("approvedAt") }
+      { label: "Data da Aprovação", value: date("approvedAt") }
     ], 3);
     document.getElementById("positionPresentation").innerHTML = SL.infoGrid([
       { label: "Cargo", value: value("role") }, { label: "Nível / Step", value: value("level") },
-      { label: "Setor / Seção", value: value("area") }, { label: "Centro de custo", value: value("costCenter") },
-      { label: "Descrição do cargo", value: value("description"), wide: true },
-      { label: "Área / Gerência", value: value("department") }, { label: "Gestor responsável", value: value("manager") },
-      { label: "Unidade / Filial", value: value("unit") }, { label: "Quantidade de posições", value: value("positions") },
-      { label: "Tipo de necessidade", value: value("need") }, { label: "Tipo de contrato", value: value("contract") },
-      { label: "Salário proposto", value: value("salary") }, { label: "Data desejada de início", value: date("desiredDate") },
+      { label: "Setor / Seção", value: value("area") }, { label: "Centro de Custo", value: value("costCenter") },
+      { label: "Descrição do Cargo", value: value("description"), wide: true },
+      { label: "Área / Gerência", value: value("department") }, { label: "Gestor Responsável", value: value("manager") },
+      { label: "Unidade / Filial", value: value("unit") }, { label: "Quantidade de Posições", value: value("positions") },
+      { label: "Tipo de Necessidade", value: value("need") }, { label: "Tipo de Contrato", value: value("contract") },
+      { label: "Salário Proposto", value: value("salary") }, { label: "Data Desejada de Início", value: date("desiredDate") },
       { label: "Escala", value: value("schedule") }, { label: "Horário", value: value("hours") },
       { label: "Escolaridade", value: value("education") },
       { label: "Justificativa", value: value("justification"), wide: true },
-      { label: "Observações para a vaga", value: value("notes"), wide: true }
+      { label: "Observações para a Vaga", value: value("notes"), wide: true }
     ], 4);
     document.getElementById("publicationDate").min = requisition ? requisition.approvedAt : "";
   }
@@ -251,7 +251,7 @@
       control.disabled = !published;
       var required = published && name !== "publicationNotes";
       control.required = required;
-      control.closest("label").querySelector("span").innerHTML = SL.escapeHtml({ reference: "Código / referência Sólides", url: "Link da vaga na Sólides", publicationDate: "Data de publicação", publicationNotes: "Observação da publicação" }[name]) + (required ? ' <em>*</em>' : '');
+      control.closest("label").querySelector("span").innerHTML = SL.escapeHtml({ reference: "Código / Referência Sólides", url: "Link da Vaga na Sólides", publicationDate: "Data de Publicação", publicationNotes: "Observação da Publicação" }[name]) + (required ? ' <em>*</em>' : '');
     });
     var status = document.getElementById("macrostatus");
     if (syncStatus !== false && (status.value === "Aguardando publicação" || status.value === "Em recrutamento")) {
@@ -339,16 +339,16 @@
 
   function review(record) {
     return SL.infoGrid([
-      { label: "Requisição de origem", value: record.requisitionNumber },
-      { label: "Título da vaga", value: record.title },
+      { label: "Requisição de Origem", value: record.requisitionNumber },
+      { label: "Título da Vaga", value: record.title },
       { label: "Cargo", value: record.requisition.role },
       { label: "Nível / Step", value: record.requisition.level },
-      { label: "Quantidade de posições", value: String(record.requisition.positions) },
+      { label: "Quantidade de Posições", value: String(record.requisition.positions) },
       { label: "Gestor", value: record.requisition.manager },
-      { label: "Responsável pelo recrutamento", value: record.recruiter },
-      { label: "Status da vaga", value: record.status },
+      { label: "Responsável pelo Recrutamento", value: record.recruiter },
+      { label: "Status da Vaga", value: record.status },
       { label: "Referência Sólides", value: record.reference || "Não vinculada" },
-      { label: "Etapas de seleção", value: DB.activeSelectionSteps(record).map(function (step) { return step.title; }).join(" → "), wide: true }
+      { label: "Etapas de Seleção", value: DB.activeSelectionSteps(record).map(function (step) { return step.title; }).join(" → "), wide: true }
     ]);
   }
 
@@ -490,10 +490,10 @@
     document.getElementById("saveDraft").addEventListener("click", function () {
       var record = snapshot();
       document.getElementById("vacancyDraftReview").innerHTML = SL.infoGrid([
-        { label: "Requisição de origem", value: record.requisitionNumber || "Não selecionada" },
-        { label: "Título da vaga", value: record.title || "Não informado" },
-        { label: "Status da vaga", value: record.status },
-        { label: "Etapas ativas", value: String(record.steps.length) }
+        { label: "Requisição de Origem", value: record.requisitionNumber || "Não selecionada" },
+        { label: "Título da Vaga", value: record.title || "Não informado" },
+        { label: "Status da Vaga", value: record.status },
+        { label: "Etapas Ativas", value: String(record.steps.length) }
       ], 2);
       openDialog("vacancyDraft");
     });

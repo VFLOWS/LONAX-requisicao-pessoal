@@ -35,20 +35,20 @@
         document.querySelectorAll('.sl-vagas-kpi').forEach(node => {
           const label = node.querySelector('small')?.textContent;
           const value = node.querySelector('strong');
-          if (value && label === 'Situação da admissão') value.textContent = status;
-          if (value && label === 'Atividade atual') value.textContent = current;
+          if (value && label === 'Situação da Admissão') value.textContent = status;
+          if (value && label === 'Atividade Atual') value.textContent = current;
         });
         const tags = document.querySelector('.sl-candidate-profile-tags .sl-status-pill'); if (tags) tags.textContent = status;
         let target = document.getElementById('admissionTracking');
         if (!target) { target = document.createElement('div'); target.id = 'admissionTracking'; document.getElementById('candidateDetailApp').append(target); }
-        const content = SL.infoSection({ title: 'Acompanhamento da Admissão', icon: 'fa-file-signature', tone: 'blue', bodyHtml: SL.infoGrid([{ label: 'Solicitação', value: process.id }, { label: 'Atividade atual', value: current }, { label: 'Situação da admissão', value: status }, { label: 'Chapa', value: process.rm.chapa || 'Aguardando integração' }]) + '<a class="sl-primary-button" href="' + link + '"><i class="fa-solid fa-arrow-right"></i> Acessar admissão</a>' });
+        const content = SL.infoSection({ title: 'Acompanhamento da Admissão', icon: 'fa-file-signature', tone: 'blue', bodyHtml: SL.infoGrid([{ label: 'Solicitação', value: process.id }, { label: 'Atividade Atual', value: current }, { label: 'Situação da Admissão', value: status }, { label: 'Chapa', value: process.rm.chapa || 'Aguardando integração' }]) + '<a class="sl-primary-button" href="' + link + '"><i class="fa-solid fa-arrow-right"></i> Acessar Admissão</a>' });
         if (target.innerHTML !== content) target.innerHTML = content;
       }
       if (vacancy === 'VG-001' && document.getElementById('tabAdmissoes')) {
         tableRows(document.querySelector('.sl-admission-table'), row => /Ana Beatriz/.test(row[0] || ''), row => [row[0], escape(process.id), escape(current), 'Juliana Costa', pill, escape(A.date(process.form.admissao))]);
         let target = document.getElementById('admissionVacancyTracking');
         if (!target) { target = document.createElement('div'); target.id = 'admissionVacancyTracking'; document.getElementById('tabAdmissoes').append(target); }
-        const content = SL.infoSection({ title: 'Resultado da Admissão', icon: 'fa-user-check', tone: 'green', bodyHtml: SL.infoGrid([{ label: 'Candidato', value: process.form.nome }, { label: 'Situação da admissão', value: status }, { label: 'Situação da posição', value: admitted ? 'Preenchida' : cancelled ? 'Disponível para seleção' : 'Aguardando conclusão da admissão' }]) + '<a class="sl-secondary-button" href="' + link + '">Consultar admissão</a>' });
+        const content = SL.infoSection({ title: 'Resultado da Admissão', icon: 'fa-user-check', tone: 'green', bodyHtml: SL.infoGrid([{ label: 'Candidato', value: process.form.nome }, { label: 'Situação da Admissão', value: status }, { label: 'Situação da Posição', value: admitted ? 'Preenchida' : cancelled ? 'Disponível para seleção' : 'Aguardando conclusão da admissão' }]) + '<a class="sl-secondary-button" href="' + link + '">Consultar Admissão</a>' });
         if (target.innerHTML !== content) target.innerHTML = content;
       }
       tableRows(document.querySelector('.sl-candidates-table'), row => /candidato=ana-beatriz|Ana Beatriz/.test(row[0] || ''), row => { row[4] = '<a class="sl-table-link" href="' + link + '">' + escape(process.id) + '</a>'; row[5] = escape(current); row[6] = pill; return row; });

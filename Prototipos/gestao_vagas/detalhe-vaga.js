@@ -14,9 +14,9 @@
       { icon: "fa-dollar-sign", text: "R$ 2.450,00" }
     ],
     metrics: [
-      { icon: "fa-file-signature", className: "sl-vagas-kpi-blue", label: "Requisição de origem", value: "REQ-2026-0184" },
-      { icon: "fa-id-badge", className: "sl-vagas-kpi-green", label: "Tipo de contratação", value: "Efetivo" },
-      { icon: "fa-users-gear", className: "sl-vagas-kpi-orange", label: "Quantidade de posições", value: "1" },
+      { icon: "fa-file-signature", className: "sl-vagas-kpi-blue", label: "Requisição de Origem", value: "REQ-2026-0184" },
+      { icon: "fa-id-badge", className: "sl-vagas-kpi-green", label: "Tipo de Contratação", value: "Efetivo" },
+      { icon: "fa-users-gear", className: "sl-vagas-kpi-orange", label: "Quantidade de Posições", value: "1" },
       { icon: "fa-link", className: "sl-vagas-kpi-red", label: "Referência Sólides", value: "895022" }
     ],
     responsibles: [
@@ -122,7 +122,7 @@
 
   function renderDetail() {
     var detailTabs = SL.tabs({
-      label: "Detalhe da vaga",
+      label: "Detalhe da Vaga",
       items: [
         { label: "Resumo", icon: "fa-chart-column", active: true, attrs: { "data-detail-tab": "resumo" } },
         { label: "Candidatos", icon: "fa-users", attrs: { "data-detail-tab": "candidatos" } },
@@ -140,46 +140,46 @@
         { className: "sl-vagas-kpi-orange", icon: "fa-user-check", label: "Aprovados", value: "1" },
         { className: "sl-vagas-kpi-red", icon: "fa-triangle-exclamation", label: "Fora do SLA", value: "0" }
       ]),
-      SL.infoSection({ title: "Resumo gerencial", icon: "fa-briefcase", tone: "blue", columns: 4, items: [
+      SL.infoSection({ title: "Resumo Gerencial", icon: "fa-briefcase", tone: "blue", columns: 4, items: [
         { label: "Código da Vaga", value: "VG-001" },
-        { label: "Requisição de origem", value: "REQ-2026-0184" },
-        { label: "Status da vaga", value: "Em seleção" },
-        { label: "Previsão de início", value: "20/10/2026" },
+        { label: "Requisição de Origem", value: "REQ-2026-0184" },
+        { label: "Status da Vaga", value: "Em seleção" },
+        { label: "Previsão de Início", value: "20/10/2026" },
         { label: "Área / Gerência", value: "Produção / Gerência Industrial" },
         { label: "Gestor", value: "Eduardo Martins" },
         { label: "Unidade / Filial", value: "Matriz - Sarzedo/MG" },
-        { label: "Centro de custo", value: "IND.PRO.001" },
-        { label: "Posições disponíveis", value: "1 de 1" },
-        { label: "Posições preenchidas", value: "0" },
-        { label: "Responsável pelo recrutamento", value: "Carla Mendes" },
-        { label: "Responsável pela admissão", value: "Renato Silva" }
+        { label: "Centro de Custo", value: "IND.PRO.001" },
+        { label: "Posições Disponíveis", value: "1 de 1" },
+        { label: "Posições Preenchidas", value: "0" },
+        { label: "Responsável pelo Recrutamento", value: "Carla Mendes" },
+        { label: "Responsável pela Admissão", value: "Renato Silva" }
       ] }),
-      SL.infoSection({ title: "Perfil da posição", icon: "fa-address-card", tone: "purple", columns: 4, items: [
+      SL.infoSection({ title: "Perfil da Posição", icon: "fa-address-card", tone: "purple", columns: 4, items: [
         { label: "Cargo", value: "Operador de Máquinas" },
         { label: "Nível / Step", value: "Operacional - Step 2" },
-        { label: "Tipo de necessidade", value: "Substituto" },
+        { label: "Tipo de Necessidade", value: "Substituto" },
         { label: "Escolaridade", value: "Ensino médio completo" },
-        { label: "Tipo de contrato", value: "Efetivo" },
-        { label: "Salário proposto", value: "R$ 2.450,00" },
+        { label: "Tipo de Contrato", value: "Efetivo" },
+        { label: "Salário Proposto", value: "R$ 2.450,00" },
         { label: "Escala", value: "6x1" },
         { label: "Horário", value: "06:00 às 14:00" },
-        { label: "Principais responsabilidades", value: "Operar máquinas da linha industrial, acompanhar parâmetros de produção, registrar ocorrências e apoiar a organização e a segurança da área.", wide: true },
-        { label: "Requisitos prioritários", value: "Experiência na operação de máquinas industriais e disponibilidade para trabalho presencial em Sarzedo/MG, na escala 6x1.", wide: true }
+        { label: "Principais Responsabilidades", value: "Operar máquinas da linha industrial, acompanhar parâmetros de produção, registrar ocorrências e apoiar a organização e a segurança da área.", wide: true },
+        { label: "Requisitos Prioritários", value: "Experiência na operação de máquinas industriais e disponibilidade para trabalho presencial em Sarzedo/MG, na escala 6x1.", wide: true }
       ] }),
-      SL.infoSection({ title: "Situação da seleção e próximos passos", icon: "fa-list-check", tone: "green", columns: 4, items: [
-        { label: "Candidato aprovado", value: "Ana Beatriz" },
-        { label: "Situação da admissão", value: "Documentação em análise" },
-        { label: "Pendência para contratação", value: "Comprovante de escolaridade" },
-        { label: "Responsável pela pendência", value: "Renato Silva" },
-        { label: "Última movimentação", value: "06/08/2026 08:45 - Conferência de documentação" },
-        { label: "Entrevista técnica", value: "Caio Henrique - Avaliação do Gestor" },
-        { label: "Triagem em andamento", value: "Marina Oliveira - Triagem RH" },
-        { label: "Preenchimento da posição", value: "Aguardando conclusão da admissão" }
+      SL.infoSection({ title: "Situação da Seleção e Próximos Passos", icon: "fa-list-check", tone: "green", columns: 4, items: [
+        { label: "Candidato Aprovado", value: "Ana Beatriz" },
+        { label: "Situação da Admissão", value: "Documentação em análise" },
+        { label: "Pendência para Contratação", value: "Comprovante de escolaridade" },
+        { label: "Responsável pela Pendência", value: "Renato Silva" },
+        { label: "Última Movimentação", value: "06/08/2026 08:45 - Conferência de documentação" },
+        { label: "Entrevista Técnica", value: "Caio Henrique - Avaliação do Gestor" },
+        { label: "Triagem em Andamento", value: "Marina Oliveira - Triagem RH" },
+        { label: "Preenchimento da Posição", value: "Aguardando conclusão da admissão" }
       ] }),
-      sectionHeader("Candidatos em destaque", "Etapa, responsável e próxima ação dos candidatos acompanhados nesta vaga.", "fa-users", SL.button({ className: "sl-secondary-button", icon: "fa-users", label: "Ver candidatos", attrs: { "data-detail-open": "candidatos" } })),
+      sectionHeader("Candidatos em Destaque", "Etapa, responsável e próxima ação dos candidatos acompanhados nesta vaga.", "fa-users", SL.button({ className: "sl-secondary-button", icon: "fa-users", label: "Ver Candidatos", attrs: { "data-detail-open": "candidatos" } })),
       SL.table({
         className: "sl-summary-candidates-table",
-        columns: ["Candidato", "Etapa atual", "Perfil", "Aderência", "Responsável", "Próxima ação"],
+        columns: ["Candidato", "Etapa Atual", "Perfil", "Aderência", "Responsável", "Próxima Ação"],
         rows: candidates.slice().sort(function (a, b) {
           return Number(b.status === "Aprovado") - Number(a.status === "Aprovado");
         }).map(function (candidate) {
@@ -188,10 +188,10 @@
       }),
       "</div>",
       '<div class="sl-detail-section sl-hidden" id="tabCandidatos">',
-      sectionHeader("Lista de candidatos", "Acompanhamento da solicitação Fluig de cada candidato.", "fa-users", '<a class="sl-secondary-button" href="index.html"><i class="fa-solid fa-file-import"></i> Gerenciar candidatos</a>'),
+      sectionHeader("Lista de Candidatos", "Acompanhamento da solicitação Fluig de cada candidato.", "fa-users", '<a class="sl-secondary-button" href="index.html"><i class="fa-solid fa-file-import"></i> Gerenciar Candidatos</a>'),
       SL.table({
         className: "sl-candidates-table",
-        columns: ["Candidato", "E-mail", "CPF", "Perfil", "Solicitação Fluig", "Atividade atual", "Status", "SLA"],
+        columns: ["Candidato", "E-mail", "CPF", "Perfil", "Solicitação Fluig", "Atividade Atual", "Status", "SLA"],
         rows: renderCandidateRows()
       }),
       "</div>",
@@ -203,46 +203,46 @@
         { label: "Cargo", value: "Operador de Máquinas" },
         { label: "Nível / Step", value: "Operacional - Step 2" },
         { label: "Setor / Seção", value: "Produção" },
-        { label: "Centro de custo", value: "IND.PRO.001" },
-        { label: "Descrição do cargo", value: "Operar máquinas da linha industrial, acompanhar parâmetros de produção, registrar ocorrências e apoiar a organização e a segurança da área.", wide: true },
+        { label: "Centro de Custo", value: "IND.PRO.001" },
+        { label: "Descrição do Cargo", value: "Operar máquinas da linha industrial, acompanhar parâmetros de produção, registrar ocorrências e apoiar a organização e a segurança da área.", wide: true },
         { label: "Área / Gerência", value: "Gerência Industrial" },
-        { label: "Gestor responsável", value: "Eduardo Martins" },
+        { label: "Gestor Responsável", value: "Eduardo Martins" },
         { label: "Unidade / Filial", value: "Matriz - Sarzedo/MG" },
-        { label: "Quantidade de posições", value: "1" },
-        { label: "Tipo de necessidade", value: "Substituto" },
-        { label: "Tipo de contrato", value: "Efetivo" },
-        { label: "Salário proposto", value: "R$ 2.450,00" },
-        { label: "Data desejada para contratação", value: "20/10/2026" },
+        { label: "Quantidade de Posições", value: "1" },
+        { label: "Tipo de Necessidade", value: "Substituto" },
+        { label: "Tipo de Contrato", value: "Efetivo" },
+        { label: "Salário Proposto", value: "R$ 2.450,00" },
+        { label: "Data Desejada para Contratação", value: "20/10/2026" },
         { label: "Escala", value: "6x1" },
         { label: "Horário", value: "06:00 às 14:00" },
-        { label: "Data de abertura", value: "31/07/2026" },
+        { label: "Data de Abertura", value: "31/07/2026" },
         { label: "Escolaridade", value: "Ensino médio completo" }
       ] }),
-      SL.infoSection({ title: "Recrutamento e publicação", icon: "fa-bullhorn", tone: "green", columns: 4, items: [
+      SL.infoSection({ title: "Recrutamento e Publicação", icon: "fa-bullhorn", tone: "green", columns: 4, items: [
         { label: "Referência Sólides", value: "895022" },
-        { label: "Data de publicação", value: "31/07/2026" },
-        { label: "Data de fechamento", value: "14/08/2026" },
-        { label: "Status de publicação", value: "Publicada" },
+        { label: "Data de Publicação", value: "31/07/2026" },
+        { label: "Data de Fechamento", value: "14/08/2026" },
+        { label: "Status de Publicação", value: "Publicada" },
         { label: "Modalidade", value: "Presencial" },
-        { label: "Local de trabalho", value: "Sarzedo/MG" },
-        { label: "Responsável pelo recrutamento", value: "Carla Mendes" },
-        { label: "Responsável pela admissão", value: "Renato Silva" }
+        { label: "Local de Trabalho", value: "Sarzedo/MG" },
+        { label: "Responsável pelo Recrutamento", value: "Carla Mendes" },
+        { label: "Responsável pela Admissão", value: "Renato Silva" }
       ] }),
-      SL.infoSection({ title: "Justificativa e observações", icon: "fa-comment-dots", tone: "purple", items: [
+      SL.infoSection({ title: "Justificativa e Observações", icon: "fa-comment-dots", tone: "purple", items: [
         { label: "Justificativa", value: "Reposição operacional para reforçar a linha industrial diante do aumento de demanda produtiva.", wide: true },
-        { label: "Observações para a vaga", value: "Priorizar candidatos com experiência na operação de máquinas industriais e disponibilidade para a escala 6x1.", wide: true }
+        { label: "Observações para a Vaga", value: "Priorizar candidatos com experiência na operação de máquinas industriais e disponibilidade para a escala 6x1.", wide: true }
       ] }),
-      '<div class="sl-vaga-link-card"><span><i class="fa-solid fa-arrow-up-right-from-square"></i></span><div><small>Link da vaga na Sólides</small><a href="' + vacancy.linkHref + '" target="_blank" rel="noopener noreferrer">' + vacancy.linkText + "</a></div></div>",
+      '<div class="sl-vaga-link-card"><span><i class="fa-solid fa-arrow-up-right-from-square"></i></span><div><small>Link da Vaga na Sólides</small><a href="' + vacancy.linkHref + '" target="_blank" rel="noopener noreferrer">' + vacancy.linkText + "</a></div></div>",
       "</div>",
       '<div class="sl-detail-section sl-hidden" id="tabHistorico">',
-      sectionHeader("Histórico da vaga", "Eventos e movimentações realizadas no processo seletivo.", "fa-clock-rotate-left"),
+      sectionHeader("Histórico da Vaga", "Eventos e movimentações realizadas no processo seletivo.", "fa-clock-rotate-left"),
       renderHistory(),
       "</div>",
       '<div class="sl-detail-section sl-hidden" id="tabAdmissoes">',
       sectionHeader("Admissões", "Candidatos aprovados e seus processos de contratação.", "fa-file-contract"),
       SL.table({
         className: "sl-admission-table",
-        columns: ["Candidato", "Solicitação Fluig", "Etapa", "Responsável", "Status", "Previsão de início"],
+        columns: ["Candidato", "Solicitação Fluig", "Etapa", "Responsável", "Status", "Previsão de Início"],
         rows: [
           [candidateName(candidates[2]), "5003", "Documentação", "Equipe de Admissão", statusPill("Em análise", "sl-status-neutral"), "20/10/2026"]
         ]
@@ -251,11 +251,11 @@
     ];
 
     document.getElementById("detailApp").innerHTML = SL.pageSection({
-      title: "Detalhe da vaga",
+      title: "Detalhe da Vaga",
       description: "Resumo, dados, histórico e acompanhamento da posição.",
       icon: "fa-briefcase",
       iconClass: "sl-section-icon-candidates",
-      actionsHtml: '<a class="sl-secondary-button" href="index.html"><i class="fa-solid fa-users"></i> Processo seletivo</a>',
+      actionsHtml: '<a class="sl-secondary-button" href="index.html"><i class="fa-solid fa-users"></i> Processo Seletivo</a>',
       bodyHtml: [
         SL.jobSummary(vacancy),
         '<div class="sl-detail-viewbar">' + detailTabs + "</div>",
@@ -266,22 +266,22 @@
 
   function renderHistory() {
     return SL.historyTimeline([
-      { date: "2026-07-31T09:12:00", title: "Abertura da vaga", icon: "fa-folder-plus", responsible: "Eduardo Martins", department: "Gerência Industrial", description: "Vaga criada após a aprovação da Requisição de Pessoal.", items: [{ label: "Requisição de origem", value: "REQ-2026-0184" }, { label: "Código da vaga", value: "VG-001" }, { label: "Posições autorizadas", value: "1" }] },
+      { date: "2026-07-31T09:12:00", title: "Abertura da Vaga", icon: "fa-folder-plus", responsible: "Eduardo Martins", department: "Gerência Industrial", description: "Vaga criada após a aprovação da Requisição de Pessoal.", items: [{ label: "Requisição de Origem", value: "REQ-2026-0184" }, { label: "Código da Vaga", value: "VG-001" }, { label: "Posições Autorizadas", value: "1" }] },
       { date: "2026-07-31T10:40:00", title: "Publicação na Sólides", icon: "fa-bullhorn", responsible: "Carla Mendes", department: "Recursos Humanos", description: "Publicação realizada com prazo de recebimento de currículos até 14/08/2026.", items: [{ label: "Referência Sólides", value: "895022" }, { label: "Status", value: "Publicada" }, { label: "Modalidade", value: "Presencial" }] },
-      { date: "2026-08-02T15:20:00", title: "Importação de candidatos", icon: "fa-file-import", responsible: "Carla Mendes", department: "Recursos Humanos", description: "Planilha da Sólides conferida e candidatos vinculados à vaga, com solicitações individuais no Fluig.", items: [{ label: "Candidatos importados", value: "12" }, { label: "Origem", value: "Planilha Sólides" }, { label: "Resultado", value: "Importação concluída" }] },
-      { date: "2026-08-03T09:10:00", title: "Triagem de candidatos", icon: "fa-list-check", responsible: "Carla Mendes", department: "Recursos Humanos", description: "Currículos revisados considerando experiência operacional, disponibilidade e perfil da posição.", items: [{ label: "Em processo", value: "7" }, { label: "Reprovados na triagem", value: "3" }, { label: "Próxima etapa", value: "Avaliação do Gestor" }] },
+      { date: "2026-08-02T15:20:00", title: "Importação de Candidatos", icon: "fa-file-import", responsible: "Carla Mendes", department: "Recursos Humanos", description: "Planilha da Sólides conferida e candidatos vinculados à vaga, com solicitações individuais no Fluig.", items: [{ label: "Candidatos Importados", value: "12" }, { label: "Origem", value: "Planilha Sólides" }, { label: "Resultado", value: "Importação Concluída" }] },
+      { date: "2026-08-03T09:10:00", title: "Triagem de Candidatos", icon: "fa-list-check", responsible: "Carla Mendes", department: "Recursos Humanos", description: "Currículos revisados considerando experiência operacional, disponibilidade e perfil da posição.", items: [{ label: "Em Processo", value: "7" }, { label: "Reprovados na Triagem", value: "3" }, { label: "Próxima Etapa", value: "Avaliação do Gestor" }] },
       { date: "2026-08-04T14:30:00", title: "Avaliação do Gestor", icon: "fa-user-tie", responsible: "Eduardo Martins", department: "Gerência Industrial", description: "Entrevista técnica realizada com Ana Beatriz. Experiência e disponibilidade compatíveis com a vaga.", items: [{ label: "Candidato", value: "Ana Beatriz" }, { label: "Solicitação Fluig", value: "5003" }, { label: "Decisão", value: "Aprovada" }], tone: "green" },
-      { date: "2026-08-05T11:35:00", title: "Encaminhamento para admissão", icon: "fa-user-check", responsible: "Renato Silva", department: "Departamento Pessoal", description: "Ana Beatriz encaminhada para conferência de documentos. Preenchimento da posição depende da conclusão da admissão.", items: [{ label: "Candidato", value: "Ana Beatriz" }, { label: "Solicitação Fluig", value: "5003" }, { label: "Previsão de início", value: "20/10/2026" }], tone: "green" },
-      { date: "2026-08-06T08:45:00", title: "Conferência de documentação", icon: "fa-file-contract", responsible: "Renato Silva", department: "Departamento Pessoal", description: "Documentos recebidos e em análise. Aguardando comprovante de escolaridade para prosseguir com a admissão.", items: [{ label: "Candidato", value: "Ana Beatriz" }, { label: "Etapa", value: "Documentação" }, { label: "Situação", value: "Em análise" }], tone: "purple" }
+      { date: "2026-08-05T11:35:00", title: "Encaminhamento para Admissão", icon: "fa-user-check", responsible: "Renato Silva", department: "Departamento Pessoal", description: "Ana Beatriz encaminhada para conferência de documentos. Preenchimento da posição depende da conclusão da admissão.", items: [{ label: "Candidato", value: "Ana Beatriz" }, { label: "Solicitação Fluig", value: "5003" }, { label: "Previsão de Início", value: "20/10/2026" }], tone: "green" },
+      { date: "2026-08-06T08:45:00", title: "Conferência de Documentação", icon: "fa-file-contract", responsible: "Renato Silva", department: "Departamento Pessoal", description: "Documentos recebidos e em análise. Aguardando comprovante de escolaridade para prosseguir com a admissão.", items: [{ label: "Candidato", value: "Ana Beatriz" }, { label: "Etapa", value: "Documentação" }, { label: "Situação", value: "Em análise" }], tone: "purple" }
     ]);
   }
 
   function renderRegisteredDetail(record) {
     if (!record) {
       document.getElementById("detailApp").innerHTML = SL.pageSection({
-        title: "Vaga não encontrada", icon: "fa-briefcase",
+        title: "Vaga não Encontrada", icon: "fa-briefcase",
         description: "O registro não está disponível neste navegador.",
-        bodyHtml: '<a class="sl-secondary-button" href="dashboard.html">Voltar ao painel</a>'
+        bodyHtml: '<a class="sl-secondary-button" href="dashboard.html">Voltar ao Painel</a>'
       });
       return false;
     }
@@ -289,32 +289,32 @@
     function date(value) { return value ? value.split("-").reverse().join("/") : "Não informada"; }
     function person(name) { return { name: name, initials: name.split(" ").slice(0, 2).map(function (part) { return part.charAt(0); }).join("") }; }
     var originItems = [
-      { label: "Requisição de origem", value: origin.number },
-      { label: "Código da vaga", value: record.code }, { label: "Solicitante", value: origin.requester },
+      { label: "Requisição de Origem", value: origin.number },
+      { label: "Código da Vaga", value: record.code }, { label: "Solicitante", value: origin.requester },
       { label: "Cargo", value: origin.role }, { label: "Nível / Step", value: origin.level },
-      { label: "Setor / Seção", value: origin.area }, { label: "Centro de custo", value: origin.costCenter },
-      { label: "Descrição do cargo", value: origin.description, wide: true },
+      { label: "Setor / Seção", value: origin.area }, { label: "Centro de Custo", value: origin.costCenter },
+      { label: "Descrição do Cargo", value: origin.description, wide: true },
       { label: "Área / Gerência", value: origin.department }, { label: "Gestor", value: origin.manager },
-      { label: "Unidade / Filial", value: origin.unit }, { label: "Quantidade de posições", value: String(origin.positions) },
-      { label: "Tipo de contrato", value: origin.contract }, { label: "Salário proposto", value: origin.salary },
+      { label: "Unidade / Filial", value: origin.unit }, { label: "Quantidade de Posições", value: String(origin.positions) },
+      { label: "Tipo de Contrato", value: origin.contract }, { label: "Salário Proposto", value: origin.salary },
       { label: "Escala", value: origin.schedule }, { label: "Horário", value: origin.hours },
-      { label: "Tipo de necessidade", value: origin.need }, { label: "Data desejada de início", value: date(origin.desiredDate) },
-      { label: "Escolaridade", value: origin.education }, { label: "Data de abertura", value: date(record.openingDate) },
-      { label: "Justificativa", value: origin.justification, wide: true }, { label: "Observações para a vaga", value: origin.notes, wide: true }
+      { label: "Tipo de Necessidade", value: origin.need }, { label: "Data Desejada de Início", value: date(origin.desiredDate) },
+      { label: "Escolaridade", value: origin.education }, { label: "Data de Abertura", value: date(record.openingDate) },
+      { label: "Justificativa", value: origin.justification, wide: true }, { label: "Observações para a Vaga", value: origin.notes, wide: true }
     ];
     var recruitmentItems = [
-      { label: "Responsável pelo recrutamento", value: record.recruiter }, { label: "Responsável pela admissão", value: record.admissionOwner },
-      { label: "Modalidade", value: record.modality }, { label: "Local de trabalho", value: record.address || "Não informado" },
-      { label: "Status da vaga", value: record.status }, { label: "Referência Sólides", value: record.reference || "Não vinculada" },
-      { label: "Data de publicação", value: date(record.publicationDate) }, { label: "Publicação", value: record.published ? "Registrada" : "Aguardando publicação" },
-      { label: "Etapas de seleção", value: window.SLVagas.activeSelectionSteps(record).map(function (step) { return step.title; }).join(" → "), wide: true },
-      { label: "Observações do recrutamento", value: record.notes || "Sem observações.", wide: true },
-      { label: "Observação da publicação", value: record.publicationNotes || "Sem observações.", wide: true }
+      { label: "Responsável pelo Recrutamento", value: record.recruiter }, { label: "Responsável pela Admissão", value: record.admissionOwner },
+      { label: "Modalidade", value: record.modality }, { label: "Local de Trabalho", value: record.address || "Não informado" },
+      { label: "Status da Vaga", value: record.status }, { label: "Referência Sólides", value: record.reference || "Não vinculada" },
+      { label: "Data de Publicação", value: date(record.publicationDate) }, { label: "Publicação", value: record.published ? "Registrada" : "Aguardando publicação" },
+      { label: "Etapas de Seleção", value: window.SLVagas.activeSelectionSteps(record).map(function (step) { return step.title; }).join(" → "), wide: true },
+      { label: "Observações do Recrutamento", value: record.notes || "Sem observações.", wide: true },
+      { label: "Observação da Publicação", value: record.publicationNotes || "Sem observações.", wide: true }
     ];
-    var history = [{ date: record.createdAt, title: "Cadastro da vaga", icon: "fa-folder-plus", responsible: record.recruiter, department: "Recursos Humanos", description: "Registro da vaga criado a partir de uma Requisição de Pessoal aprovada.", items: [{ label: "Código", value: record.code }, { label: "Requisição", value: origin.number }, { label: "Posições", value: String(origin.positions) }] }];
-    if (record.updatedAt !== record.createdAt) history.push({ date: record.updatedAt, title: "Atualização do cadastro", icon: "fa-pen-to-square", responsible: record.recruiter, department: "Recursos Humanos", description: "Dados do recrutamento e configuração da seleção atualizados.", items: [{ label: "Status da vaga", value: record.status }, { label: "Referência Sólides", value: record.reference || "Não vinculada" }] });
+    var history = [{ date: record.createdAt, title: "Cadastro da Vaga", icon: "fa-folder-plus", responsible: record.recruiter, department: "Recursos Humanos", description: "Registro da vaga criado a partir de uma Requisição de Pessoal aprovada.", items: [{ label: "Código", value: record.code }, { label: "Requisição", value: origin.number }, { label: "Posições", value: String(origin.positions) }] }];
+    if (record.updatedAt !== record.createdAt) history.push({ date: record.updatedAt, title: "Atualização do Cadastro", icon: "fa-pen-to-square", responsible: record.recruiter, department: "Recursos Humanos", description: "Dados do recrutamento e configuração da seleção atualizados.", items: [{ label: "Status da Vaga", value: record.status }, { label: "Referência Sólides", value: record.reference || "Não vinculada" }] });
     document.getElementById("detailApp").innerHTML = SL.pageSection({
-      title: "Detalhe da vaga", description: "Resumo, dados, histórico e acompanhamento da posição.",
+      title: "Detalhe da Vaga", description: "Resumo, dados, histórico e acompanhamento da posição.",
       icon: "fa-briefcase", iconClass: "sl-section-icon-candidates",
       actionsHtml: '<a class="sl-secondary-button" href="cadastro-vaga.html?vaga=' + encodeURIComponent(record.code) + '"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Editar cadastro</a>',
       bodyHtml: [
@@ -322,12 +322,12 @@
           { icon: "fa-location-dot", text: record.address || origin.unit }, { icon: "fa-building", text: record.modality },
           { icon: "fa-medal", text: origin.level }, { icon: "fa-dollar-sign", text: origin.salary }
         ], metrics: [
-          { icon: "fa-file-signature", className: "sl-vagas-kpi-blue", label: "Requisição de origem", value: origin.number },
-          { icon: "fa-id-badge", className: "sl-vagas-kpi-green", label: "Tipo de contratação", value: origin.contract },
-          { icon: "fa-users-gear", className: "sl-vagas-kpi-orange", label: "Quantidade de posições", value: String(origin.positions) },
+          { icon: "fa-file-signature", className: "sl-vagas-kpi-blue", label: "Requisição de Origem", value: origin.number },
+          { icon: "fa-id-badge", className: "sl-vagas-kpi-green", label: "Tipo de Contratação", value: origin.contract },
+          { icon: "fa-users-gear", className: "sl-vagas-kpi-orange", label: "Quantidade de Posições", value: String(origin.positions) },
           { icon: "fa-link", className: "sl-vagas-kpi-red", label: "Referência Sólides", value: record.reference || "Não vinculada" }
         ], responsibles: [person(record.recruiter), person(record.admissionOwner)], linkHref: record.published ? record.url : "", linkText: record.url }),
-        '<div class="sl-detail-viewbar">' + SL.tabs({ label: "Detalhe da vaga", items: [
+        '<div class="sl-detail-viewbar">' + SL.tabs({ label: "Detalhe da Vaga", items: [
           { label: "Resumo", icon: "fa-chart-column", active: true, attrs: { "data-detail-tab": "resumo" } },
           { label: "Candidatos", icon: "fa-users", attrs: { "data-detail-tab": "candidatos" } },
           { label: "Dados da Vaga", icon: "fa-file-lines", attrs: { "data-detail-tab": "dados" } },
@@ -335,20 +335,20 @@
           { label: "Admissões", icon: "fa-file-contract", attrs: { "data-detail-tab": "admissoes" } }
         ] }) + '</div>',
         '<div class="sl-detail-section" id="tabResumo">',
-        SL.infoSection({ title: "Resumo gerencial", icon: "fa-briefcase", columns: 4, items: [
-          { label: "Código da vaga", value: record.code }, { label: "Status", value: record.status },
-          { label: "Gestor", value: origin.manager }, { label: "Previsão de início", value: date(origin.desiredDate) },
-          { label: "Posições disponíveis", value: String(origin.positions) }, { label: "Posições preenchidas", value: "0" },
-          { label: "Candidatos vinculados", value: "0" }, { label: "Situação da admissão", value: "Não iniciada" }
+        SL.infoSection({ title: "Resumo Gerencial", icon: "fa-briefcase", columns: 4, items: [
+          { label: "Código da Vaga", value: record.code }, { label: "Status", value: record.status },
+          { label: "Gestor", value: origin.manager }, { label: "Previsão de Início", value: date(origin.desiredDate) },
+          { label: "Posições Disponíveis", value: String(origin.positions) }, { label: "Posições Preenchidas", value: "0" },
+          { label: "Candidatos Vinculados", value: "0" }, { label: "Situação da Admissão", value: "Não iniciada" }
         ] }),
-        SL.infoSection({ title: "Perfil da posição", icon: "fa-address-card", tone: "purple", columns: 4, items: originItems.slice(3, 7).concat([{ label: "Responsabilidades", value: origin.description, wide: true }, { label: "Requisitos prioritários", value: origin.notes, wide: true }]) }),
+        SL.infoSection({ title: "Perfil da Posição", icon: "fa-address-card", tone: "purple", columns: 4, items: originItems.slice(3, 7).concat([{ label: "Responsabilidades", value: origin.description, wide: true }, { label: "Requisitos Prioritários", value: origin.notes, wide: true }]) }),
         SL.infoSection({ title: "Recrutamento", icon: "fa-users", tone: "green", columns: 4, items: recruitmentItems.slice(0, -2) }),
         '</div>',
         '<div class="sl-detail-section sl-hidden" id="tabCandidatos"><p class="sl-empty-state"><i class="fa-solid fa-users"></i> Nenhum candidato vinculado a esta vaga.</p></div>',
         '<div class="sl-detail-section sl-hidden" id="tabDados">',
         SL.infoSection({ title: "Dados da Requisição de Pessoal", icon: "fa-file-lines", columns: 4, items: originItems }),
-        SL.infoSection({ title: "Recrutamento e publicação", icon: "fa-bullhorn", tone: "green", columns: 4, items: recruitmentItems.filter(function (item) { return item.label !== "Etapas de seleção"; }) }),
-        SL.infoSection({ title: "Configuração do processo seletivo", icon: "fa-diagram-project", bodyHtml: SL.selectionRoute(window.SLVagas.activeSelectionSteps(record)) }),
+        SL.infoSection({ title: "Recrutamento e Publicação", icon: "fa-bullhorn", tone: "green", columns: 4, items: recruitmentItems.filter(function (item) { return item.label !== "Etapas de Seleção"; }) }),
+        SL.infoSection({ title: "Configuração do Processo Seletivo", icon: "fa-diagram-project", bodyHtml: SL.selectionRoute(window.SLVagas.activeSelectionSteps(record)) }),
         '</div>',
         '<div class="sl-detail-section sl-hidden" id="tabHistorico">' + SL.historyTimeline(history) + '</div>',
         '<div class="sl-detail-section sl-hidden" id="tabAdmissoes"><p class="sl-empty-state"><i class="fa-solid fa-file-contract"></i> Nenhuma admissão iniciada para esta vaga.</p></div>'

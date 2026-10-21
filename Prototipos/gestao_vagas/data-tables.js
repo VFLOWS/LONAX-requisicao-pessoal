@@ -85,21 +85,21 @@
         },
         language: {
           search: "Buscar:", searchPlaceholder: "Pesquisar na tabela…",
-          lengthMenu: "Itens por página _MENU_",
+          lengthMenu: "Itens por Página _MENU_",
           info: "_START_–_END_ de _TOTAL_ " + label,
           infoEmpty: "0 " + label,
           infoFiltered: "(de _MAX_ no total)",
           emptyTable: "Nenhum registro disponível.",
           zeroRecords: "Nenhum resultado encontrado para os filtros aplicados.",
           paginate: { first: "«", previous: "‹", next: "›", last: "»" },
-          columnControl: { dropdown: 'Filtrar coluna', orderAsc: 'Ordenar crescente', orderDesc: 'Ordenar decrescente', searchClear: 'Limpar filtro', list: { empty: 'Nenhuma opção encontrada', all: 'Selecionar', none: 'Limpar seleção', search: 'Pesquisar opções…' } },
-          aria: { paginate: { first: "Primeira página", previous: "Página anterior", next: "Próxima página", last: "Última página" } }
+          columnControl: { dropdown: 'Filtrar Coluna', orderAsc: 'Ordenar Crescente', orderDesc: 'Ordenar Decrescente', searchClear: 'Limpar Filtro', list: { empty: 'Nenhuma opção encontrada', all: 'Selecionar', none: 'Limpar Seleção', search: 'Pesquisar opções…' } },
+          aria: { paginate: { first: "Primeira Página", previous: "Página Anterior", next: "Próxima Página", last: "Última Página" } }
         }
       });
       var viewport = table.closest('.dt-layout-table');
       viewport.classList.add('sl-table-scroll');
       viewport.setAttribute('role', 'region'); viewport.tabIndex = 0;
-      viewport.setAttribute('aria-label', table.caption?.textContent || table.closest('.sl-table-card')?.parentElement.querySelector('h2,h3')?.textContent || 'Tabela de registros');
+      viewport.setAttribute('aria-label', table.caption?.textContent || table.closest('.sl-table-card')?.parentElement.querySelector('h2,h3')?.textContent || 'Tabela de Registros');
       var features = { api: api };
       features.filters = new global.SLColumnFilters(table, api, columns);
       features.scroll = new global.SLTableScroll(viewport);

@@ -92,9 +92,9 @@ var vacancy = {
     { icon: "fa-dollar-sign", text: "R$ 2.450,00" }
   ],
   metrics: [
-    { icon: "fa-file-signature", className: "sl-vagas-kpi-blue", label: "Requisição de origem", value: "REQ-2026-0184" },
-    { icon: "fa-id-badge", className: "sl-vagas-kpi-green", label: "Tipo de contratação", value: "Efetivo" },
-    { icon: "fa-users-gear", className: "sl-vagas-kpi-orange", label: "Quantidade de posições", value: "1" },
+    { icon: "fa-file-signature", className: "sl-vagas-kpi-blue", label: "Requisição de Origem", value: "REQ-2026-0184" },
+    { icon: "fa-id-badge", className: "sl-vagas-kpi-green", label: "Tipo de Contratação", value: "Efetivo" },
+    { icon: "fa-users-gear", className: "sl-vagas-kpi-orange", label: "Quantidade de Posições", value: "1" },
     { icon: "fa-link", className: "sl-vagas-kpi-red", label: "Referência Sólides", value: "895022" }
   ],
   responsibles: [
@@ -108,21 +108,21 @@ var vacancy = {
 function renderProcessPage() {
   var actions = [
     '<input id="candidateFile" type="file" accept=".csv,.xls,.xlsx" hidden />',
-    SL.button({ className: "sl-secondary-button", icon: "fa-user-plus", label: "Cadastrar candidato", attrs: { id: "manualButton" } }),
+    SL.button({ className: "sl-secondary-button", icon: "fa-user-plus", label: "Cadastrar Candidato", attrs: { id: "manualButton" } }),
     SL.button({ className: "sl-primary-button", icon: "fa-file-import", label: "Importar Excel", attrs: { id: "importButton" } })
   ].join("");
 
   document.getElementById("processApp").innerHTML = [
     SL.pageSection({
-      title: "Processo seletivo",
+      title: "Processo Seletivo",
       description: "Candidatos inscritos e selecionados para acompanhamento desta vaga.",
       icon: "fa-users",
       iconClass: "sl-section-icon-candidates",
       bodyHtml: [
         SL.jobSummary(vacancy),
-        '<div class="sl-candidate-list-head"><div><h3>Lista de candidatos</h3><p>Candidatos vinculados a esta vaga e suas solicitações individuais no Fluig.</p></div><div class="sl-panel-actions">' + actions + "</div></div>",
+        '<div class="sl-candidate-list-head"><div><h3>Lista de Candidatos</h3><p>Candidatos vinculados a esta vaga e suas solicitações individuais no Fluig.</p></div><div class="sl-panel-actions">' + actions + "</div></div>",
         '<div class="sl-vagas-viewbar">' + SL.tabs({
-          label: "Visualização dos candidatos",
+          label: "Visualização dos Candidatos",
           items: [
             { label: "Lista", icon: "fa-list", active: true, attrs: { "data-view": "list" } },
             { label: "Kanban", icon: "fa-table-columns", attrs: { "data-view": "kanban" } }
@@ -132,7 +132,7 @@ function renderProcessPage() {
           id: "listView",
           className: "sl-candidates-table",
           bodyId: "candidateTable",
-          columns: ["Candidato", "E-mail", "CPF", "Perfil", "Solicitação Fluig", "Atividade atual", "Status", "SLA"]
+          columns: ["Candidato", "E-mail", "CPF", "Perfil", "Solicitação Fluig", "Atividade Atual", "Status", "SLA"]
         }),
         '<div class="sl-kanban sl-candidate-kanban sl-hidden" id="kanbanView"></div>'
       ].join("")
@@ -257,8 +257,8 @@ function renderKanban() {
   var columns = [
     { title: "Triagem RH", match: function (candidate) { return candidate.activity === "Triagem RH" && candidate.status !== "Solicitação iniciada"; } },
     { title: "Avaliação do Gestor", match: function (candidate) { return candidate.activity === "Avaliação do Gestor" && candidate.status !== "Solicitação iniciada"; } },
-    { title: "Aguardando início", match: function (candidate) { return candidate.activity === "Aguardando início" && candidate.status !== "Solicitação iniciada"; } },
-    { title: "Solicitação iniciada", match: function (candidate) { return candidate.status === "Solicitação iniciada"; } }
+    { title: "Aguardando Início", match: function (candidate) { return candidate.activity === "Aguardando início" && candidate.status !== "Solicitação iniciada"; } },
+    { title: "Solicitação Iniciada", match: function (candidate) { return candidate.status === "Solicitação iniciada"; } }
   ];
 
   var table = els.candidateTable.closest('table');
@@ -550,7 +550,7 @@ function confirmImport() {
   var candidates = selectedCandidates();
   els.confirmPanel.classList.add("sl-hidden");
   els.importPanel.classList.add("sl-hidden");
-  els.loadingTitle.textContent = "Importando candidatos";
+  els.loadingTitle.textContent = "Importando Candidatos";
   els.loadingText.textContent = "Estamos criando os registros e iniciando as solicitações individuais no Fluig.";
   els.loadingPanel.classList.remove("sl-hidden");
 
@@ -591,7 +591,7 @@ function finishImport(candidates) {
   });
 
   renderCandidateTable();
-  els.successTitle.textContent = "Importação concluída";
+  els.successTitle.textContent = "Importação Concluída";
   els.successText.textContent = importedNow.length + " candidato(s) importado(s) e solicitação(ões) individual(is) iniciada(s) com sucesso.";
   renderSuccessTable(importedNow);
   els.loadingPanel.classList.add("sl-hidden");
@@ -620,7 +620,7 @@ function renderConfirmTable(candidates) {
       "<td>" + escapeHtml(candidate.cpf || "-") + "</td>",
       "<td>" + profileTags(candidate.profile || []) + "</td>",
       "<td>" + escapeHtml(candidate.origin || "Sólides") + "</td>",
-      '<td><span class="sl-status-pill sl-status-neutral">A importar</span></td>',
+      '<td><span class="sl-status-pill sl-status-neutral">A Importar</span></td>',
       "</tr>"
     ].join("");
   }).join(""), true);
@@ -693,7 +693,7 @@ function renderManualReview() {
     "</table>",
     "</div>",
     '<div class="sl-manual-review-grid">',
-    '<span><small>Data de nascimento</small><strong>' + escapeHtml(candidate.birthDate || "-") + "</strong></span>",
+    '<span><small>Data de Nascimento</small><strong>' + escapeHtml(candidate.birthDate || "-") + "</strong></span>",
     '<span><small>Gênero</small><strong>' + escapeHtml(candidate.gender || "-") + "</strong></span>",
     '<span><small>Endereço</small><strong>' + escapeHtml(candidate.address || "-") + "</strong></span>",
     "</div>"
@@ -709,7 +709,7 @@ function renderManualConfirmTable(candidate) {
     "<td>" + escapeHtml(candidate.email || "-") + "</td>",
     "<td>" + escapeHtml(candidate.phone || "-") + "</td>",
     "<td>" + profileTags(candidate.profile || []) + "</td>",
-    '<td><span class="sl-status-pill sl-status-neutral">A cadastrar</span></td>',
+    '<td><span class="sl-status-pill sl-status-neutral">A Cadastrar</span></td>',
     "</tr>"
   ].join(""), true);
 }
@@ -798,7 +798,7 @@ function finishManualCandidate(candidate) {
 
 function updateSelectAllButton() {
   var allSelected = importedCandidates.length && selectedIds.length === importedCandidates.length;
-  els.selectAllButton.textContent = allSelected ? "Limpar seleção" : "Selecionar todos";
+  els.selectAllButton.textContent = allSelected ? "Limpar Seleção" : "Selecionar Todos";
 }
 
 function ensureSelected() {

@@ -236,9 +236,9 @@
       body = renderReadOnlySummaryComponent() + viewComponent(stage.title, stage.desc, state.status, renderRecebedor(), "", stage.icon, stage.tone);
       stack = true;
     }
-    if (state.stage === "diretoria") { body = renderApproval("diretoria", "Aprovar movimentação", "A movimentação seguirá para validação técnica."); stack = true; }
-    if (state.stage === "seguranca") { body = renderApproval("seguranca", "Validar movimentação", "A movimentação seguirá para aprovação final do RH."); stack = true; }
-    if (state.stage === "rh") { body = renderApproval("rh", "Aprovar movimentação", "A movimentação será aprovada e seguirá para conclusão."); stack = true; }
+    if (state.stage === "diretoria") { body = renderApproval("diretoria", "Aprovar Movimentação", "A movimentação seguirá para validação técnica."); stack = true; }
+    if (state.stage === "seguranca") { body = renderApproval("seguranca", "Validar Movimentação", "A movimentação seguirá para aprovação final do RH."); stack = true; }
+    if (state.stage === "rh") { body = renderApproval("rh", "Aprovar Movimentação", "A movimentação será aprovada e seguirá para conclusão."); stack = true; }
     if (state.stage === "correcao") { body = renderCorrectionFlow(); stack = true; }
     if (state.stage === "reprovada") { body = renderRejectedFlow(); stack = true; }
     if (state.stage === "finalizada") { body = renderFinishedFlow(); stack = true; }
@@ -281,12 +281,12 @@
           field("Horário", "horarioAtual", f.horarioAtual, true, true)
         ], "lx-movement-current-grid") +
         formFieldset("Infraestrutura da Origem", "laptop",
-          radioGroup("Colaborador utiliza equipamentos atualmente?", "usaEquipamentoAtual", f.usaEquipamentoAtual, ["Sim", "Não"], true) +
+          radioGroup("Colaborador Utiliza Equipamentos Atualmente?", "usaEquipamentoAtual", f.usaEquipamentoAtual, ["Sim", "Não"], true) +
           renderOriginEquipmentsEditor()
         ) +
         renderAttachmentsEditor("anexos", "Upload de Arquivos", "paperclip") +
-        formFieldset("Justificativa", "comment-dots", textarea("Justificativa da movimentação", "justificativa", f.justificativa, true)) +
-        '<div class="lx-actions"><button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar rascunho</button><button class="lx-btn lx-btn-primary" type="button" data-action="submit-cedente"><i class="fa-solid fa-paper-plane"></i> Enviar para Gestor Recebedor</button></div>'
+        formFieldset("Justificativa", "comment-dots", textarea("Justificativa da Movimentação", "justificativa", f.justificativa, true)) +
+        '<div class="lx-actions"><button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar Rascunho</button><button class="lx-btn lx-btn-primary" type="button" data-action="submit-cedente"><i class="fa-solid fa-paper-plane"></i> Enviar para Gestor Recebedor</button></div>'
       );
   }
 
@@ -317,22 +317,22 @@
           singleSelect("Escala", "escalaDestino", f.escalaDestino, rm.escalas.map(function (item) { return item.nome; }), true),
           field("Horário", "horarioDestino", f.horarioDestino, true, true),
           field("Data Prevista de Início", "vigencia", f.vigencia, isCostCenterOnlyMovement(), true, "", "", "date"),
-          radioGroup("Duração da movimentação", "duracao", f.duracao, ["Definitiva", "Provisória"], true),
+          radioGroup("Duração da Movimentação", "duracao", f.duracao, ["Definitiva", "Provisória"], true),
           f.duracao === "Provisória" ? field("Data Prevista de Término", "fimProvisorio", f.fimProvisorio, false, true, "", "", "date") : "",
-          textarea("Observações adicionais da movimentação", "observacoesMovimentacao", f.observacoesMovimentacao, false)
+          textarea("Observações Adicionais da Movimentação", "observacoesMovimentacao", f.observacoesMovimentacao, false)
         ], "lx-movement-destination-grid")
       ) +
       formFieldset("Infraestrutura do Destino", "laptop",
         '<div class="lx-destination-equipment-grid">' +
-          radioGroup("Colaborador utilizará equipamentos na área de destino?", "precisaEquipamentoDestino", f.precisaEquipamentoDestino, ["Sim", "Não"], true) +
+          radioGroup("Colaborador Utilizará Equipamentos na Área de Destino?", "precisaEquipamentoDestino", f.precisaEquipamentoDestino, ["Sim", "Não"], true) +
         '</div>' +
         (f.precisaEquipamentoDestino === "Sim" ? renderEquipmentsEditor() : "") +
-        (f.precisaEquipamentoDestino === "Sim" ? textarea("Observações do destino", "observacoesDestino", f.observacoesDestino, false) : "")
+        (f.precisaEquipamentoDestino === "Sim" ? textarea("Observações do Destino", "observacoesDestino", f.observacoesDestino, false) : "")
       )
     ) +
     renderAttachmentsEditor("anexosRecebedor", "Upload de Arquivos", "paperclip") +
     renderComparison() +
-    formFieldset("Justificativa", "comment-dots", textarea("Justificativa da movimentação", "justificativa", f.justificativa, true));
+    formFieldset("Justificativa", "comment-dots", textarea("Justificativa da Movimentação", "justificativa", f.justificativa, true));
   }
 
   function renderRecebedorDecision() {
@@ -340,12 +340,12 @@
     var hideReturnRecebedor = state.stage === "correcao" && state.status.indexOf("Gestor Cedente") === -1;
     return '<div class="lx-recebedor-approval">' + formFieldset("Decisão de Aprovação", "list-check",
       '<div class="lx-current-decision" data-approval="recebedor">' +
-        decisionOption("approve", "Aprovar movimentação", "A movimentação seguirá para aprovação da Diretoria.", decision.value) +
+        decisionOption("approve", "Aprovar Movimentação", "A movimentação seguirá para aprovação da Diretoria.", decision.value) +
         decisionOption("returnCedente", "Devolver ao Gestor Cedente", "A movimentação retornará para ajuste dos dados de origem.", decision.value) +
         (hideReturnRecebedor ? "" : decisionOption("returnRecebedor", "Corrigir com Gestor Recebedor", "A movimentação retornará para ajuste dos dados de destino.", decision.value)) +
-        decisionOption("reject", "Reprovar movimentação", "A movimentação será encerrada como reprovada.", decision.value) +
+        decisionOption("reject", "Reprovar Movimentação", "A movimentação será encerrada como reprovada.", decision.value) +
         '<label class="lx-field' + (!decision.value || decision.value === "approve" ? " lx-hidden" : "") + '" data-approval-justification><span>Justificativa <b>*</b></span><textarea data-decision-field="justification" placeholder="Informe o motivo da correção ou reprovação...">' + escapeHtml(decision.justification) + '</textarea></label>' +
-        '<div class="lx-actions"><button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar rascunho</button><button class="lx-btn lx-btn-primary" type="button" data-action="submit-recebedor"><i class="fa-solid fa-paper-plane"></i> Enviar decisão</button></div>' +
+        '<div class="lx-actions"><button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar Rascunho</button><button class="lx-btn lx-btn-primary" type="button" data-action="submit-recebedor"><i class="fa-solid fa-paper-plane"></i> Enviar Decisão</button></div>' +
       '</div>'
     ) + '</div>';
   }
@@ -379,11 +379,11 @@
         decisionOption("approve", approveTitle, approveText, decision.value) +
         decisionOption("returnCedente", "Devolver ao Gestor Cedente", "A movimentação retornará para ajuste dos dados de origem.", decision.value) +
         decisionOption("returnRecebedor", "Devolver para Gestor Recebedor", "A movimentação retornará para ajuste dos dados de destino.", decision.value) +
-        decisionOption("reject", "Reprovar movimentação", "A movimentação será encerrada como reprovada.", decision.value) +
+        decisionOption("reject", "Reprovar Movimentação", "A movimentação será encerrada como reprovada.", decision.value) +
         '<label class="lx-field' + (decision.value === "approve" ? " lx-hidden" : "") + '" data-approval-justification><span>Justificativa <b>*</b></span><textarea data-decision-field="justification" placeholder="Informe o motivo da devolução ou reprovação...">' + escapeHtml(decision.justification) + '</textarea></label>' +
         (key === "seguranca" ? renderAttachmentsEditor("anexosSeguranca", "Upload de Arquivos - Segurança do Trabalho", "paperclip") : "") +
         (key === "rh" ? renderAttachmentsEditor("anexosRh", "Upload de Arquivos - RH", "paperclip") : "") +
-        '<div class="lx-actions"><button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar rascunho</button><button class="lx-btn lx-btn-primary" type="button" data-action="send-approval" data-approval-key="' + key + '"><i class="fa-solid fa-paper-plane"></i> Enviar decisão</button></div></div>'
+        '<div class="lx-actions"><button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar Rascunho</button><button class="lx-btn lx-btn-primary" type="button" data-action="send-approval" data-approval-key="' + key + '"><i class="fa-solid fa-paper-plane"></i> Enviar Decisão</button></div></div>'
       ), "", getStage(key).icon, getStage(key).tone);
   }
 
@@ -473,7 +473,7 @@
       historySection("Dados da Movimentação de Pessoal", "people-arrows", "green", [["Colaborador", f.colaborador], ["Matrícula", f.chapa], ["Data de Admissão", f.admissao], ["Cargo Atual", f.cargoAtual], ["Função Atual", f.funcaoAtual], ["Nível / Step Atual", f.nivelAtual], ["Setor / Seção Atual", f.secaoAtual], ["Centro de Custo Origem", f.centroAtual], ["Descrição do Cargo Atual", f.descricaoCargoAtual], ["Escala", f.escalaAtual], ["Horário", f.horarioAtual]], "lx-readonly-request-grid") +
       historyCustomSection("Equipamentos da Origem", "laptop", "purple", renderOriginEquipmentsSnapshot()) +
       historySection("Dados de Destino", "people-arrows", "blue", [["Tipo de Movimentação", f.tipoMovimentacao]]) +
-      historySection("Situação Destino", "briefcase", "green", [["Cargo de Destino", f.cargoDestino], ["Função de Destino", f.funcaoDestino], ["Nível / Step de Destino", f.nivelDestino], ["Setor / Seção Destino", f.secaoDestino], ["Centro de Custo Destino", snapshot.centroDestino], ["Descrição do Cargo de Destino", f.descricaoCargoDestino], ["Escala", f.escalaDestino], ["Horário", f.horarioDestino], ["Data Prevista de Início", formatDate(f.vigencia)], ["Duração da movimentação", f.duracao], ["Data Prevista de Término", f.duracao === "Provisória" ? formatDate(f.fimProvisorio) : "-"], ["Observações adicionais da movimentação", snapshot.observacoesMovimentacao || "-"]], "lx-readonly-request-grid lx-destination-history-grid") +
+      historySection("Situação Destino", "briefcase", "green", [["Cargo de Destino", f.cargoDestino], ["Função de Destino", f.funcaoDestino], ["Nível / Step de Destino", f.nivelDestino], ["Setor / Seção Destino", f.secaoDestino], ["Centro de Custo Destino", snapshot.centroDestino], ["Descrição do Cargo de Destino", f.descricaoCargoDestino], ["Escala", f.escalaDestino], ["Horário", f.horarioDestino], ["Data Prevista de Início", formatDate(f.vigencia)], ["Duração da Movimentação", f.duracao], ["Data Prevista de Término", f.duracao === "Provisória" ? formatDate(f.fimProvisorio) : "-"], ["Observações Adicionais da Movimentação", snapshot.observacoesMovimentacao || "-"]], "lx-readonly-request-grid lx-destination-history-grid") +
       renderDestinationInfrastructureSnapshot({ observacoesDestino: snapshot.observacoesDestino }) +
       historyCustomSection("Upload de Arquivos", "paperclip", "purple", renderAttachmentsList(snapshot.anexosRecebedor, "anexosRecebedor", false)) +
       renderComparisonSnapshot(snapshot.centroDestino) +
@@ -482,7 +482,7 @@
 
   function renderEquipmentNotification() {
     var f = state.form;
-    return renderFinishedFlow() + viewComponent("Prévia do e-mail para infraestrutura", getStage("equipamentos").desc, "",
+    return renderFinishedFlow() + viewComponent("Prévia do E-mail para Infraestrutura", getStage("equipamentos").desc, "",
       '<div class="lx-history-stage lx-history-stage-blue"><strong>Assunto:</strong> Movimentação de equipamentos - ' + escapeHtml(f.numero) + '<br /><br /><strong>Colaborador:</strong> ' + escapeHtml(f.colaborador) + ' - ' + escapeHtml(f.chapa) + '<br /><strong>Origem:</strong> ' + escapeHtml(f.gestorCedente) + ' / ' + escapeHtml(f.gerenciaOrigem) + ' / ' + escapeHtml(f.centroAtual) + '<br /><strong>Destino:</strong> ' + escapeHtml(f.gestorRecebedor) + ' / ' + escapeHtml(f.gerenciaDestino) + ' / ' + escapeHtml(f.centroDestino) + '<br /><strong>Data prevista de início:</strong> ' + escapeHtml(formatDate(f.vigencia)) + '<br /><strong>Equipamentos atuais:</strong><br />' + renderOriginEquipmentLines() + '<br /><br /><strong>Novos equipamentos:</strong><br />' + f.equipamentos.map(function (item) { return "- " + item.equipamento + " (" + item.quantidade + ") - " + item.observacao; }).join("<br />") + '</div>', "", "fa-laptop", "teal");
   }
 
@@ -539,7 +539,7 @@
   function renderDestinationSnapshot() {
     var f = state.form;
     return historySection("Dados de Destino", "people-arrows", "blue", [["Tipo de Movimentação", f.tipoMovimentacao]]) +
-      historySection("Situação Destino", "briefcase", "green", [["Cargo de Destino", f.cargoDestino], ["Função de Destino", f.funcaoDestino], ["Nível / Step de Destino", f.nivelDestino], ["Setor / Seção Destino", f.secaoDestino], ["Centro de Custo Destino", f.centroDestino], ["Descrição do Cargo de Destino", f.descricaoCargoDestino], ["Escala", f.escalaDestino], ["Horário", f.horarioDestino], ["Data Prevista de Início", formatDate(f.vigencia)], ["Duração da movimentação", f.duracao], ["Data Prevista de Término", f.duracao === "Provisória" ? formatDate(f.fimProvisorio) : "-"], ["Observações adicionais da movimentação", f.observacoesMovimentacao || "-"]], "lx-readonly-request-grid lx-destination-history-grid") +
+      historySection("Situação Destino", "briefcase", "green", [["Cargo de Destino", f.cargoDestino], ["Função de Destino", f.funcaoDestino], ["Nível / Step de Destino", f.nivelDestino], ["Setor / Seção Destino", f.secaoDestino], ["Centro de Custo Destino", f.centroDestino], ["Descrição do Cargo de Destino", f.descricaoCargoDestino], ["Escala", f.escalaDestino], ["Horário", f.horarioDestino], ["Data Prevista de Início", formatDate(f.vigencia)], ["Duração da Movimentação", f.duracao], ["Data Prevista de Término", f.duracao === "Provisória" ? formatDate(f.fimProvisorio) : "-"], ["Observações Adicionais da Movimentação", f.observacoesMovimentacao || "-"]], "lx-readonly-request-grid lx-destination-history-grid") +
       renderDestinationInfrastructureSnapshot() +
       historyCustomSection("Upload de Arquivos", "paperclip", "purple", renderAttachmentsList(f.anexosRecebedor, "anexosRecebedor", false)) +
       renderComparison() +
@@ -550,12 +550,12 @@
   function renderDestinationInfrastructureSnapshot(overrides) {
     var f = state.form;
     var observacoesDestino = overrides && overrides.observacoesDestino ? overrides.observacoesDestino : f.observacoesDestino;
-    var rows = [["Colaborador utilizará equipamentos na área de destino?", f.precisaEquipamentoDestino]];
+    var rows = [["Colaborador Utilizará Equipamentos na Área de Destino?", f.precisaEquipamentoDestino]];
     return historyCustomSection("Infraestrutura do Destino", "laptop", "purple",
       '<div class="lx-history-stage-grid lx-readonly-request-grid">' +
         rows.map(function (row) { return '<div class="lx-history-stage-item ' + readonlyItemClass(row[0]) + '"><span>' + escapeHtml(row[0]) + '</span><strong>' + escapeHtml(row[1] || "-") + '</strong></div>'; }).join("") +
       '</div>' +
-      (f.precisaEquipamentoDestino === "Sim" ? renderDestinationEquipmentsSnapshot() + '<div class="lx-history-note"><span>Observações do destino</span><strong>' + escapeHtml(observacoesDestino || "-") + '</strong></div>' : "")
+      (f.precisaEquipamentoDestino === "Sim" ? renderDestinationEquipmentsSnapshot() + '<div class="lx-history-note"><span>Observações do Destino</span><strong>' + escapeHtml(observacoesDestino || "-") + '</strong></div>' : "")
     );
   }
 
@@ -643,28 +643,28 @@
   }
 
   function renderEquipmentsEditor() {
-    return '<div class="lx-child-table"><button class="lx-btn lx-btn-primary" type="button" data-action="add-equipment"><i class="fa-solid fa-plus"></i> Adicionar equipamento</button>' + state.form.equipamentos.map(function (item, index) {
-      return '<div class="lx-child-row">' + field("Equipamento", "equipamento", item.equipamento, false, true, "equipment", index) + field("Quantidade", "quantidade", item.quantidade, false, true, "equipment", index, "number") + textareaScoped("Observação", "observacao", item.observacao, false, "equipment", index) + '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-equipment" data-index="' + index + '" aria-label="Excluir equipamento"><i class="fa-solid fa-trash"></i></button></div>';
+    return '<div class="lx-child-table"><button class="lx-btn lx-btn-primary" type="button" data-action="add-equipment"><i class="fa-solid fa-plus"></i> Adicionar Equipamento</button>' + state.form.equipamentos.map(function (item, index) {
+      return '<div class="lx-child-row">' + field("Equipamento", "equipamento", item.equipamento, false, true, "equipment", index) + field("Quantidade", "quantidade", item.quantidade, false, true, "equipment", index, "number") + textareaScoped("Observação", "observacao", item.observacao, false, "equipment", index) + '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-equipment" data-index="' + index + '" aria-label="Excluir Equipamento"><i class="fa-solid fa-trash"></i></button></div>';
     }).join("") + '</div>';
   }
   function renderOriginEquipmentsEditor() {
     if (state.form.usaEquipamentoAtual !== "Sim") return "";
-    return '<div class="lx-child-table lx-origin-equipment-table"><button class="lx-btn lx-btn-primary" type="button" data-action="add-origin-equipment"><i class="fa-solid fa-plus"></i> Adicionar equipamento</button>' + state.form.equipamentosOrigem.map(function (item, index) {
+    return '<div class="lx-child-table lx-origin-equipment-table"><button class="lx-btn lx-btn-primary" type="button" data-action="add-origin-equipment"><i class="fa-solid fa-plus"></i> Adicionar Equipamento</button>' + state.form.equipamentosOrigem.map(function (item, index) {
       return '<div class="lx-child-row lx-origin-equipment-row">' +
         field("Equipamento", "equipamento", item.equipamento, false, true, "originEquipment", index) +
         field("Quantidade", "quantidade", item.quantidade, false, true, "originEquipment", index, "text") +
         textareaScoped("Destino do Equipamento", "observacao", item.observacao, false, "originEquipment", index) +
-        '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-origin-equipment" data-index="' + index + '" aria-label="Excluir equipamento"><i class="fa-solid fa-trash"></i></button>' +
+        '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-origin-equipment" data-index="' + index + '" aria-label="Excluir Equipamento"><i class="fa-solid fa-trash"></i></button>' +
         '</div>';
     }).join("") + '</div>' + textarea("Observações da Origem", "observacoesOrigem", state.form.observacoesOrigem, false);
   }
   function renderAttachmentsEditor(fieldName, title, icon) {
-    return formFieldset(title, icon, '<div class="lx-dropzone" data-dropzone="' + fieldName + '"><i class="fa-solid fa-cloud-arrow-up"></i><p>Arraste e solte seus arquivos aqui</p><span>ou</span><button type="button" class="lx-btn-outline">Escolher arquivo</button><input type="file" class="lx-file-input" data-file-upload="' + fieldName + '" multiple /></div>' + renderAttachmentsList(state.form[fieldName] || [], fieldName, true));
+    return formFieldset(title, icon, '<div class="lx-dropzone" data-dropzone="' + fieldName + '"><i class="fa-solid fa-cloud-arrow-up"></i><p>Arraste e solte seus arquivos aqui</p><span>ou</span><button type="button" class="lx-btn-outline">Escolher Arquivo</button><input type="file" class="lx-file-input" data-file-upload="' + fieldName + '" multiple /></div>' + renderAttachmentsList(state.form[fieldName] || [], fieldName, true));
   }
   function renderAttachmentsList(files, fieldName, editable) {
     if (!files.length) return '<div class="lx-empty-list">Nenhum arquivo anexado.</div>';
     return '<div class="lx-attachment-list">' + files.map(function (file, index) {
-      return '<div class="lx-attachment-row"><div class="lx-attachment-info"><i class="fa-solid fa-file-lines"></i><div><strong>' + escapeHtml(file.nome) + '</strong><span>' + escapeHtml(file.tamanho || "-") + ' - ' + escapeHtml(file.origem || "Anexo") + '</span></div></div><div class="lx-attachment-actions"><button class="lx-btn-icon lx-btn-secondary" type="button" data-action="view-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Visualizar anexo"><i class="fa-solid fa-eye"></i></button><button class="lx-btn-icon lx-btn-secondary" type="button" data-action="download-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Baixar anexo"><i class="fa-solid fa-download"></i></button>' + (editable ? '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Excluir anexo"><i class="fa-solid fa-trash"></i></button>' : "") + '</div></div>';
+      return '<div class="lx-attachment-row"><div class="lx-attachment-info"><i class="fa-solid fa-file-lines"></i><div><strong>' + escapeHtml(file.nome) + '</strong><span>' + escapeHtml(file.tamanho || "-") + ' - ' + escapeHtml(file.origem || "Anexo") + '</span></div></div><div class="lx-attachment-actions"><button class="lx-btn-icon lx-btn-secondary" type="button" data-action="view-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Visualizar Anexo"><i class="fa-solid fa-eye"></i></button><button class="lx-btn-icon lx-btn-secondary" type="button" data-action="download-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Baixar Anexo"><i class="fa-solid fa-download"></i></button>' + (editable ? '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Excluir Anexo"><i class="fa-solid fa-trash"></i></button>' : "") + '</div></div>';
     }).join("") + '</div>';
   }
 
@@ -708,7 +708,7 @@
     else if (scope === "originEquipment") state.form.equipamentosOrigem[Number(index)][name] = value;
     else { state.form[name] = value; applyAutoFill(name, value); }
     state.errors = {};
-    if (name === "vigencia" && value && value < todayValue()) { state.errors.vigencia = "A Data Prevista de Início não pode ser menor que a data atual."; showModal({ title: "Data inválida", message: "A Data Prevista de Início não pode ser menor que a data atual.", icon: "fa-triangle-exclamation", confirmText: "Entendi", cancelText: "Fechar", onConfirm: hideModal }); render(); return; }
+    if (name === "vigencia" && value && value < todayValue()) { state.errors.vigencia = "A Data Prevista de Início não pode ser menor que a data atual."; showModal({ title: "Data Inválida", message: "A Data Prevista de Início não pode ser menor que a data atual.", icon: "fa-triangle-exclamation", confirmText: "Entendi", cancelText: "Fechar", onConfirm: hideModal }); render(); return; }
     if (rerender) render();
   }
 
@@ -765,23 +765,23 @@
 
   function handleAction(event) {
     var action = event.currentTarget.getAttribute("data-action");
-    if (action === "draft") showModal({ title: "Salvar rascunho", message: "Deseja salvar os dados preenchidos até o momento?", icon: "fa-save", confirmText: "Salvar", onConfirm: function () { setStatus("Rascunho salvo"); hideModal(); } });
-    if (action === "submit-cedente") { if (!validateCedente()) return renderAndScroll(); showModal({ title: "Enviar movimentação", message: "Deseja enviar a movimentação para o Gestor Recebedor?", icon: "fa-paper-plane", confirmText: "Enviar", onConfirm: function () { setStatus("Enviado para Gestor Recebedor"); hideModal(); render(); } }); }
+    if (action === "draft") showModal({ title: "Salvar Rascunho", message: "Deseja salvar os dados preenchidos até o momento?", icon: "fa-save", confirmText: "Salvar", onConfirm: function () { setStatus("Rascunho salvo"); hideModal(); } });
+    if (action === "submit-cedente") { if (!validateCedente()) return renderAndScroll(); showModal({ title: "Enviar Movimentação", message: "Deseja enviar a movimentação para o Gestor Recebedor?", icon: "fa-paper-plane", confirmText: "Enviar", onConfirm: function () { setStatus("Enviado para Gestor Recebedor"); hideModal(); render(); } }); }
     if (action === "submit-recebedor") {
       var recebedorDecision = state.decisions.recebedor || {};
-      if (!recebedorDecision.value) { showModal({ title: "Decisão obrigatória", message: "Selecione uma decisão para a movimentação.", icon: "fa-triangle-exclamation", confirmText: "Entendi", cancelText: "Fechar", onConfirm: hideModal }); return; }
+      if (!recebedorDecision.value) { showModal({ title: "Decisão Obrigatória", message: "Selecione uma decisão para a movimentação.", icon: "fa-triangle-exclamation", confirmText: "Entendi", cancelText: "Fechar", onConfirm: hideModal }); return; }
       if (recebedorDecision.value === "approve" && !validateRecebedor()) return renderAndScroll();
       if (!validateApproval("recebedor")) return;
-      showModal({ title: "Enviar decisão", message: "Deseja registrar a decisão do Gestor Recebedor?", icon: "fa-paper-plane", confirmText: "Enviar", onConfirm: function () { applyDecision("recebedor"); hideModal(); render(); } });
+      showModal({ title: "Enviar Decisão", message: "Deseja registrar a decisão do Gestor Recebedor?", icon: "fa-paper-plane", confirmText: "Enviar", onConfirm: function () { applyDecision("recebedor"); hideModal(); render(); } });
     }
     if (action === "add-equipment") { state.form.equipamentos.push({ equipamento: "", quantidade: "1", observacao: "" }); render(); }
-    if (action === "delete-equipment") { var index = Number(event.currentTarget.getAttribute("data-index")); showModal({ title: "Excluir equipamento", message: "Deseja remover este equipamento?", icon: "fa-trash", confirmText: "Excluir", onConfirm: function () { state.form.equipamentos.splice(index, 1); hideModal(); render(); } }); }
+    if (action === "delete-equipment") { var index = Number(event.currentTarget.getAttribute("data-index")); showModal({ title: "Excluir Equipamento", message: "Deseja remover este equipamento?", icon: "fa-trash", confirmText: "Excluir", onConfirm: function () { state.form.equipamentos.splice(index, 1); hideModal(); render(); } }); }
     if (action === "add-origin-equipment") { state.form.equipamentosOrigem.push({ equipamento: "", quantidade: "1", observacao: "" }); render(); }
-    if (action === "delete-origin-equipment") { var originIndex = Number(event.currentTarget.getAttribute("data-index")); showModal({ title: "Excluir equipamento", message: "Deseja remover este equipamento da origem?", icon: "fa-trash", confirmText: "Excluir", onConfirm: function () { state.form.equipamentosOrigem.splice(originIndex, 1); hideModal(); render(); } }); }
-    if (action === "send-approval") { var key = event.currentTarget.getAttribute("data-approval-key"); if (!validateApproval(key)) return render(); showModal({ title: "Enviar decisão", message: "Deseja registrar a decisão desta etapa?", icon: "fa-paper-plane", confirmText: "Enviar", onConfirm: function () { applyDecision(key); hideModal(); render(); } }); }
-    if (action === "view-attachment") { var attachment = getAttachmentFromButton(event.currentTarget); showModal({ title: attachment ? attachment.nome : "Visualizar anexo", html: renderAttachmentPreview(attachment), icon: "fa-eye", confirmText: "Fechar", hideCancel: true, wide: true, onConfirm: hideModal }); }
-    if (action === "download-attachment") { var file = getAttachmentFromButton(event.currentTarget); if (file && file.url) { window.open(file.url, "_blank"); return; } showModal({ title: "Baixar anexo", message: file ? file.nome : "Anexo não encontrado.", icon: "fa-download", confirmText: "Ok", cancelText: "Fechar", onConfirm: hideModal }); }
-    if (action === "delete-attachment") { var button = event.currentTarget; var fieldName = button.getAttribute("data-attachment-field"); var attachmentIndex = Number(button.getAttribute("data-index")); showModal({ title: "Excluir anexo", message: "Deseja remover este arquivo anexado?", icon: "fa-trash", confirmText: "Excluir", onConfirm: function () { state.form[fieldName].splice(attachmentIndex, 1); hideModal(); render(); } }); }
+    if (action === "delete-origin-equipment") { var originIndex = Number(event.currentTarget.getAttribute("data-index")); showModal({ title: "Excluir Equipamento", message: "Deseja remover este equipamento da origem?", icon: "fa-trash", confirmText: "Excluir", onConfirm: function () { state.form.equipamentosOrigem.splice(originIndex, 1); hideModal(); render(); } }); }
+    if (action === "send-approval") { var key = event.currentTarget.getAttribute("data-approval-key"); if (!validateApproval(key)) return render(); showModal({ title: "Enviar Decisão", message: "Deseja registrar a decisão desta etapa?", icon: "fa-paper-plane", confirmText: "Enviar", onConfirm: function () { applyDecision(key); hideModal(); render(); } }); }
+    if (action === "view-attachment") { var attachment = getAttachmentFromButton(event.currentTarget); showModal({ title: attachment ? attachment.nome : "Visualizar Anexo", html: renderAttachmentPreview(attachment), icon: "fa-eye", confirmText: "Fechar", hideCancel: true, wide: true, onConfirm: hideModal }); }
+    if (action === "download-attachment") { var file = getAttachmentFromButton(event.currentTarget); if (file && file.url) { window.open(file.url, "_blank"); return; } showModal({ title: "Baixar Anexo", message: file ? file.nome : "Anexo não encontrado.", icon: "fa-download", confirmText: "Ok", cancelText: "Fechar", onConfirm: hideModal }); }
+    if (action === "delete-attachment") { var button = event.currentTarget; var fieldName = button.getAttribute("data-attachment-field"); var attachmentIndex = Number(button.getAttribute("data-index")); showModal({ title: "Excluir Anexo", message: "Deseja remover este arquivo anexado?", icon: "fa-trash", confirmText: "Excluir", onConfirm: function () { state.form[fieldName].splice(attachmentIndex, 1); hideModal(); render(); } }); }
   }
 
   function renderAndScroll() {
@@ -823,7 +823,7 @@
   }
   function validateApproval(key) {
     var decision = state.decisions[key] || { value: "approve", justification: "" };
-    if (decision.value !== "approve" && !String(decision.justification || "").trim()) { showModal({ title: "Justificativa obrigatória", message: "Informe a justificativa para devolver ou reprovar a movimentação.", icon: "fa-triangle-exclamation", confirmText: "Entendi", cancelText: "Fechar", onConfirm: hideModal }); return false; }
+    if (decision.value !== "approve" && !String(decision.justification || "").trim()) { showModal({ title: "Justificativa Obrigatória", message: "Informe a justificativa para devolver ou reprovar a movimentação.", icon: "fa-triangle-exclamation", confirmText: "Entendi", cancelText: "Fechar", onConfirm: hideModal }); return false; }
     return true;
   }
   function applyDecision(key) {

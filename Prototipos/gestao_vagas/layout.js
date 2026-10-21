@@ -1,6 +1,6 @@
 (function () {
   var page = document.body.getAttribute("data-sl-page") || "";
-  var current = document.body.getAttribute("data-sl-current") || "Painel de vagas";
+  var current = document.body.getAttribute("data-sl-current") || "Painel de Vagas";
   var backHref = document.body.getAttribute("data-sl-back-href") || "#";
   var backLabel = document.body.getAttribute("data-sl-back-label") || "Voltar para o Fluig";
 
@@ -8,19 +8,19 @@
     {
       id: "painel",
       href: "dashboard.html",
-      label: "Painel de vagas",
+      label: "Painel de Vagas",
       icon: "fa-chart-line"
     },
     {
       id: "cadastro",
       href: "cadastro-vaga.html",
-      label: "Cadastro de vaga",
+      label: "Cadastro de Vaga",
       icon: "fa-plus"
     },
     {
       id: "processo",
       href: "index.html",
-      label: "Processo seletivo",
+      label: "Processo Seletivo",
       icon: "fa-users"
     }
   ];

@@ -354,7 +354,7 @@
     var backLink = document.querySelector(".lx-back-link");
     if (!backLink || !isStagePage) return;
     backLink.href = getFlowUrl(getRequestedFlow());
-    backLink.innerHTML = '<i class="fa-solid fa-arrow-left"></i> Voltar para etapas do fluxo';
+    backLink.innerHTML = '<i class="fa-solid fa-arrow-left"></i> Voltar para Etapas do Fluxo';
   }
 
   function renderNavigation() {
@@ -409,7 +409,7 @@
 
   function renderSolicitacao() {
     var waitingMovementType = isMovementTypeSelectorLayout() && !state.movementTypePicked;
-    var actions = '<div class="lx-actions"><button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar rascunho</button><button class="lx-btn lx-btn-primary" type="button" data-action="submit"><i class="fa-solid fa-paper-plane"></i> Enviar para aprovação</button></div>';
+    var actions = '<div class="lx-actions"><button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar Rascunho</button><button class="lx-btn lx-btn-primary" type="button" data-action="submit"><i class="fa-solid fa-paper-plane"></i> Enviar para Aprovação</button></div>';
     return renderSolicitacaoFields() + (waitingMovementType ? "" : actions);
   }
 
@@ -450,7 +450,7 @@
       formFieldset("Movimentação Proposta", "chart-line",
         renderMovementTypeFields() +
         renderSalaryRangeComponent() +
-        textarea("Observações adicionais", "observacoes", f.observacoes, false)
+        textarea("Observações Adicionais", "observacoes", f.observacoes, false)
       )
     ) +
     (f.tipoMovimentacao === "Promoção" ? section("Infraestrutura e Equipamentos", "laptop", renderInfrastructure()) : "") +
@@ -515,13 +515,13 @@
       viewComponent(approvalTitle(phase), stage.desc, state.status,
         renderCareerApprovalSnapshot(type) +
         '<fieldset class="lx-history-fieldset lx-history-fieldset-blue lx-approval-decision-fieldset"><legend><i class="fa-solid fa-list-check"></i> Decisão de Aprovação</legend><div class="lx-current-decision" data-approval="' + state.stage + '">' +
-          decisionOption("approve", "Aprovar movimentação", approvalDescription(type, phase), decision.value) +
-          decisionOption("return", "Devolver para correção", "A solicitação retornará ao solicitante para ajustes.", decision.value) +
-          decisionOption("reject", "Cancelar movimentação", "A movimentação será encerrada como cancelada.", decision.value) +
+          decisionOption("approve", "Aprovar Movimentação", approvalDescription(type, phase), decision.value) +
+          decisionOption("return", "Devolver para Correção", "A solicitação retornará ao solicitante para ajustes.", decision.value) +
+          decisionOption("reject", "Cancelar Movimentação", "A movimentação será encerrada como cancelada.", decision.value) +
           '<label class="lx-field' + (decision.value === "approve" ? " lx-hidden" : "") + '" data-approval-justification><span>Justificativa <b>*</b></span><textarea data-decision-field="justification" placeholder="Informe o motivo da correção ou cancelamento...">' + escapeHtml(decision.justification) + '</textarea></label>' +
           (phase === "seguranca" ? renderAttachmentsEditor("anexosSeguranca", "Upload de Arquivos - Segurança do Trabalho", "paperclip") : "") +
           (phase === "rh" ? renderAttachmentsEditor("anexosRh", "Upload de Arquivos - RH", "paperclip") : "") +
-          '<div class="lx-actions"><button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar rascunho</button><button class="lx-btn lx-btn-primary" type="button" data-action="send-approval" data-approval-key="' + state.stage + '"><i class="fa-solid fa-paper-plane"></i> Enviar decisão</button></div></div></fieldset>'
+          '<div class="lx-actions"><button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar Rascunho</button><button class="lx-btn lx-btn-primary" type="button" data-action="send-approval" data-approval-key="' + state.stage + '"><i class="fa-solid fa-paper-plane"></i> Enviar Decisão</button></div></div></fieldset>'
         , "", stage.icon, stage.tone);
   }
   function approvalDescription(type, phase) {
@@ -548,7 +548,7 @@
       renderPreviousApprovalComponent(type, getFlowApprovals(type)[0], { value: "return", justification: "Solicitação devolvida para revisão das informações da movimentação de " + movementTypeLabel(type) + "." }, true) +
       viewComponent("Correção da Movimentação de Carreira", "Ajuste das informações antes de reenviar o fluxo.", state.status,
         renderSolicitacaoFields() +
-        '<div class="lx-actions"><button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar rascunho</button><button class="lx-btn lx-btn-primary" type="button" data-action="resend-correction" data-flow-type="' + type + '"><i class="fa-solid fa-paper-plane"></i> Reenviar solicitação</button></div>',
+        '<div class="lx-actions"><button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar Rascunho</button><button class="lx-btn lx-btn-primary" type="button" data-action="resend-correction" data-flow-type="' + type + '"><i class="fa-solid fa-paper-plane"></i> Reenviar Solicitação</button></div>',
         "", "fa-rotate-left", "slate");
   }
   function renderFinishedFlow(type) {
@@ -624,7 +624,7 @@
       rows = rows.concat([["Cargo Proposto", data.novoCargo], ["Função Proposta", data.novaFuncao], ["Nível / Step Proposto", data.novoNivel], ["Descrição do Cargo", data.descricaoCargoProposto], ["Faixa Salarial", data.novaFaixa], ["Novo Salário", data.novoSalario], ["Escala", data.novaEscala], ["Horário", data.novoHorario], ["Data de Início da Vigência", formatDate(data.dataVigencia)]]);
     }
     if (type === "progressao") {
-      rows = rows.concat([["Cargo após movimentação", data.novoCargo], ["Função após movimentação", data.novaFuncao], ["Nível / Step Proposto", data.novoNivel], ["Descrição do Cargo", data.descricaoCargoProposto], ["Faixa Salarial", data.novaFaixa], ["Novo Salário", data.novoSalario], ["Data de Início da Vigência", formatDate(data.dataVigencia)]]);
+      rows = rows.concat([["Cargo após Movimentação", data.novoCargo], ["Função após Movimentação", data.novaFuncao], ["Nível / Step Proposto", data.novoNivel], ["Descrição do Cargo", data.descricaoCargoProposto], ["Faixa Salarial", data.novaFaixa], ["Novo Salário", data.novoSalario], ["Data de Início da Vigência", formatDate(data.dataVigencia)]]);
     }
     if (type === "enquadramento") {
       rows = rows.concat([["Cargo", data.novoCargo], ["Função", data.novaFuncao], ["Nível / Step Proposto", data.novoNivel], ["Novo Nível/Step", data.novoStep], ["Faixa Salarial", data.novaFaixa], ["Novo Salário Enquadrado", data.novoSalario], ["Data de Início da Vigência", formatDate(data.dataVigencia)]]);
@@ -634,7 +634,7 @@
       rows.map(function (row) { return '<div class="lx-history-stage-item ' + readonlyItemClass(row[0]) + '"><span>' + escapeHtml(row[0]) + '</span><strong>' + escapeHtml(row[1] || "-") + '</strong></div>'; }).join("") +
       '</div>' +
       renderSalaryRangeHistory(data) +
-      '<div class="lx-history-note lx-career-observation-note"><span>Observações adicionais</span><strong>' + escapeHtml(data.observacoes || "-") + '</strong></div>'
+      '<div class="lx-history-note lx-career-observation-note"><span>Observações Adicionais</span><strong>' + escapeHtml(data.observacoes || "-") + '</strong></div>'
     );
   }
   function renderSalaryRangeHistory(data) {
@@ -648,9 +648,9 @@
       }).join("") + '</div></div>';
   }
   function renderCareerEquipmentSnapshot(data) {
-    var currentRows = '<div class="lx-history-note"><span>O colaborador utiliza equipamentos atualmente?</span><strong>' + escapeHtml(data.usaEquipamentoAtual) + '</strong></div>' +
+    var currentRows = '<div class="lx-history-note"><span>O Colaborador Utiliza Equipamentos Atualmente?</span><strong>' + escapeHtml(data.usaEquipamentoAtual) + '</strong></div>' +
       (data.usaEquipamentoAtual === "Sim" ? renderEquipmentRows(data.equipamentosOrigem, "destino") : "");
-    var requiredRows = '<div class="lx-history-note"><span>O novo cargo / função necessita equipamentos?</span><strong>' + escapeHtml(data.novoCargoPrecisaEquipamento) + '</strong></div>' +
+    var requiredRows = '<div class="lx-history-note"><span>O Novo Cargo / Função Necessita Equipamentos?</span><strong>' + escapeHtml(data.novoCargoPrecisaEquipamento) + '</strong></div>' +
       (data.novoCargoPrecisaEquipamento === "Sim" ? renderEquipmentRows(data.equipamentosNecessarios, "observacao") : "");
     return currentRows + requiredRows;
   }
@@ -723,8 +723,8 @@
     }
     if (f.tipoMovimentacao === "Progressão") {
       return grid([
-        field("Cargo após movimentação", "cargoAtual", f.cargoAtual, true, true),
-        field("Função após movimentação", "funcaoAtual", f.funcaoAtual, true, true),
+        field("Cargo após Movimentação", "cargoAtual", f.cargoAtual, true, true),
+        field("Função após Movimentação", "funcaoAtual", f.funcaoAtual, true, true),
         singleSelect("Novo Nível / Step", "novoNivel", f.novoNivel, rm.niveis, true),
         readonlyTextarea("Descrição do Cargo", "descricaoCargoProposto", f.descricaoCargoProposto, true),
         field("Nova Faixa Salarial", "novaFaixa", f.novaFaixa, true, true),
@@ -733,10 +733,10 @@
       ], "lx-career-proposed-grid lx-career-progression-grid");
     }
     return grid([
-        field("Step correto sugerido", "stepSugerido", f.stepSugerido, true, true),
-        field("Salário correspondente ao Step sugerido", "salarioSugerido", f.salarioSugerido, true, true),
-        field("Diferença salarial em valor", "diferencaValor", f.diferencaValor, true, true),
-        field("Diferença salarial em percentual", "diferencaPercentual", f.diferencaPercentual, true, true),
+        field("Step Correto Sugerido", "stepSugerido", f.stepSugerido, true, true),
+        field("Salário Correspondente ao Step Sugerido", "salarioSugerido", f.salarioSugerido, true, true),
+        field("Diferença Salarial em Valor", "diferencaValor", f.diferencaValor, true, true),
+        field("Diferença Salarial em Percentual", "diferencaPercentual", f.diferencaPercentual, true, true),
         singleSelect("Novo Nível/Step", "novoStep", f.novoStep, rm.steps, true),
         field("Nova Faixa Salarial", "novaFaixa", f.novaFaixa, true, true),
         field("Novo Salário Enquadrado", "novoSalario", f.novoSalario, true),
@@ -777,35 +777,35 @@
   function renderInfrastructure() {
     var f = state.form;
     return formFieldset("Equipamentos Atuais", "laptop",
-      radioGroup("O colaborador utiliza equipamentos atualmente?", "usaEquipamentoAtual", f.usaEquipamentoAtual, ["Sim", "Não"], true) +
+      radioGroup("O Colaborador Utiliza Equipamentos Atualmente?", "usaEquipamentoAtual", f.usaEquipamentoAtual, ["Sim", "Não"], true) +
       (f.usaEquipamentoAtual === "Sim" ? renderCurrentEquipments() : "")
     ) +
     formFieldset("Equipamentos Necessários", "desktop",
-      radioGroup("O novo cargo / função necessita equipamentos?", "novoCargoPrecisaEquipamento", f.novoCargoPrecisaEquipamento, ["Sim", "Não"], true) +
+      radioGroup("O Novo Cargo / Função Necessita Equipamentos?", "novoCargoPrecisaEquipamento", f.novoCargoPrecisaEquipamento, ["Sim", "Não"], true) +
       (needsNewEquipmentBlock() ? renderRequiredEquipments() : "")
     );
   }
 
   function renderCurrentEquipments() {
-    return '<div class="lx-child-table lx-origin-equipment-table"><button class="lx-btn lx-btn-primary" type="button" data-action="add-current-equipment"><i class="fa-solid fa-plus"></i> Adicionar equipamento</button>' +
+    return '<div class="lx-child-table lx-origin-equipment-table"><button class="lx-btn lx-btn-primary" type="button" data-action="add-current-equipment"><i class="fa-solid fa-plus"></i> Adicionar Equipamento</button>' +
       state.form.equipamentosOrigem.map(function (item, index) {
         return '<div class="lx-child-row lx-career-equipment-row lx-career-current-equipment-row">' +
           field("Equipamento", "equipamento", item.equipamento, true, false, "text", "currentEquipment", index) +
           field("Quantidade", "quantidade", item.quantidade, true, true, "text", "currentEquipment", index) +
           textareaScoped("Destino do Equipamento", "destino", item.destino, true, "currentEquipment", index) +
-          '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-current-equipment" data-index="' + index + '" aria-label="Excluir equipamento"><i class="fa-solid fa-trash"></i></button>' +
+          '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-current-equipment" data-index="' + index + '" aria-label="Excluir Equipamento"><i class="fa-solid fa-trash"></i></button>' +
         '</div>';
       }).join("") + '</div>';
   }
 
   function renderRequiredEquipments() {
-    return '<div class="lx-child-table"><button class="lx-btn lx-btn-primary" type="button" data-action="add-required-equipment"><i class="fa-solid fa-plus"></i> Adicionar equipamento</button>' +
+    return '<div class="lx-child-table"><button class="lx-btn lx-btn-primary" type="button" data-action="add-required-equipment"><i class="fa-solid fa-plus"></i> Adicionar Equipamento</button>' +
       state.form.equipamentosNecessarios.map(function (item, index) {
         return '<div class="lx-child-row lx-career-equipment-row lx-career-required-equipment-row">' +
           field("Equipamento", "equipamento", item.equipamento, true, false, "text", "requiredEquipment", index) +
           field("Quantidade", "quantidade", item.quantidade, true, false, "number", "requiredEquipment", index) +
           textareaScoped("Observações", "observacao", item.observacao, false, "requiredEquipment", index) +
-          '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-required-equipment" data-index="' + index + '" aria-label="Excluir equipamento"><i class="fa-solid fa-trash"></i></button>' +
+          '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-required-equipment" data-index="' + index + '" aria-label="Excluir Equipamento"><i class="fa-solid fa-trash"></i></button>' +
         '</div>';
       }).join("") + '</div>';
   }
@@ -858,12 +858,12 @@
     return '<label class="lx-field ' + fieldClass(name, scope) + (error ? " lx-error" : "") + '"><span>' + label + (required ? " <b>*</b>" : "") + '</span><div class="lx-single-select' + (value ? " has-value" : "") + '" data-single-select data-field="' + name + '"' + scopedAttrs(scope, index) + '><div class="lx-single-select-control"><span class="lx-tag" data-selected-text>' + escapeHtml(value) + ' <button type="button" data-clear-select aria-label="Remover">x</button></span><input data-select-input placeholder="Pesquisar ' + label.toLowerCase() + '..." /></div><div class="lx-select-list lx-hidden">' + options.map(function (option) { return '<button type="button" data-select-option="' + escapeHtml(option) + '">' + escapeHtml(option) + '</button>'; }).join("") + '</div></div>' + errorHtml(error) + '</label>';
   }
   function renderAttachmentsEditor(fieldName, title, icon) {
-    return formFieldset(title, icon, '<div class="lx-dropzone" data-dropzone="' + fieldName + '"><i class="fa-solid fa-cloud-arrow-up"></i><p>Arraste e solte seus arquivos aqui</p><span>ou</span><button type="button" class="lx-btn-outline">Escolher arquivo</button><input type="file" class="lx-file-input" data-file-upload="' + fieldName + '" multiple /></div>' + renderAttachmentsList(state.form[fieldName] || [], fieldName, true));
+    return formFieldset(title, icon, '<div class="lx-dropzone" data-dropzone="' + fieldName + '"><i class="fa-solid fa-cloud-arrow-up"></i><p>Arraste e solte seus arquivos aqui</p><span>ou</span><button type="button" class="lx-btn-outline">Escolher Arquivo</button><input type="file" class="lx-file-input" data-file-upload="' + fieldName + '" multiple /></div>' + renderAttachmentsList(state.form[fieldName] || [], fieldName, true));
   }
   function renderAttachmentsList(files, fieldName, editable) {
     if (!files.length) return '<div class="lx-empty-list">Nenhum arquivo anexado.</div>';
     return '<div class="lx-attachment-list">' + files.map(function (file, index) {
-      return '<div class="lx-attachment-row"><div class="lx-attachment-info"><i class="fa-solid fa-file-lines"></i><div><strong>' + escapeHtml(file.nome) + '</strong><span>' + escapeHtml(file.tamanho || "-") + ' - ' + escapeHtml(file.origem || "Anexo") + '</span></div></div><div class="lx-attachment-actions"><button class="lx-btn-icon lx-btn-secondary" type="button" data-action="view-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Visualizar anexo"><i class="fa-solid fa-eye"></i></button><button class="lx-btn-icon lx-btn-secondary" type="button" data-action="download-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Baixar anexo"><i class="fa-solid fa-download"></i></button>' + (editable ? '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Excluir anexo"><i class="fa-solid fa-trash"></i></button>' : "") + '</div></div>';
+      return '<div class="lx-attachment-row"><div class="lx-attachment-info"><i class="fa-solid fa-file-lines"></i><div><strong>' + escapeHtml(file.nome) + '</strong><span>' + escapeHtml(file.tamanho || "-") + ' - ' + escapeHtml(file.origem || "Anexo") + '</span></div></div><div class="lx-attachment-actions"><button class="lx-btn-icon lx-btn-secondary" type="button" data-action="view-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Visualizar Anexo"><i class="fa-solid fa-eye"></i></button><button class="lx-btn-icon lx-btn-secondary" type="button" data-action="download-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Baixar Anexo"><i class="fa-solid fa-download"></i></button>' + (editable ? '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Excluir Anexo"><i class="fa-solid fa-trash"></i></button>' : "") + '</div></div>';
     }).join("") + '</div>';
   }
 
@@ -930,11 +930,11 @@
       updateEnquadramentoCalculations();
       state.form.novoSalario = state.form.salarioSugerido;
       updateEnquadramentoCalculations();
-      showModal({ title: "Salário inválido", message: "O Novo Salário Enquadrado não pode ser menor que o Salário Atual. O campo foi ajustado para o salário correspondente à regra do enquadramento.", icon: "fa-triangle-exclamation", confirmText: "Entendi", cancelText: "Fechar", onConfirm: hideModal });
+      showModal({ title: "Salário Inválido", message: "O Novo Salário Enquadrado não pode ser menor que o Salário Atual. O campo foi ajustado para o salário correspondente à regra do enquadramento.", icon: "fa-triangle-exclamation", confirmText: "Entendi", cancelText: "Fechar", onConfirm: hideModal });
     }
     if (name === "dataVigencia" && value && value < todayValue()) {
       state.errors.dataVigencia = "A data de início da vigência não pode ser menor que a data atual.";
-      showModal({ title: "Data inválida", message: "A data de início da vigência não pode ser menor que a data atual.", icon: "fa-triangle-exclamation", confirmText: "Entendi", cancelText: "Fechar", onConfirm: hideModal });
+      showModal({ title: "Data Inválida", message: "A data de início da vigência não pode ser menor que a data atual.", icon: "fa-triangle-exclamation", confirmText: "Entendi", cancelText: "Fechar", onConfirm: hideModal });
     }
     render();
   }
@@ -1001,22 +1001,22 @@
       render();
       return;
     }
-    if (action === "draft") showModal({ title: "Salvar rascunho", message: "Deseja salvar os dados preenchidos até o momento?", icon: "fa-save", confirmText: "Salvar", onConfirm: function () { state.status = "Rascunho salvo"; hideModal(); render(); } });
-    if (action === "submit") { if (!validateSolicitacao()) return renderAndScroll(); showModal({ title: "Enviar solicitação", message: "Deseja enviar a movimentação de carreira para aprovação?", icon: "fa-paper-plane", confirmText: "Enviar", onConfirm: function () { state.status = "Enviado para aprovação"; hideModal(); render(); } }); }
-    if (action === "send-approval") { var approvalKey = event.currentTarget.getAttribute("data-approval-key"); if (!validateApproval(approvalKey)) return; showModal({ title: "Enviar decisão", message: "Deseja registrar a decisão desta etapa?", icon: "fa-paper-plane", confirmText: "Enviar", onConfirm: function () { applyDecision(approvalKey); hideModal(); } }); }
-    if (action === "resend-correction") { var type = event.currentTarget.getAttribute("data-flow-type"); showModal({ title: "Reenviar solicitação", message: "Deseja reenviar a movimentação para aprovação?", icon: "fa-paper-plane", confirmText: "Reenviar", onConfirm: function () { hideModal(); setStage(flowStageKey(type, getFlowApprovals(type)[0])); } }); }
+    if (action === "draft") showModal({ title: "Salvar Rascunho", message: "Deseja salvar os dados preenchidos até o momento?", icon: "fa-save", confirmText: "Salvar", onConfirm: function () { state.status = "Rascunho salvo"; hideModal(); render(); } });
+    if (action === "submit") { if (!validateSolicitacao()) return renderAndScroll(); showModal({ title: "Enviar Solicitação", message: "Deseja enviar a movimentação de carreira para aprovação?", icon: "fa-paper-plane", confirmText: "Enviar", onConfirm: function () { state.status = "Enviado para aprovação"; hideModal(); render(); } }); }
+    if (action === "send-approval") { var approvalKey = event.currentTarget.getAttribute("data-approval-key"); if (!validateApproval(approvalKey)) return; showModal({ title: "Enviar Decisão", message: "Deseja registrar a decisão desta etapa?", icon: "fa-paper-plane", confirmText: "Enviar", onConfirm: function () { applyDecision(approvalKey); hideModal(); } }); }
+    if (action === "resend-correction") { var type = event.currentTarget.getAttribute("data-flow-type"); showModal({ title: "Reenviar Solicitação", message: "Deseja reenviar a movimentação para aprovação?", icon: "fa-paper-plane", confirmText: "Reenviar", onConfirm: function () { hideModal(); setStage(flowStageKey(type, getFlowApprovals(type)[0])); } }); }
     if (action === "add-current-equipment") { state.form.equipamentosOrigem.push({ equipamento: "", quantidade: "1", destino: "" }); render(); }
     if (action === "delete-current-equipment") { var currentIndex = Number(event.currentTarget.getAttribute("data-index")); showDelete("Deseja remover este equipamento atual?", function () { state.form.equipamentosOrigem.splice(currentIndex, 1); }); }
     if (action === "add-required-equipment") { state.form.equipamentosNecessarios.push({ equipamento: "", quantidade: "1", observacao: "" }); render(); }
     if (action === "delete-required-equipment") { var requiredIndex = Number(event.currentTarget.getAttribute("data-index")); showDelete("Deseja remover este equipamento necessário?", function () { state.form.equipamentosNecessarios.splice(requiredIndex, 1); }); }
     if (action === "delete-attachment") { var attachmentIndex = Number(event.currentTarget.getAttribute("data-index")); var attachmentField = event.currentTarget.getAttribute("data-attachment-field") || "anexos"; showDelete("Deseja remover este arquivo anexado?", function () { state.form[attachmentField].splice(attachmentIndex, 1); }); }
-    if (action === "view-attachment") { var viewField = event.currentTarget.getAttribute("data-attachment-field") || "anexos"; var file = (state.form[viewField] || [])[Number(event.currentTarget.getAttribute("data-index"))]; showModal({ title: file ? file.nome : "Visualizar anexo", html: renderAttachmentPreview(file), icon: "fa-eye", confirmText: "Fechar", hideCancel: true, wide: true, onConfirm: hideModal }); }
-    if (action === "download-attachment") { var downloadField = event.currentTarget.getAttribute("data-attachment-field") || "anexos"; var downloadFile = (state.form[downloadField] || [])[Number(event.currentTarget.getAttribute("data-index"))]; if (downloadFile && downloadFile.url) { window.open(downloadFile.url, "_blank"); return; } showModal({ title: "Baixar anexo", message: downloadFile ? downloadFile.nome : "Anexo não encontrado.", icon: "fa-download", confirmText: "Ok", cancelText: "Fechar", onConfirm: hideModal }); }
+    if (action === "view-attachment") { var viewField = event.currentTarget.getAttribute("data-attachment-field") || "anexos"; var file = (state.form[viewField] || [])[Number(event.currentTarget.getAttribute("data-index"))]; showModal({ title: file ? file.nome : "Visualizar Anexo", html: renderAttachmentPreview(file), icon: "fa-eye", confirmText: "Fechar", hideCancel: true, wide: true, onConfirm: hideModal }); }
+    if (action === "download-attachment") { var downloadField = event.currentTarget.getAttribute("data-attachment-field") || "anexos"; var downloadFile = (state.form[downloadField] || [])[Number(event.currentTarget.getAttribute("data-index"))]; if (downloadFile && downloadFile.url) { window.open(downloadFile.url, "_blank"); return; } showModal({ title: "Baixar Anexo", message: downloadFile ? downloadFile.nome : "Anexo não encontrado.", icon: "fa-download", confirmText: "Ok", cancelText: "Fechar", onConfirm: hideModal }); }
   }
   function validateApproval(key) {
     var decision = state.decisions[key] || { value: "approve", justification: "" };
     if (decision.value !== "approve" && !String(decision.justification || "").trim()) {
-      showModal({ title: "Justificativa obrigatória", message: "Informe a justificativa para devolver ou cancelar a movimentação.", icon: "fa-triangle-exclamation", confirmText: "Entendi", cancelText: "Fechar", onConfirm: hideModal });
+      showModal({ title: "Justificativa Obrigatória", message: "Informe a justificativa para devolver ou cancelar a movimentação.", icon: "fa-triangle-exclamation", confirmText: "Entendi", cancelText: "Fechar", onConfirm: hideModal });
       return false;
     }
     return true;
@@ -1031,7 +1031,7 @@
     setStage(next ? flowStageKey(flow.type, next) : flowStageKey(flow.type, "finalizada"));
   }
   function showDelete(message, onConfirm) {
-    showModal({ title: "Excluir item", message: message, icon: "fa-trash", confirmText: "Excluir", onConfirm: function () { onConfirm(); hideModal(); render(); } });
+    showModal({ title: "Excluir Item", message: message, icon: "fa-trash", confirmText: "Excluir", onConfirm: function () { onConfirm(); hideModal(); render(); } });
   }
   function validateSolicitacao() {
     var f = state.form;

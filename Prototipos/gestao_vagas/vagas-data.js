@@ -81,8 +81,8 @@
       { id: "avaliacao", title: "Avaliação do Gestor", icon: "fa-user-tie" },
       { id: "entrevistaRh", title: "Entrevista RH", icon: "fa-comments" },
       { id: "entrevistaGestor", title: "Entrevista Gestor", icon: "fa-people-arrows" },
-      { id: "teste", title: "Teste / Avaliação complementar", icon: "fa-clipboard-check" },
-      { id: "parecer", title: "Parecer final", icon: "fa-user-check" }
+      { id: "teste", title: "Teste / Avaliação Complementar", icon: "fa-clipboard-check" },
+      { id: "parecer", title: "Parecer Final", icon: "fa-user-check" }
     ],
     requisitions: requisitions,
     activeSelectionSteps: function (record) {

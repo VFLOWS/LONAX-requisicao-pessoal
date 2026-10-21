@@ -186,16 +186,16 @@
       { label: "Cidade", value: address.city && address.city.name || address.foreign_city || "Não informado" },
       { label: "UF", value: address.city && address.city.state && address.city.state.initials || address.stateAcronym || "Não informado" },
       { label: "País", value: address.countryAcronym === "BR" ? "Brasil" : address.countryAcronym || "Não informado" }
-    ] : [{ label: "Localidade informada", value: candidate.address || "Não informado", wide: true }];
+    ] : [{ label: "Localidade Informada", value: candidate.address || "Não informado", wide: true }];
     return fields;
   }
 
   function professionalFields(candidate) {
     var source = candidate.source;
-    var fields = [{ label: "Pretensão salarial", value: candidate.salary }];
+    var fields = [{ label: "Pretensão Salarial", value: candidate.salary }];
     if (source) {
       var levels = { management: "Gestão", junior: "Júnior", middle: "Pleno", senior: "Sênior" };
-      fields.push({ label: "Senioridade informada", value: levels[source.seniority] || source.seniority || "Não informada" });
+      fields.push({ label: "Senioridade Informada", value: levels[source.seniority] || source.seniority || "Não informada" });
       var license = String(source.drivers_license);
       fields.push({ label: "Possui CNH?", value: license === "1" || license === "true" ? "Sim" : license === "0" || license === "false" ? "Não" : "Não informado" });
       if (source.drivers_license_category && (license === "1" || license === "true")) fields.push({ label: "Categoria da CNH", value: source.drivers_license_category });
@@ -205,17 +205,17 @@
 
   function renderCandidateData(candidate) {
     var fields = [
-      { label: "Nome completo", value: candidate.fullName },
+      { label: "Nome Completo", value: candidate.fullName },
       { label: "CPF", value: candidate.cpf },
-      { label: "Data de nascimento", value: candidate.birthDate },
+      { label: "Data de Nascimento", value: candidate.birthDate },
       { label: "Gênero", value: candidate.gender },
-      { label: "E-mail principal", value: candidate.email || "Não informado" }
+      { label: "E-mail Principal", value: candidate.email || "Não informado" }
     ];
-    if (candidate.secondaryEmail) fields.push({ label: "E-mail alternativo", value: candidate.secondaryEmail });
+    if (candidate.secondaryEmail) fields.push({ label: "E-mail Alternativo", value: candidate.secondaryEmail });
     fields.push({ label: "Telefone", value: candidate.phone });
     if (candidate.mobile) fields.push({ label: "Celular", value: candidate.mobile });
     fields = fields.concat(professionalFields(candidate), addressFields(candidate));
-    return SL.infoSection({ title: "Dados do candidato", icon: "fa-address-card", tone: "blue", bodyHtml: SL.infoGrid(fields, 3) + renderContactActions(candidate) });
+    return SL.infoSection({ title: "Dados do Candidato", icon: "fa-address-card", tone: "blue", bodyHtml: SL.infoGrid(fields, 3) + renderContactActions(candidate) });
   }
 
   function renderExperiences(candidate) {
@@ -223,14 +223,14 @@
     if (!experiences.length) return "";
     var timeline = '<div class="sl-record-timeline sl-experience-timeline">' + experiences.slice().sort(function (a, b) { return dateOrder(b.startDate) - dateOrder(a.startDate); }).map(function (entry, index) {
       var period = formatDate(entry.startDate) + " a " + (entry.endDate ? formatDate(entry.endDate) : "Término não informado");
-      return '<article class="sl-record-event"><span class="sl-record-event-dot"><i class="fa-solid fa-briefcase" aria-hidden="true"></i></span><details class="sl-record-collapse"' + (index === 0 ? ' open' : '') + '><summary><div><h3>' + SL.escapeHtml(entry.position || "Cargo não informado") + '</h3><p>' + SL.escapeHtml(entry.company || "Empresa não informada") + ' - ' + SL.escapeHtml(period) + '</p></div><i class="fa-solid fa-chevron-down sl-record-chevron" aria-hidden="true"></i></summary><div class="sl-record-event-body"><div class="sl-experience-description"><span>Atividades desempenhadas</span><p>' + SL.escapeHtml((entry.activitiesDescription || "Atividades não informadas.").trim()) + '</p></div></div></details></article>';
+      return '<article class="sl-record-event"><span class="sl-record-event-dot"><i class="fa-solid fa-briefcase" aria-hidden="true"></i></span><details class="sl-record-collapse"' + (index === 0 ? ' open' : '') + '><summary><div><h3>' + SL.escapeHtml(entry.position || "Cargo não informado") + '</h3><p>' + SL.escapeHtml(entry.company || "Empresa não informada") + ' - ' + SL.escapeHtml(period) + '</p></div><i class="fa-solid fa-chevron-down sl-record-chevron" aria-hidden="true"></i></summary><div class="sl-record-event-body"><div class="sl-experience-description"><span>Atividades Desempenhadas</span><p>' + SL.escapeHtml((entry.activitiesDescription || "Atividades não informadas.").trim()) + '</p></div></div></details></article>';
     }).join("") + '</div>';
-    return SL.infoSection({ title: "Experiência profissional", icon: "fa-briefcase", tone: "green", bodyHtml: timeline });
+    return SL.infoSection({ title: "Experiência Profissional", icon: "fa-briefcase", tone: "green", bodyHtml: timeline });
   }
 
   function renderBehaviorProfile(candidate) {
     if (!candidate.profile.length) return "";
-    return SL.infoSection({ title: "Perfil comportamental", icon: "fa-chart-simple", tone: "purple", bodyHtml: SL.behaviorProfileCards(candidate.profile) });
+    return SL.infoSection({ title: "Perfil Comportamental", icon: "fa-chart-simple", tone: "purple", bodyHtml: SL.behaviorProfileCards(candidate.profile) });
   }
 
   function queryCandidate() {
@@ -254,8 +254,8 @@
       "</div>",
       "</div>",
       '<div class="sl-candidate-profile-actions">',
-      '<a class="sl-secondary-button" href="detalhe-vaga.html"><i class="fa-solid fa-briefcase" aria-hidden="true"></i> Detalhe da vaga</a>',
-      '<a class="sl-primary-button" href="index.html"><i class="fa-solid fa-users" aria-hidden="true"></i> Lista de candidatos</a>',
+      '<a class="sl-secondary-button" href="detalhe-vaga.html"><i class="fa-solid fa-briefcase" aria-hidden="true"></i> Detalhe da Vaga</a>',
+      '<a class="sl-primary-button" href="index.html"><i class="fa-solid fa-users" aria-hidden="true"></i> Lista de Candidatos</a>',
       "</div>",
       "</div>"
     ].join("");
@@ -264,12 +264,12 @@
   function renderDetail() {
     var candidate = loadCandidate(queryCandidate());
     if (!candidate) {
-      document.getElementById("candidateDetailApp").innerHTML = SL.pageSection({ title: "Candidato não encontrado", icon: "fa-user", description: "O registro não está disponível nesta consulta.", bodyHtml: '<a class="sl-secondary-button" href="index.html">Voltar para candidatos</a>' });
+      document.getElementById("candidateDetailApp").innerHTML = SL.pageSection({ title: "Candidato não Encontrado", icon: "fa-user", description: "O registro não está disponível nesta consulta.", bodyHtml: '<a class="sl-secondary-button" href="index.html">Voltar para Candidatos</a>' });
       return;
     }
 
     document.getElementById("candidateDetailApp").innerHTML = SL.pageSection({
-      title: "Detalhe do candidato",
+      title: "Detalhe do Candidato",
       description: "Consulta individual do candidato, perfil e andamento da solicitação Fluig.",
       icon: "fa-user",
       iconClass: "sl-section-icon-candidates",
@@ -277,21 +277,21 @@
         renderCandidateHeader(candidate),
         SL.kpiGrid([
           { className: "sl-vagas-kpi-blue", icon: "fa-file-signature", label: "Solicitação Fluig", value: candidate.workflow || "Não iniciada" },
-          { className: "sl-vagas-kpi-green", icon: "fa-list-check", label: "Atividade atual", value: candidate.activity },
-          { className: "sl-vagas-kpi-orange", icon: "fa-dollar-sign", label: "Pretensão salarial", value: candidate.salary },
-          { className: "sl-vagas-kpi-red", icon: "fa-file-contract", label: "Situação da admissão", value: candidate.admission }
+          { className: "sl-vagas-kpi-green", icon: "fa-list-check", label: "Atividade Atual", value: candidate.activity },
+          { className: "sl-vagas-kpi-orange", icon: "fa-dollar-sign", label: "Pretensão Salarial", value: candidate.salary },
+          { className: "sl-vagas-kpi-red", icon: "fa-file-contract", label: "Situação da Admissão", value: candidate.admission }
         ]),
         renderCandidateData(candidate),
         renderExperiences(candidate),
         renderBehaviorProfile(candidate),
         SL.infoSection({ title: "Solicitação Fluig", icon: "fa-file-signature", tone: "green", bodyHtml: candidate.workflow ? SL.table({
           className: "sl-candidate-workflow-table", compact: true,
-          columns: ["Solicitação", "Atividade atual", "Responsável", "Status", "SLA"],
+          columns: ["Solicitação", "Atividade Atual", "Responsável", "Status", "SLA"],
           rows: [
             [candidate.workflow, candidate.activity, candidate.activity === "Avaliação do Gestor" ? "Eduardo Martins" : candidate.activity === "Admissão Digital" ? "Renato Silva" : "Carla Mendes", statusPill(candidate.status, candidate.statusClass), candidate.sla]
           ]
         }) : '<p class="sl-candidate-empty">Nenhuma solicitação iniciada para este candidato.</p>' }),
-        '<div class="sl-detail-subsection-head"><div><span class="sl-section-icon sl-section-icon-candidates"><i class="fa-solid fa-clock-rotate-left"></i></span><div><h3>Histórico do candidato</h3><p>Movimentações e decisões nesta vaga.</p></div></div></div>',
+        '<div class="sl-detail-subsection-head"><div><span class="sl-section-icon sl-section-icon-candidates"><i class="fa-solid fa-clock-rotate-left"></i></span><div><h3>Histórico do Candidato</h3><p>Movimentações e decisões nesta vaga.</p></div></div></div>',
         renderHistory(candidate)
       ].join("")
     });
@@ -301,23 +301,23 @@
     if (candidate.registeredAt || !candidates[candidate.key]) {
       if (!candidate.workflow || !candidate.registeredAt) return '<p class="sl-candidate-empty">Não há movimentações registradas para este candidato.</p>';
       return SL.historyTimeline([
-        { date: candidate.registeredAt, title: "Vínculo com a vaga", icon: "fa-user-plus", responsible: "Carla Mendes", department: "Recursos Humanos", description: "Candidato vinculado à vaga Operador de Máquinas - Linha Industrial.", items: [{ label: "Candidato", value: candidate.name }, { label: "Origem", value: candidate.origin }, { label: "Vaga", value: "VG-001" }] },
-        { date: candidate.registeredAt, title: "Abertura da Solicitação Fluig", icon: "fa-file-signature", responsible: "Carla Mendes", department: "Recursos Humanos", description: "Solicitação individual iniciada para acompanhamento das avaliações do candidato.", items: [{ label: "Solicitação Fluig", value: candidate.workflow }, { label: "Etapa atual", value: candidate.activity }, { label: "Status", value: candidate.status }] }
+        { date: candidate.registeredAt, title: "Vínculo com a Vaga", icon: "fa-user-plus", responsible: "Carla Mendes", department: "Recursos Humanos", description: "Candidato vinculado à vaga Operador de Máquinas - Linha Industrial.", items: [{ label: "Candidato", value: candidate.name }, { label: "Origem", value: candidate.origin }, { label: "Vaga", value: "VG-001" }] },
+        { date: candidate.registeredAt, title: "Abertura da Solicitação Fluig", icon: "fa-file-signature", responsible: "Carla Mendes", department: "Recursos Humanos", description: "Solicitação individual iniciada para acompanhamento das avaliações do candidato.", items: [{ label: "Solicitação Fluig", value: candidate.workflow }, { label: "Etapa Atual", value: candidate.activity }, { label: "Status", value: candidate.status }] }
       ]);
     }
     var events = [
-      { date: "2026-08-02T15:20:00", title: "Vínculo com a vaga", icon: "fa-user-plus", responsible: "Carla Mendes", department: "Recursos Humanos", description: "Dados conferidos e candidato vinculado à vaga Operador de Máquinas - Linha Industrial.", items: [{ label: "Candidato", value: candidate.name }, { label: "Origem", value: candidate.origin }, { label: "Vaga", value: "VG-001" }] },
-      { date: "2026-08-02T15:23:00", title: "Abertura da Solicitação Fluig", icon: "fa-file-signature", responsible: "Carla Mendes", department: "Recursos Humanos", description: "Solicitação individual iniciada para registrar as avaliações e decisões do processo seletivo.", items: [{ label: "Solicitação Fluig", value: candidate.workflow }, { label: "Etapa inicial", value: "Triagem RH" }, { label: "Status", value: "Solicitação iniciada" }] }
+      { date: "2026-08-02T15:20:00", title: "Vínculo com a Vaga", icon: "fa-user-plus", responsible: "Carla Mendes", department: "Recursos Humanos", description: "Dados conferidos e candidato vinculado à vaga Operador de Máquinas - Linha Industrial.", items: [{ label: "Candidato", value: candidate.name }, { label: "Origem", value: candidate.origin }, { label: "Vaga", value: "VG-001" }] },
+      { date: "2026-08-02T15:23:00", title: "Abertura da Solicitação Fluig", icon: "fa-file-signature", responsible: "Carla Mendes", department: "Recursos Humanos", description: "Solicitação individual iniciada para registrar as avaliações e decisões do processo seletivo.", items: [{ label: "Solicitação Fluig", value: candidate.workflow }, { label: "Etapa Inicial", value: "Triagem RH" }, { label: "Status", value: "Solicitação iniciada" }] }
     ];
     if (candidate.status !== "Solicitação iniciada") {
-      events.push({ date: "2026-08-03T09:10:00", title: "Triagem RH", icon: "fa-list-check", responsible: "Carla Mendes", department: "Recursos Humanos", description: candidate.activity === "Triagem RH" ? "Currículo e disponibilidade recebidos. A avaliação de aderência aos requisitos da vaga está em andamento." : "Currículo compatível com os requisitos. Candidato encaminhado para avaliação técnica do gestor.", items: [{ label: "Situação", value: candidate.activity === "Triagem RH" ? "Em análise" : "Aprovado na triagem" }, { label: "Perfis identificados", value: candidate.profile.join(" / ") }, { label: "Aderência", value: candidate.score }], tone: "green" });
+      events.push({ date: "2026-08-03T09:10:00", title: "Triagem RH", icon: "fa-list-check", responsible: "Carla Mendes", department: "Recursos Humanos", description: candidate.activity === "Triagem RH" ? "Currículo e disponibilidade recebidos. A avaliação de aderência aos requisitos da vaga está em andamento." : "Currículo compatível com os requisitos. Candidato encaminhado para avaliação técnica do gestor.", items: [{ label: "Situação", value: candidate.activity === "Triagem RH" ? "Em análise" : "Aprovado na triagem" }, { label: "Perfis Identificados", value: candidate.profile.join(" / ") }, { label: "Aderência", value: candidate.score }], tone: "green" });
     }
     if (candidate.activity === "Avaliação do Gestor" || candidate.status === "Aprovado") {
       events.push({ date: "2026-08-04T14:30:00", title: "Avaliação do Gestor", icon: "fa-user-tie", responsible: "Eduardo Martins", department: "Gerência Industrial", description: candidate.status === "Aprovado" ? "Entrevista técnica concluída. Experiência operacional e disponibilidade compatíveis com a posição." : "Entrevista técnica agendada para avaliação da experiência em máquinas industriais e disponibilidade de horário.", items: [{ label: "Decisão", value: candidate.status === "Aprovado" ? "Aprovado" : "Em avaliação" }, { label: "Cargo", value: "Operador de Máquinas" }, { label: "Solicitação Fluig", value: candidate.workflow }], tone: "green" });
     }
     if (candidate.status === "Aprovado") {
-      events.push({ date: "2026-08-05T11:35:00", title: "Encaminhamento para admissão", icon: "fa-user-check", responsible: "Renato Silva", department: "Departamento Pessoal", description: "Candidato aprovado e encaminhado para envio dos documentos necessários à contratação.", items: [{ label: "Decisão", value: "Aprovado" }, { label: "Previsão de início", value: "20/10/2026" }, { label: "Admissão", value: candidate.admission }], tone: "green" });
-      events.push({ date: "2026-08-06T08:45:00", title: "Conferência de documentação", icon: "fa-file-contract", responsible: "Renato Silva", department: "Departamento Pessoal", description: "Documentação recebida e em análise. Aguardando comprovante de escolaridade para concluir a conferência.", items: [{ label: "Etapa", value: "Admissão Digital" }, { label: "Situação", value: "Em análise" }, { label: "Pendência", value: "Comprovante de escolaridade" }], tone: "purple" });
+      events.push({ date: "2026-08-05T11:35:00", title: "Encaminhamento para Admissão", icon: "fa-user-check", responsible: "Renato Silva", department: "Departamento Pessoal", description: "Candidato aprovado e encaminhado para envio dos documentos necessários à contratação.", items: [{ label: "Decisão", value: "Aprovado" }, { label: "Previsão de Início", value: "20/10/2026" }, { label: "Admissão", value: candidate.admission }], tone: "green" });
+      events.push({ date: "2026-08-06T08:45:00", title: "Conferência de Documentação", icon: "fa-file-contract", responsible: "Renato Silva", department: "Departamento Pessoal", description: "Documentação recebida e em análise. Aguardando comprovante de escolaridade para concluir a conferência.", items: [{ label: "Etapa", value: "Admissão Digital" }, { label: "Situação", value: "Em análise" }, { label: "Pendência", value: "Comprovante de escolaridade" }], tone: "purple" });
     }
     return SL.historyTimeline(events);
   }

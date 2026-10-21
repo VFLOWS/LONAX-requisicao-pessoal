@@ -16,7 +16,7 @@
   employees.forEach(e => Object.assign(e, employeeDetails[e.chapa]));
   const stabilityExamples = {
     '000731': [
-      { tipo: 'CIPA', informado: 'Sim', inicio: '2026-01-01', fim: '2026-12-31', detalhes: [['Representação', 'Titular'], ['Data da eleição', '2025-12-15']], descricao: 'Representante dos empregados na CIPA. Mandato informado no cadastro do colaborador.' },
+      { tipo: 'CIPA', informado: 'Sim', inicio: '2026-01-01', fim: '2026-12-31', detalhes: [['Representação', 'Titular'], ['Data da Eleição', '2025-12-15']], descricao: 'Representante dos empregados na CIPA. Mandato informado no cadastro do colaborador.' },
       { tipo: 'Afastamento', informado: 'Não', inicio: '', fim: '', descricao: 'Sem afastamento informado no cadastro.' },
       { tipo: 'Maternidade', informado: 'Não', inicio: '', fim: '', descricao: 'Sem informação de maternidade no cadastro.' }
     ],
@@ -26,7 +26,7 @@
       { tipo: 'Maternidade', informado: 'Sim', inicio: '2026-09-01', fim: '2027-02-28', detalhes: [['Tipo de licença', 'Licença-maternidade'], ['Retorno previsto', '2027-03-01']], descricao: 'Licença-maternidade informada no cadastro da colaboradora.' }
     ],
     '001042': [
-      { tipo: 'CIPA', informado: 'Sim', inicio: '2025-11-01', fim: '2026-10-31', detalhes: [['Representação', 'Suplente'], ['Data da eleição', '2025-10-15']], descricao: 'Participação na CIPA informada no cadastro do colaborador.' },
+      { tipo: 'CIPA', informado: 'Sim', inicio: '2025-11-01', fim: '2026-10-31', detalhes: [['Representação', 'Suplente'], ['Data da Eleição', '2025-10-15']], descricao: 'Participação na CIPA informada no cadastro do colaborador.' },
       { tipo: 'Afastamento', informado: 'Sim', inicio: '2026-10-01', fim: '2026-10-31', detalhes: [['Motivo', 'Saúde'], ['Retorno previsto', '2026-11-03']], descricao: 'Afastamento por motivo de saúde informado no cadastro do colaborador.' },
       { tipo: 'Maternidade', informado: 'Não', inicio: '', fim: '', descricao: 'Sem informação de maternidade no cadastro.' }
     ]
@@ -99,9 +99,9 @@
   ].map(([key, title, icon, tone, desc]) => ({ key, title, icon, tone, desc }));
   const owners = { solicitacao: 'Eduardo Martins', diretoria: 'Roberto Siqueira', rh: 'Ricardo Nunes', paralelo: 'Ricardo Nunes', sesmt: 'Marcos Oliveira', ti: 'Patrícia Almeida', documento: 'Ricardo Nunes', assinaturas: 'Ricardo Nunes', validacao_assinaturas: 'Ricardo Nunes', dp: 'Juliana Costa' };
   const checklistGroups = [
-    ['proventos', 'Descontos / Proventos', ['Plano de Saúde', 'Coparticipação', 'Odontológico', 'Alimentação', 'Adicional Noturno', 'Art. 73 — Hora Ficta', 'Faltas', 'Atrasos', 'Comissões', 'Periculosidade / Insalubridade', 'Desconto Vale-Transporte', 'Desconto Combustível', 'Pensão', 'FGTS do mês anterior', 'Farmácia', 'Bazar / Feira da Família', 'Uniforme', 'Banco de Horas', 'Cesta Básica', 'Fretado', 'EPI', 'E-Consignado', 'Insuficiência de saldo do mês anterior', 'Conferência de gozo de férias']],
+    ['proventos', 'Descontos / Proventos', ['Plano de Saúde', 'Coparticipação', 'Odontológico', 'Alimentação', 'Adicional Noturno', 'Art. 73 — Hora Ficta', 'Faltas', 'Atrasos', 'Comissões', 'Periculosidade / Insalubridade', 'Desconto Vale-Transporte', 'Desconto Combustível', 'Pensão', 'FGTS do Mês Anterior', 'Farmácia', 'Bazar / Feira da Família', 'Uniforme', 'Banco de Horas', 'Cesta Básica', 'Fretado', 'EPI', 'E-Consignado', 'Insuficiência de Saldo do Mês Anterior', 'Conferência de Gozo de Férias']],
     ['cancelamentos', 'Cancelamentos', ['Plano de Saúde', 'Odontológico', 'Farmácia', 'Tangerino', 'CTRL ID']],
-    ['documentos', 'Documentos / Providências', ['PPP', 'TRCT', 'Folha de Ponto', 'Extrato FGTS', 'GRRF', 'Ficha de Registro', 'Seguro', 'ASO Demissional', 'Aviso Assinado', 'Lançamento Financeiro', 'Arquivo Bancário', 'Lançamento do Líquido', 'Total TRCT', 'Total GRRF', 'Envio do evento S-2299 ao eSocial']]
+    ['documentos', 'Documentos / Providências', ['PPP', 'TRCT', 'Folha de Ponto', 'Extrato FGTS', 'GRRF', 'Ficha de Registro', 'Seguro', 'ASO Demissional', 'Aviso Assinado', 'Lançamento Financeiro', 'Arquivo Bancário', 'Lançamento do Líquido', 'Total TRCT', 'Total GRRF', 'Envio do Evento S-2299 ao eSocial']]
   ];
   const labels = { solicitacao: 'Em preenchimento', diretoria: 'Aguardando Diretoria', rh: 'Aguardando RH', paralelo: 'Aguardando SESMT e TI', documento: 'Aguardando documento', assinaturas: 'Aguardando encaminhamento para assinatura', validacao_assinaturas: 'Aguardando validação das assinaturas', dp: 'Checklist do DP', correcao: 'Em correção', retomada: 'Aguardando regra de retomada', reprovada: 'Reprovado', finalizada: 'Finalizado' };
 
@@ -299,7 +299,7 @@
   function closeModal() { backdrop.classList.add('lx-hidden'); dialog.classList.remove('lx-modal-wide'); modalAction = null; modalValidation = null; document.getElementById('modalMessage').innerHTML = ''; if (previewURL) { URL.revokeObjectURL(previewURL); previewURL = null; } previousFocus?.focus(); }
   function notice(text, tone = '') { return '<div class="lx-alert ' + tone + '"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><div>' + text + '</div></div>'; }
   function button(action, text, style = 'primary', attrs = '') { return '<button type="button" class="lx-btn lx-btn-' + style + '" data-action="' + action + '" ' + attrs + '>' + text + '</button>'; }
-  function actions(primary, key) { return '<div class="lx-actions">' + button('draft', '<i class="fa-solid fa-save"></i> Salvar rascunho', 'secondary') + button(primary, '<i class="fa-solid fa-paper-plane"></i> ' + key) + '</div>'; }
+  function actions(primary, key) { return '<div class="lx-actions">' + button('draft', '<i class="fa-solid fa-save"></i> Salvar Rascunho', 'secondary') + button(primary, '<i class="fa-solid fa-paper-plane"></i> ' + key) + '</div>'; }
   function grid(content, columns = 3) { return '<div class="lx-grid-' + columns + '">' + content.join('') + '</div>'; }
   function fieldset(heading, icon, body) { return '<fieldset class="lx-fieldset"><legend><i class="fa-solid fa-' + icon + '" aria-hidden="true"></i> ' + heading + '</legend>' + body + '</fieldset>'; }
   function section(heading, icon, body) { return '<section class="lx-section"><div class="lx-section-head"><div><span class="lx-section-icon"><i class="fa-solid fa-' + icon + '"></i></span><h2>' + heading + '</h2></div></div><div class="lx-view-body">' + body + '</div></section>'; }
@@ -378,20 +378,20 @@
   function renderRequest(correction) {
     const context = correction ? correctionContext() : null;
     if (correction && state.current === 'retomada') {
-      return notice('Correção registrada e dados preservados. A regra BPM de retomada ainda será definida. O protótipo aguarda uma escolha explícita para demonstrar a reanálise.') + readGrid([['Área que devolveu', title(state.correction.origin)], ['Parecer', state.correction.note], ['Ajustes realizados', state.correction.changes]]) + select('Área para reanálise (somente simulação)', 'resumeArea', ['diretoria', 'rh', 'sesmt', 'ti'].map(k => [k, title(k)]), true, state.form.resumeArea || state.correction.origin) + '<div class="lx-actions">' + button('resume', 'Simular retomada pela área selecionada') + '</div>';
+      return notice('Correção registrada e dados preservados. A regra BPM de retomada ainda será definida. O protótipo aguarda uma escolha explícita para demonstrar a reanálise.') + readGrid([['Área que devolveu', title(state.correction.origin)], ['Parecer', state.correction.note], ['Ajustes Realizados', state.correction.changes]]) + select('Área para Reanálise (Somente Simulação)', 'resumeArea', ['diretoria', 'rh', 'sesmt', 'ti'].map(k => [k, title(k)]), true, state.form.resumeArea || state.correction.origin) + '<div class="lx-actions">' + button('resume', 'Simular Retomada pela Área Selecionada') + '</div>';
     }
     return (correction ? '<div class="lx-alert"><i class="fa-solid fa-rotate-left"></i><div><strong>Solicitação devolvida para correção pelo ' + escape(context.origin === 'rh' ? 'RH' : title(context.origin)) + '.</strong><br>' + escape(context.note) + '</div></div>' : '') +
       renderRequester(correction) +
       section('Dados de Desligamento', 'user-minus',
       renderEmployee() +
-      fieldset('Parâmetros de Desligamento', 'user-minus', grid([singleSelect('Tipo de Desligamento', 'tipo', terminationTypes, true), input('Data prevista de desligamento', 'prevista', { type: 'date', required: true })], 2)) +
+      fieldset('Parâmetros de Desligamento', 'user-minus', grid([singleSelect('Tipo de Desligamento', 'tipo', terminationTypes, true), input('Data Prevista de Desligamento', 'prevista', { type: 'date', required: true })], 2)) +
       renderStability(state.form) +
-      fieldset('Infraestrutura do colaborador', 'laptop', radios('Colaborador utiliza equipamentos atualmente?', 'infraestrutura', ['Sim', 'Não']) + (state.form.infraestrutura === 'Sim' ? renderItems('infraItems', true) + input('Observações da infraestrutura', 'infraObs', { textarea: true }) : '')) +
-      fieldset('Equipamentos de Proteção Individual — EPI', 'helmet-safety', radios('Colaborador utiliza EPIs atualmente?', 'epi', ['Sim', 'Não']) + (state.form.epi === 'Sim' ? renderItems('epiItems', true) + input('Observações de EPI', 'epiObs', { textarea: true }) : '')) +
+      fieldset('Infraestrutura do Colaborador', 'laptop', radios('Colaborador Utiliza Equipamentos Atualmente?', 'infraestrutura', ['Sim', 'Não']) + (state.form.infraestrutura === 'Sim' ? renderItems('infraItems', true) + input('Observações da Infraestrutura', 'infraObs', { textarea: true }) : '')) +
+      fieldset('Equipamentos de Proteção Individual — EPI', 'helmet-safety', radios('Colaborador Utiliza EPIs Atualmente?', 'epi', ['Sim', 'Não']) + (state.form.epi === 'Sim' ? renderItems('epiItems', true) + input('Observações de EPI', 'epiObs', { textarea: true }) : '')) +
       fieldset('Upload de Arquivos', 'paperclip', attachments('solicitacao', '', true)) +
-      fieldset('Justificativa', 'comment-dots', input('Justificativa de desligamento', 'justificativa', { textarea: true, required: true })) +
-      (correction ? input('Descreva os ajustes realizados', 'changes', { textarea: true, required: true, value: state.form.changes ?? 'Data prevista e justificativa revisadas conforme orientação do RH.' }) : '') +
-      actions(correction ? 'correct' : 'submit', correction ? 'Registrar correção' : 'Enviar para Diretoria'));
+      fieldset('Justificativa', 'comment-dots', input('Justificativa de Desligamento', 'justificativa', { textarea: true, required: true })) +
+      (correction ? input('Descreva os Ajustes Realizados', 'changes', { textarea: true, required: true, value: state.form.changes ?? 'Data prevista e justificativa revisadas conforme orientação do RH.' }) : '') +
+      actions(correction ? 'correct' : 'submit', correction ? 'Registrar Correção' : 'Enviar para Diretoria'));
   }
   function renderRequester(correction) {
     const fields = [
@@ -414,14 +414,14 @@
       field('Cargo Atual', 'cargo'), field('Função Atual', 'funcao'), field('Nível / Step Atual', 'nivel'),
       field('Setor / Seção Atual', 'secao'), field('Centro de Custo Origem', 'centro'),
       field('Descrição do Cargo Atual', 'descricao'), field('Escala', 'escala'), field('Horário', 'horario'),
-      field('Pessoa com deficiência', 'pcd'), field('Tipo de Contrato', 'contrato'), field('Sexo', 'sexo')
+      field('Pessoa com Deficiência', 'pcd'), field('Tipo de Contrato', 'contrato'), field('Sexo', 'sexo')
     ].join('') + '</div>';
   }
   function renderStability(f, history = false) {
     const records = Array.isArray(f.rmStability) ? f.rmStability : stabilityExamples[f.employee] || [];
     if (!records.length) return '';
     const content = '<div class="lx-stability-list">' + records.map(record => {
-      const rows = record.informado === 'Sim' ? [['Data inicial', date(record.inicio)], ['Data final', date(record.fim)]] : [];
+      const rows = record.informado === 'Sim' ? [['Data Inicial', date(record.inicio)], ['Data Final', date(record.fim)]] : [];
       (record.detalhes || []).forEach(([label, value]) => rows.push([label, date(value)]));
       return '<article class="lx-stability-record" data-stability-type="' + escape(record.tipo) + '" aria-label="' + escape(record.tipo) + '">' +
         '<div class="lx-stability-record-head"><h3>' + escape(record.tipo) + '</h3>' +
@@ -435,7 +435,7 @@
     const rows = state.form[scope];
     const epi = scope === 'epiItems';
     const itemName = epi ? 'EPI' : 'Equipamento';
-    const add = editable ? button('add-item', '<i class="fa-solid fa-plus"></i> Adicionar ' + (epi ? 'EPI' : 'equipamento'), 'primary', 'data-scope="' + scope + '"') : '';
+    const add = editable ? button('add-item', '<i class="fa-solid fa-plus"></i> Adicionar ' + (epi ? 'EPI' : 'Equipamento'), 'primary', 'data-scope="' + scope + '"') : '';
     if (!editable && !rows.length) return '<p class="lx-empty-list">Nenhum item informado pelo solicitante.</p>';
     return '<div class="' + (editable ? 'lx-child-table lx-origin-equipment-table' : 'lx-dismissal-review-items') + '">' + add + rows.map((item, i) => {
       const attrs = ' data-item="' + scope + '" data-index="' + i + '"';
@@ -446,7 +446,7 @@
           '<label class="lx-field lx-item-observation"><span>Observação</span><textarea' + attrs + ' data-prop="descricao">' + escape(item.descricao) + '</textarea></label>' +
           '<button type="button" class="lx-btn-icon lx-btn-danger" data-action="delete-item" data-scope="' + scope + '" data-index="' + i + '" aria-label="Excluir ' + (epi ? 'EPI' : 'equipamento') + ' ' + (i + 1) + '"><i class="fa-solid fa-trash"></i></button></div>';
       }
-      const review = reviewArea ? '<label class="lx-field"><span>Deve ser devolvido? <b>*</b></span><select' + attrs + ' data-prop="devolver"><option value="">Selecione...</option>' + ['Sim', 'Não'].map(v => '<option' + (item.devolver === v ? ' selected' : '') + '>' + v + '</option>').join('') + '</select></label><label class="lx-field"><span>Observação da análise</span><textarea' + attrs + ' data-prop="parecer" rows="3">' + escape(item.parecer || '') + '</textarea></label>' : '';
+      const review = reviewArea ? '<label class="lx-field"><span>Deve Ser Devolvido? <b>*</b></span><select' + attrs + ' data-prop="devolver"><option value="">Selecione...</option>' + ['Sim', 'Não'].map(v => '<option' + (item.devolver === v ? ' selected' : '') + '>' + v + '</option>').join('') + '</select></label><label class="lx-field"><span>Observação da Análise</span><textarea' + attrs + ' data-prop="parecer" rows="3">' + escape(item.parecer || '') + '</textarea></label>' : '';
       return '<div class="lx-child-row lx-dismissal-item-row">' + readGrid([[itemName, item.tipo], ['Quantidade', item.quantidade], ['Observação', item.descricao]]) + review + '</div>';
     }).join('') + '</div>';
   }
@@ -458,20 +458,20 @@
     if (choice !== 'Sim') html = readGrid([[epi ? 'Utiliza EPIs?' : 'Utiliza Equipamentos?', choice]]);
     else if (!rows.length) html = '<div class="lx-empty-list">Nenhum item informado.</div>';
     else html = '<div class="lx-read-table lx-read-table-origin"><div class="lx-read-head"><span>' + (epi ? 'EPI' : 'Equipamento') + '</span><span>Quantidade</span><span>Observação</span></div>' + rows.map(item => '<div class="lx-read-row"><strong>' + escape(item.tipo || '—') + '</strong><strong>' + escape(item.quantidade || '—') + '</strong><strong>' + escape(item.descricao || '—') + '</strong></div>').join('') + '</div>';
-    return html + '<div class="lx-history-note"><span>' + (epi ? 'Observações de EPI' : 'Observações da infraestrutura') + '</span><strong>' + escape(f[epi ? 'epiObs' : 'infraObs'] || '—') + '</strong></div>';
+    return html + '<div class="lx-history-note"><span>' + (epi ? 'Observações de EPI' : 'Observações da Infraestrutura') + '</span><strong>' + escape(f[epi ? 'epiObs' : 'infraObs'] || '—') + '</strong></div>';
   }
   function renderRequestSnapshot(f, includeAttachments = false, extra = '', files) {
     f = requestSnapshotExamples(f);
     const e = employees.find(item => item.chapa === f.employee) || {};
     return '<div class="lx-dismissal-history">' +
       historySection('Dados do Solicitante', 'user', 'blue', [['Data/Hora', state.created], ['Número Solicitação', 'DES-2026-0042'], ['Solicitante', owners.solicitacao], ['Gerência', 'Gerência Industrial'], ['Filial', 'Matriz - Sarzedo/MG'], ['Gestor Imediato', owners.solicitacao], ['Área Diretoria', 'Diretoria Industrial']]) +
-      historySection('Dados de Desligamento', 'user-minus', 'green', [['Colaborador', e.nome], ['Chapa', e.chapa], ['Data de Admissão', date(e.admissao)], ['Cargo Atual', e.cargo], ['Função Atual', e.funcao], ['Nível / Step Atual', e.nivel], ['Setor / Seção Atual', e.secao], ['Centro de Custo Origem', e.centro], ['Descrição do Cargo Atual', e.descricao], ['Sexo', e.sexo], ['Pessoa com deficiência', e.pcd], ['Tipo de Contrato', e.contrato], ['Escala', e.escala], ['Horário', e.horario]], 'lx-readonly-request-grid lx-dismissal-history-grid') +
-      historySection('Parâmetros de Desligamento', 'user-minus', 'blue', [['Tipo de Desligamento', f.tipo], ['Data prevista de desligamento', date(f.prevista)]]) +
+      historySection('Dados de Desligamento', 'user-minus', 'green', [['Colaborador', e.nome], ['Chapa', e.chapa], ['Data de Admissão', date(e.admissao)], ['Cargo Atual', e.cargo], ['Função Atual', e.funcao], ['Nível / Step Atual', e.nivel], ['Setor / Seção Atual', e.secao], ['Centro de Custo Origem', e.centro], ['Descrição do Cargo Atual', e.descricao], ['Sexo', e.sexo], ['Pessoa com Deficiência', e.pcd], ['Tipo de Contrato', e.contrato], ['Escala', e.escala], ['Horário', e.horario]], 'lx-readonly-request-grid lx-dismissal-history-grid') +
+      historySection('Parâmetros de Desligamento', 'user-minus', 'blue', [['Tipo de Desligamento', f.tipo], ['Data Prevista de Desligamento', date(f.prevista)]]) +
       renderStability(f, true) +
-      historyCustomSection('Infraestrutura do colaborador', 'laptop', 'purple', renderItemsSnapshot(f, 'infraItems')) +
+      historyCustomSection('Infraestrutura do Colaborador', 'laptop', 'purple', renderItemsSnapshot(f, 'infraItems')) +
       historyCustomSection('Equipamentos de Proteção Individual — EPI', 'helmet-safety', 'purple', renderItemsSnapshot(f, 'epiItems')) +
       (includeAttachments ? historyCustomSection('Upload de Arquivos', 'paperclip', 'purple', attachments('solicitacao', '', false, files?.solicitacao)) : '') + extra +
-      historyCustomSection('Justificativa de desligamento', 'comment-dots', 'teal', '<div class="lx-history-text">' + escape(f.justificativa || '—') + '</div>') + '</div>';
+      historyCustomSection('Justificativa de Desligamento', 'comment-dots', 'teal', '<div class="lx-history-text">' + escape(f.justificativa || '—') + '</div>') + '</div>';
   }
   function historyPanel(heading, description, body, key, icon, tone = 'green') {
     const open = key === 'request' ? summaryOpen : !!openApprovals[key];
@@ -499,7 +499,7 @@
       const action = key === 'correcao' ? 'Devolução para correção' : 'Reprovado';
       const actual = key === 'correcao' ? isCurrentCorrection() : state.current === 'reprovada';
       const source = (actual && state.history.findLast(record => record.action === action)?.area) || (key === 'correcao' ? correctionContext().origin : 'rh');
-      return ({ diretoria: ['diretoria'], rh: approvals, sesmt: waiting.concat('sesmt'), ti: waiting.concat('ti') })[source] || approvals;
+      return ({ diretoria: ['diretoria'], rh: approvals, sesmt: waiting.concat('sesmt'), ti: waiting.concat('ti'), dp: signed.concat('dp') })[source] || approvals;
     }
     return ({ diretoria: [], rh: ['diretoria'], paralelo: approvals, sesmt: waiting, ti: waiting, documento: technical, assinaturas: technical.concat('documento'), validacao_assinaturas: signing, dp: signed, finalizada: signed.concat('dp') })[key] || [];
   }
@@ -596,15 +596,15 @@
     const label = returned ? 'Solicitação devolvida para correção' : rejected ? 'Solicitação reprovada' : ['diretoria', 'rh'].includes(record.area) ? 'Solicitação aprovada' : 'Análise concluída';
     const f = requestSnapshotExamples(record.snapshot);
     let body = historySection('Decisão sobre a Solicitação', 'list-check', tone, [['Decisão', label], ['Responsável', record.responsible], ['Observação', record.note || 'Etapa aprovada sem ressalvas.']]);
-    if (record.area === 'rh') body += renderStability(f, true) + historySection('Análise de Estabilidade', 'shield-halved', 'teal', [['Possui estabilidade?', f.estabilidade], ['Tipo / motivo da estabilidade', f.motivoEstabilidade], ['Pode prosseguir?', f.prosseguir]]);
-    if (record.area === 'sesmt') body += historyCustomSection('Exame Demissional', 'stethoscope', 'blue', readGrid([['Necessita exame demissional?', f.exame], ['Observações', f.exameObs]]) + (f.exame === 'Sim' ? attachments('guia', 'Guia de encaminhamento para exame', false, historyFiles(record, 'guia')) : ''));
+    if (record.area === 'rh') body += renderStability(f, true) + historySection('Análise de Estabilidade', 'shield-halved', 'teal', [['Possui Estabilidade?', f.estabilidade], ['Tipo / Motivo da Estabilidade', f.motivoEstabilidade], ['Pode Prosseguir?', f.prosseguir]]);
+    if (record.area === 'sesmt') body += historyCustomSection('Exame Demissional', 'stethoscope', 'blue', readGrid([['Necessita Exame Demissional?', f.exame], ['Observações', f.exameObs]]) + (f.exame === 'Sim' ? attachments('guia', 'Guia de encaminhamento para exame', false, historyFiles(record, 'guia')) : ''));
     if (record.area === 'sesmt' || record.area === 'ti') {
       const epi = record.area === 'sesmt';
       const scope = epi ? 'epiItems' : 'infraItems';
       const choice = epi ? 'epi' : 'infraestrutura';
       const group = epi ? 'termoEpi' : 'termoInfra';
-      const rows = f[choice] === 'Sim' ? (f[scope] || []).map(item => '<div class="lx-dismissal-review-items">' + readGrid([[epi ? 'EPI' : 'Equipamento', item.tipo], ['Quantidade', item.quantidade], ['Deve ser devolvido?', item.devolver], ['Observação do item', item.descricao], ['Observação da análise', item.parecer]], 'lx-review-item-history-grid') + '</div>').join('') : '';
-      body += historyCustomSection(epi ? 'Avaliação de EPI' : 'Avaliação de Infraestrutura', epi ? 'helmet-safety' : 'laptop', 'purple', readGrid([[epi ? 'Possui EPI informado?' : 'Possui infraestrutura informada?', f[choice]]]) + rows + (f[choice] === 'Sim' ? attachments(group, epi ? 'Termo de EPI' : 'Termo de infraestrutura', false, historyFiles(record, group)) : ''));
+      const rows = f[choice] === 'Sim' ? (f[scope] || []).map(item => '<div class="lx-dismissal-review-items">' + readGrid([[epi ? 'EPI' : 'Equipamento', item.tipo], ['Quantidade', item.quantidade], ['Deve Ser Devolvido?', item.devolver], ['Observação do Item', item.descricao], ['Observação da Análise', item.parecer]], 'lx-review-item-history-grid') + '</div>').join('') : '';
+      body += historyCustomSection(epi ? 'Avaliação de EPI' : 'Avaliação de Infraestrutura', epi ? 'helmet-safety' : 'laptop', 'purple', readGrid([[epi ? 'Possui EPI Informado?' : 'Possui Infraestrutura Informada?', f[choice]]]) + rows + (f[choice] === 'Sim' ? attachments(group, epi ? 'Termo de EPI' : 'Termo de infraestrutura', false, historyFiles(record, group)) : ''));
     }
     return { body, tone };
   }
@@ -618,7 +618,7 @@
         const done = record.action === 'Análises paralelas concluídas' || !['sesmt', 'ti'].includes(page.key);
         body = historySection('Acompanhamento das Análises', 'list-check', 'blue', [['SESMT', done || completed('sesmt') ? 'Aprovado' : 'Pendente'], ['TI', done || completed('ti') ? 'Aprovado' : 'Pendente'], ['Próxima atividade', 'Documento de Desligamento']]);
       }
-      if (record.area === 'correcao') body = historySection('Ajustes realizados', 'rotate-left', 'blue', [['Responsável', record.responsible], ['Observações', record.note]]) + renderRequestSnapshot(f, true, '', record.files);
+      if (record.area === 'correcao') body = historySection('Ajustes Realizados', 'rotate-left', 'blue', [['Responsável', record.responsible], ['Observações', record.note]]) + renderRequestSnapshot(f, true, '', record.files);
       if (record.area === 'documento') {
         body = historyCustomSection('Documento de Desligamento', 'file-lines', 'blue', attachments('documento', '', false, historyFiles(record, 'documento').length ? historyFiles(record, 'documento') : documentAttachments(record.revision).documento));
       }
@@ -636,8 +636,11 @@
       }
       if (record.area === 'dp') {
         const e = employees.find(item => item.chapa === f.employee) || {};
+        const returned = record.action === 'Devolução para correção';
+        if (returned) tone = 'orange';
         body = historySection('Dados da Rescisão', 'id-card', 'blue', dpReferenceRows(f, e)) + renderChecklists(true, record.snapshot?.checklist || {}) +
-          historySection('Conclusão pelo Departamento Pessoal', 'clipboard-check', 'teal', [['Checklist concluído?', f.checklistConcluido], ['Responsável', record.responsible], ['Data da conclusão', record.date], ['Observações finais', f.finais]], 'lx-dp-conclusion-history-grid');
+          (returned ? historySection('Decisão sobre a Solicitação', 'clipboard-check', 'orange', [['Decisão', 'Solicitação devolvida para correção'], ['Responsável', record.responsible], ['Data da Análise', record.date], ['Observações Finais', record.note]], 'lx-dp-conclusion-history-grid') :
+            historySection('Conclusão pelo Departamento Pessoal', 'clipboard-check', 'teal', [['Checklist Concluído?', f.checklistConcluido], ['Responsável', record.responsible], ['Data da Conclusão', record.date], ['Observações Finais', f.finais]], 'lx-dp-conclusion-history-grid'));
       }
       const department = { diretoria: 'Diretoria Industrial', rh: 'Recursos Humanos', paralelo: 'Recursos Humanos', sesmt: 'Segurança do Trabalho', ti: 'Tecnologia da Informação', documento: 'Recursos Humanos', assinaturas: 'Recursos Humanos', validacao_assinaturas: 'Recursos Humanos', dp: 'Departamento Pessoal', correcao: 'Gerência Industrial' }[record.area];
       return historyPanel(stage.title, record.date + ' - ' + record.responsible + ' - ' + department, body, key, stage.icon, tone);
@@ -647,18 +650,18 @@
   function decisionFields(key) {
     const d = decision(key);
     if (!d.value) d.value = 'approve';
-    const options = key === 'diretoria' ? [['approve', 'Aprovar solicitação', 'A solicitação seguirá para aprovação do RH.'], ['return', 'Devolver para correção', 'A solicitação retornará ao solicitante para ajustes.'], ['reject', 'Reprovar solicitação', 'A solicitação será encerrada como reprovada.']] : key === 'rh' ? [['approve', 'Aprovar continuidade', 'Abrir SESMT e TI em paralelo.'], ['return', 'Devolver para correção', 'A solicitação retornará ao solicitante para ajustes.'], ['reject', 'Impedir continuidade', 'Encerrar conforme o parecer do RH.']] : [['approve', 'Concluir análise', 'Aguardar a conclusão da outra atividade paralela.'], ['return', 'Devolver para correção', 'A solicitação retornará ao solicitante para ajustes.']];
+    const options = key === 'diretoria' ? [['approve', 'Aprovar Solicitação', 'A solicitação seguirá para aprovação do RH.'], ['return', 'Devolver para Correção', 'A solicitação retornará ao solicitante para ajustes.'], ['reject', 'Reprovar Solicitação', 'A solicitação será encerrada como reprovada.']] : key === 'rh' ? [['approve', 'Aprovar Continuidade', 'Abrir SESMT e TI em paralelo.'], ['return', 'Devolver para Correção', 'A solicitação retornará ao solicitante para ajustes.'], ['reject', 'Impedir Continuidade', 'Encerrar conforme o parecer do RH.']] : [['approve', 'Concluir Análise', 'Aguardar a conclusão da outra atividade paralela.'], ['return', 'Devolver para Correção', 'A solicitação retornará ao solicitante para ajustes.']];
     const hidden = key === 'diretoria' && d.value === 'approve';
     const noteLabel = key === 'diretoria' ? 'Justificativa' : 'Parecer do ' + key.toUpperCase();
-    return fieldset('Decisão de Aprovação', 'list-check', '<div class="lx-current-decision" data-approval="' + key + '">' + options.map(([value, label, text]) => '<label class="lx-decision-option lx-decision-' + (value === 'approve' ? 'approve' : value === 'return' ? 'return' : 'reject') + (value === d.value ? ' lx-decision-option-selected' : '') + '"><input type="radio" name="decision" data-decision="' + key + '" value="' + value + '"' + (value === d.value ? ' checked' : '') + ' /><div><span>' + label + '</span><p>' + text + '</p></div></label>').join('') + '<label class="lx-field' + (hidden ? ' lx-hidden' : '') + '" data-approval-justification><span>' + noteLabel + ' <b>*</b></span><textarea data-note="' + key + '" rows="3" placeholder="' + (key === 'diretoria' ? 'Informe o motivo da devolução ou reprovação...' : 'Informe o parecer da área...') + '">' + escape(d.note) + '</textarea></label>' + actions('decide', 'Enviar decisão') + '</div>');
+    return fieldset('Decisão de Aprovação', 'list-check', '<div class="lx-current-decision" data-approval="' + key + '">' + options.map(([value, label, text]) => '<label class="lx-decision-option lx-decision-' + (value === 'approve' ? 'approve' : value === 'return' ? 'return' : 'reject') + (value === d.value ? ' lx-decision-option-selected' : '') + '"><input type="radio" name="decision" data-decision="' + key + '" value="' + value + '"' + (value === d.value ? ' checked' : '') + ' /><div><span>' + label + '</span><p>' + text + '</p></div></label>').join('') + '<label class="lx-field' + (hidden ? ' lx-hidden' : '') + '" data-approval-justification><span>' + noteLabel + ' <b>*</b></span><textarea data-note="' + key + '" rows="3" placeholder="' + (key === 'diretoria' ? 'Informe o motivo da devolução ou reprovação...' : 'Informe o parecer da área...') + '">' + escape(d.note) + '</textarea></label>' + actions('decide', 'Enviar Decisão') + '</div>');
   }
   function renderReview(key) {
     let content = '';
-    if (key === 'rh') content = renderStability(state.form) + fieldset('Análise de Estabilidade', 'shield-halved', grid([radios('Possui estabilidade?', 'estabilidade', ['Sim', 'Não']), radios('Pode prosseguir com o desligamento?', 'prosseguir', ['Sim', 'Não'])], 2) + input('Tipo / motivo da estabilidade', 'motivoEstabilidade', { textarea: true, required: state.form.estabilidade === 'Sim' }));
+    if (key === 'rh') content = renderStability(state.form) + fieldset('Análise de Estabilidade', 'shield-halved', grid([radios('Possui Estabilidade?', 'estabilidade', ['Sim', 'Não']), radios('Pode Prosseguir com o Desligamento?', 'prosseguir', ['Sim', 'Não'])], 2) + input('Tipo / Motivo da Estabilidade', 'motivoEstabilidade', { textarea: true, required: state.form.estabilidade === 'Sim' }));
     if (['sesmt', 'ti'].includes(key)) {
-      if (key === 'sesmt') content += fieldset('Exame Demissional', 'stethoscope', radios('Necessita exame demissional?', 'exame', ['Sim', 'Não']) + (state.form.exame === 'Sim' ? attachments('guia', 'Guia de encaminhamento para exame', true) : '') + input('Observações sobre o exame', 'exameObs', { textarea: true }));
+      if (key === 'sesmt') content += fieldset('Exame Demissional', 'stethoscope', radios('Necessita Exame Demissional?', 'exame', ['Sim', 'Não']) + (state.form.exame === 'Sim' ? attachments('guia', 'Guia de encaminhamento para exame', true) : '') + input('Observações sobre o Exame', 'exameObs', { textarea: true }));
       const epi = key === 'sesmt'; const scope = epi ? 'epiItems' : 'infraItems';
-      content += fieldset(epi ? 'Avaliação de EPI' : 'Avaliação de Infraestrutura', epi ? 'helmet-safety' : 'laptop', readGrid([[epi ? 'Possui EPI informado?' : 'Possui infraestrutura informada?', state.form[epi ? 'epi' : 'infraestrutura']]]) + (state.form[epi ? 'epi' : 'infraestrutura'] === 'Sim' ? renderItems(scope, false, key) : '<p class="lx-help">Nenhum item declarado pelo solicitante. A área pode devolver para complementação.</p>') + attachments(epi ? 'termoEpi' : 'termoInfra', epi ? 'Termo de EPI assinado na admissão' : 'Termo de responsabilidade / entrega assinado na admissão', true));
+      content += fieldset(epi ? 'Avaliação de EPI' : 'Avaliação de Infraestrutura', epi ? 'helmet-safety' : 'laptop', readGrid([[epi ? 'Possui EPI Informado?' : 'Possui Infraestrutura Informada?', state.form[epi ? 'epi' : 'infraestrutura']]]) + (state.form[epi ? 'epi' : 'infraestrutura'] === 'Sim' ? renderItems(scope, false, key) : '<p class="lx-help">Nenhum item declarado pelo solicitante. A área pode devolver para complementação.</p>') + attachments(epi ? 'termoEpi' : 'termoInfra', epi ? 'Termo de EPI assinado na admissão' : 'Termo de responsabilidade / entrega assinado na admissão', true));
     }
     return content + decisionFields(key);
   }
@@ -677,16 +680,16 @@
   }
   function attachments(group, label, editable, files = state.files[group] || []) {
     const source = displayedFiles.push(files) - 1;
-    return '<div class="lx-upload" data-file-group="' + group + '">' + (label ? '<strong>' + label + '</strong>' : '') + (editable ? '<div class="lx-dropzone" data-drop="' + group + '"><i class="fa-solid fa-cloud-arrow-up"></i><p>Arraste e solte seus arquivos aqui</p><span>ou</span><button type="button" class="lx-btn-outline" data-action="choose-file" data-group="' + group + '">Escolher arquivo</button><input class="lx-file-input" type="file" accept="application/pdf,image/png,image/jpeg,image/webp" data-upload="' + group + '" multiple /></div>' : '') + '<div class="lx-attachment-list">' + (files.length ? files.map((f, i) => '<div class="lx-attachment-row"><div class="lx-attachment-info"><i class="fa-solid fa-file-lines"></i><div><strong>' + escape(f.name) + '</strong><span>' + Math.ceil(f.size / 1024) + ' KB - ' + escape(f.origin || attachmentOrigin(group)) + '</span></div></div><div class="lx-attachment-actions">' + attachmentButton('file', 'eye', 'Visualizar anexo', group, i, false, source) + attachmentButton('download-file', 'download', 'Baixar anexo', group, i, false, source) + (editable ? attachmentButton('delete-file', 'trash', 'Excluir anexo', group, i, true, source) : '') + '</div></div>').join('') : '<div class="lx-empty-list">Nenhum arquivo anexado.</div>') + '</div></div>';
+    return '<div class="lx-upload" data-file-group="' + group + '">' + (label ? '<strong>' + label + '</strong>' : '') + (editable ? '<div class="lx-dropzone" data-drop="' + group + '"><i class="fa-solid fa-cloud-arrow-up"></i><p>Arraste e solte seus arquivos aqui</p><span>ou</span><button type="button" class="lx-btn-outline" data-action="choose-file" data-group="' + group + '">Escolher Arquivo</button><input class="lx-file-input" type="file" accept="application/pdf,image/png,image/jpeg,image/webp" data-upload="' + group + '" multiple /></div>' : '') + '<div class="lx-attachment-list">' + (files.length ? files.map((f, i) => '<div class="lx-attachment-row"><div class="lx-attachment-info"><i class="fa-solid fa-file-lines"></i><div><strong>' + escape(f.name) + '</strong><span>' + Math.ceil(f.size / 1024) + ' KB - ' + escape(f.origin || attachmentOrigin(group)) + '</span></div></div><div class="lx-attachment-actions">' + attachmentButton('file', 'eye', 'Visualizar Anexo', group, i, false, source) + attachmentButton('download-file', 'download', 'Baixar Anexo', group, i, false, source) + (editable ? attachmentButton('delete-file', 'trash', 'Excluir Anexo', group, i, true, source) : '') + '</div></div>').join('') : '<div class="lx-empty-list">Nenhum arquivo anexado.</div>') + '</div></div>';
   }
   function renderDocument() {
     return fieldset('Documento de Desligamento', 'file-lines', attachments('documento', '', false)) + actions('send-signatures', 'Encaminhar para Assinatura');
   }
   function renderSignatures() {
     const electronic = state.form.modalidade === 'Eletrônica';
-    return fieldset('Modalidade de Assinatura', 'pen-nib', radios('Como o documento será assinado?', 'modalidade', ['Eletrônica', 'Presencial'])) +
+    return fieldset('Modalidade de Assinatura', 'pen-nib', radios('Como o Documento Será Assinado?', 'modalidade', ['Eletrônica', 'Presencial'])) +
       (electronic ? notice('O documento será gerado automaticamente e enviado à plataforma digital.') :
-        fieldset('Documento Assinado', 'paperclip', attachments('assinado', '', true))) + actions('finish-signatures', electronic ? 'Gerar e enviar para assinatura' : 'Encaminhar documento assinado ao DP');
+        fieldset('Documento Assinado', 'paperclip', attachments('assinado', '', true))) + actions('finish-signatures', electronic ? 'Gerar e Enviar para Assinatura' : 'Encaminhar documento assinado ao DP');
   }
   function automaticDocument(group, revision, timestamp) {
     return Object.assign({}, documentAttachments(revision)[group][0], { id: 'automatico-' + group + '-' + revision, origin: group === 'assinado' ? 'Plataforma digital' : 'Gerado automaticamente', by: 'Sistema', date: timestamp });
@@ -711,11 +714,11 @@
   }
   function signingSummary(signing) {
     const signed = signing.signers.length > 0 && signing.signers.every(signer => signer.status === 'Assinado');
-    return readGrid([['Documento', signing.document?.name || 'documento-de-desligamento.pdf'], ['Plataforma', signing.provider], ['Protocolo do documento', signing.protocol], ['Data do envio', signing.sentAt], ['Última atualização', signing.updatedAt], ['Status do documento', signed ? 'Assinado' : 'Pendente']], 'lx-signing-summary-grid');
+    return readGrid([['Documento', signing.document?.name || 'documento-de-desligamento.pdf'], ['Plataforma', signing.provider], ['Protocolo do Documento', signing.protocol], ['Data do Envio', signing.sentAt], ['Última Atualização', signing.updatedAt], ['Status do Documento', signed ? 'Assinado' : 'Pendente']], 'lx-signing-summary-grid');
   }
   function signingStatus(signing, current = false) {
     return '<div class="lx-signature-tracking"' + (current ? ' data-signature-tracking' : '') + '>' + signing.signers.map(signer =>
-      '<article class="lx-signing-person" data-signer="' + escape(signer.role) + '"><div class="lx-stability-record-head"><h3>' + escape(signer.role) + '</h3><span class="lx-signing-status' + (signer.status === 'Assinado' ? ' is-signed' : '') + '"><i class="fa-solid fa-' + (signer.status === 'Assinado' ? 'circle-check' : 'clock') + '"></i> ' + escape(signer.status) + '</span></div>' + readGrid([['Nome', signer.name], ['E-mail', signer.email], ['Assinou o documento?', signer.status === 'Assinado' ? 'Sim' : 'Não'], ['Data da assinatura', signer.signedAt || 'Aguardando assinatura']], 'lx-signing-person-grid') + '</article>'
+      '<article class="lx-signing-person" data-signer="' + escape(signer.role) + '"><div class="lx-stability-record-head"><h3>' + escape(signer.role) + '</h3><span class="lx-signing-status' + (signer.status === 'Assinado' ? ' is-signed' : '') + '"><i class="fa-solid fa-' + (signer.status === 'Assinado' ? 'circle-check' : 'clock') + '"></i> ' + escape(signer.status) + '</span></div>' + readGrid([['Nome', signer.name], ['E-mail', signer.email], ['Assinou o Documento?', signer.status === 'Assinado' ? 'Sim' : 'Não'], ['Data da Assinatura', signer.signedAt || 'Aguardando assinatura']], 'lx-signing-person-grid') + '</article>'
     ).join('') + '</div>';
   }
   function renderSignatureValidation() {
@@ -725,7 +728,7 @@
     return fieldset('Envio para Assinatura Eletrônica', 'paper-plane', signingSummary(signing)) +
       fieldset('Acompanhamento das Assinaturas', 'file-signature', signingStatus(signing, true)) +
       fieldset(signed ? 'Documento Assinado' : 'Documento para Assinatura', signed ? 'file-circle-check' : 'file-lines', attachments(signed ? 'assinado' : 'paraAssinatura', '', false, [document])) +
-      actions('validate-signatures', 'Validar assinaturas e encaminhar ao DP');
+      actions('validate-signatures', 'Validar Assinaturas e Encaminhar ao DP');
   }
   function signatureCard(role, name, key, form = state.form, readonly = false) {
     const image = form[key + 'Imagem'];
@@ -741,7 +744,7 @@
       delete fieldErrors['sign.' + key]; errors = Object.values(fieldErrors);
       log('assinaturas', 'Assinatura eletrônica registrada', (key === 'assinaturaColaborador' ? 'Colaborador: ' : 'Gestor: ') + name);
       save(); render();
-    }, 'Confirmar assinatura', 'pen-nib', () => {
+    }, 'Confirmar Assinatura', 'pen-nib', () => {
       if (hasInk) return true;
       document.getElementById('signatureError').textContent = 'Desenhe a assinatura antes de confirmar.';
       document.querySelector('.lx-signature-pad').classList.add('lx-error'); return false;
@@ -807,7 +810,7 @@
         const observation = readonly ? '<span class="lx-check-readonly-note">' + note + '</span>' : '<label class="lx-field lx-check-observation"><span class="lx-check-sr-only">Observação de ' + escape(name) + '</span><input type="text" data-check-note="' + id + '" value="' + note + '" maxlength="500" aria-describedby="check-note-count-' + id + '" placeholder="Digite a observação..." /><small class="lx-check-note-count" id="check-note-count-' + id + '"><span data-note-count="' + id + '">' + (item.note || '').length + '</span>/500</small></label>';
         return '<tr class="lx-check-row' + (readonly ? '' : ' lx-check-row-editor') + '"><td class="lx-check-number" data-label="#">' + (index + 1) + '</td><th scope="row" class="lx-check-item">' + escape(name) + '</th><td data-label="Status">' + statusContent + '</td><td data-label="Data da marcação">' + dateField + '</td><td data-label="Observação">' + observation + '</td></tr>';
       }).join('');
-      return '<details class="lx-check-group" data-check-group="' + group + '"' + (readonly ? '' : ' data-check-editor') + (open ? ' open' : '') + '><summary><i class="fa-solid fa-chevron-down lx-check-chevron" aria-hidden="true"></i><strong>' + heading + '</strong><span class="lx-check-group-badge">' + items.length + ' itens</span><span class="lx-check-group-count">' + done + ' de ' + items.length + ' concluídos</span></summary><div class="lx-check-table-scroll"><table class="lx-check-table"><colgroup><col class="lx-check-col-number"><col class="lx-check-col-item"><col class="lx-check-col-status"><col class="lx-check-col-date"><col class="lx-check-col-note"></colgroup><thead><tr><th scope="col">#</th><th scope="col">Item</th><th scope="col">Status</th><th scope="col">Data da marcação</th><th scope="col">Observação</th></tr></thead><tbody>' + rows + '</tbody></table></div></details>';
+      return '<details class="lx-check-group" data-check-group="' + group + '"' + (readonly ? '' : ' data-check-editor') + (open ? ' open' : '') + '><summary><i class="fa-solid fa-chevron-down lx-check-chevron" aria-hidden="true"></i><strong>' + heading + '</strong><span class="lx-check-group-badge">' + items.length + ' itens</span><span class="lx-check-group-count">' + done + ' de ' + items.length + ' concluídos</span></summary><div class="lx-check-table-scroll"><table class="lx-check-table"><colgroup><col class="lx-check-col-number"><col class="lx-check-col-item"><col class="lx-check-col-status"><col class="lx-check-col-date"><col class="lx-check-col-note"></colgroup><thead><tr><th scope="col">#</th><th scope="col">Item</th><th scope="col">Status</th><th scope="col">Data da Marcação</th><th scope="col">Observação</th></tr></thead><tbody>' + rows + '</tbody></table></div></details>';
     }).join('');
   }
   function renderDP() {
@@ -816,13 +819,14 @@
     return fieldset('Dados de Referência da Rescisão', 'address-card', '<div class="lx-grid-3 lx-dp-reference-grid" data-dp-reference>' + fields + '</div>') + renderChecklists() + renderDPConclusion();
   }
   function renderDPConclusion() {
+    const correction = state.form.checklistConcluido === 'Não';
     const options = [
-      ['Sim', 'Concluir checklist', 'Confirmar a conferência dos itens aplicáveis e encerrar o processo.', 'approve'],
-      ['Não', 'Manter em conferência', 'Continuar a conferência dos itens antes de concluir o checklist.', 'return']
+      ['Sim', 'Concluir Checklist', 'Confirmar a conferência dos itens aplicáveis e encerrar o processo.', 'approve'],
+      ['Não', 'Enviar para Correção', 'Retornar para Correção da Solicitação com a observação do Departamento Pessoal.', 'return']
     ];
     return fieldset('Decisão de Aprovação', 'list-check', '<div class="lx-current-decision" data-approval="dp">' + options.map(([value, label, text, tone]) =>
       '<label class="lx-decision-option lx-decision-' + tone + (state.form.checklistConcluido === value ? ' lx-decision-option-selected' : '') + '"><input type="radio" name="checklistConcluido" data-field="checklistConcluido" value="' + value + '"' + (state.form.checklistConcluido === value ? ' checked' : '') + ' /><div><span>' + label + '</span><p>' + text + '</p></div></label>'
-    ).join('') + input('Observações finais', 'finais', { textarea: true }) + actions('finish', 'Concluir Checklist e Encerrar Processo') + '</div>');
+    ).join('') + input('Observações Finais', 'finais', { textarea: true, required: correction }) + actions('finish', correction ? 'Enviar para Correção' : 'Concluir Checklist e Encerrar Processo') + '</div>');
   }
   function renderEnding() {
     const ended = page.key === 'finalizada';
@@ -950,15 +954,15 @@
     const action = node.dataset.action;
     if (['submit', 'correct', 'decide', 'finish', 'finish-signatures', 'validate-signatures', 'add-item', 'delete-item'].includes(action)) { errors = []; fieldErrors = {}; }
     if (action === 'draft') {
-      modal('Salvar rascunho', '<p>Deseja salvar os dados preenchidos até o momento?</p>', () => { if (save()) feedback('Rascunho salvo neste navegador.'); }, 'Salvar', 'save'); return;
+      modal('Salvar Rascunho', '<p>Deseja salvar os dados preenchidos até o momento?</p>', () => { if (save()) feedback('Rascunho salvo neste navegador.'); }, 'Salvar', 'save'); return;
     }
-    if (action === 'reset') { modal('Reiniciar simulação?', '<p>Os dados e arquivos deste protótipo serão removidos deste navegador.</p>', async () => {
+    if (action === 'reset') { modal('Reiniciar Simulação?', '<p>Os dados e arquivos deste protótipo serão removidos deste navegador.</p>', async () => {
       try { const db = await openDB(); await dbRequest(db, 'readwrite', store => store.clear()); } catch (_) { /* The form can be reset even if IndexedDB is unavailable. */ }
       state = freshState(); correctionExample = undefined; save(); if (view) go('solicitacao'); else render();
     }, 'Reiniciar', 'rotate-left'); return; }
     if (action === 'download-file') {
       const file = displayedFiles[+node.dataset.fileSource]?.[+node.dataset.index];
-      if (file) modal('Baixar anexo', '<p>' + escape(file.name) + '</p>', () => openFile(file, true), 'Baixar', 'download');
+      if (file) modal('Baixar Anexo', '<p>' + escape(file.name) + '</p>', () => openFile(file, true), 'Baixar', 'download');
       return;
     }
     if (action === 'file') { openFile(displayedFiles[+node.dataset.fileSource]?.[+node.dataset.index]); return; }
@@ -966,14 +970,14 @@
     if (action === 'resume') {
       if (state.current !== 'retomada') return;
       const target = state.form.resumeArea || state.correction.origin;
-      modal('Simular reanálise?', '<p>A regra BPM definitiva permanece pendente. Esta escolha serve apenas para demonstrar a reanálise por ' + escape(title(target)) + '.</p><p>As análises a partir da área selecionada serão refeitas. Os registros anteriores permanecem no histórico.</p>', () => {
+      modal('Simular Reanálise?', '<p>A regra BPM definitiva permanece pendente. Esta escolha serve apenas para demonstrar a reanálise por ' + escape(title(target)) + '.</p><p>As análises a partir da área selecionada serão refeitas. Os registros anteriores permanecem no histórico.</p>', () => {
         const clear = target === 'diretoria' ? ['diretoria', 'rh', 'sesmt', 'ti'] : target === 'rh' ? ['rh', 'sesmt', 'ti'] : ['sesmt', 'ti'];
         clear.forEach(k => { delete state.decisions[k]; });
         state.files.anteriores = (state.files.anteriores || []).concat(state.files.assinado || []);
         state.document = null; state.electronicSigning = null; state.form.assinaturaColaborador = ''; state.form.assinaturaGestor = ''; delete state.form.assinaturaColaboradorImagem; delete state.form.assinaturaGestorImagem; Object.assign(state.files, documentAttachments(state.revision)); state.checks = dpExamples().checks; state.form.checklistConcluido = 'Sim';
         state.current = ['sesmt', 'ti'].includes(target) ? 'paralelo' : target;
         log('solicitacao', 'Retomada simulada', 'Escolha explícita para demonstração: ' + title(target) + '. Regra BPM pendente.'); go(state.current === 'paralelo' ? 'paralelo' : target);
-      }, 'Simular reanálise', 'rotate-left'); return;
+      }, 'Simular Reanálise', 'rotate-left'); return;
     }
     if (!guard()) return;
     if (action === 'continue-parallel') {
@@ -982,8 +986,8 @@
       state.current = 'documento'; go('documento'); return;
     }
     if (action === 'add-item') { state.form[node.dataset.scope].push({ tipo: '', quantidade: '1', descricao: '', devolver: '', parecer: '' }); save(); render(); }
-    if (action === 'delete-item') modal('Excluir item?', '<p>Deseja remover este item da solicitação?</p>', () => { state.form[node.dataset.scope].splice(+node.dataset.index, 1); save(); render(); }, 'Excluir', 'trash');
-    if (action === 'delete-file') modal('Excluir anexo?', '<p>Deseja remover este arquivo?</p>', async () => {
+    if (action === 'delete-item') modal('Excluir Item?', '<p>Deseja remover este item da solicitação?</p>', () => { state.form[node.dataset.scope].splice(+node.dataset.index, 1); save(); render(); }, 'Excluir', 'trash');
+    if (action === 'delete-file') modal('Excluir Anexo?', '<p>Deseja remover este arquivo?</p>', async () => {
       try {
         const files = state.files[node.dataset.group]; const file = files[+node.dataset.index];
         const preserved = state.history.some(record => Object.values(record.files || {}).some(list => list.some(item => item.id === file.id))) || Object.values(state.correctionExample?.files || {}).some(list => list.some(item => item.id === file.id));
@@ -1013,7 +1017,7 @@
     if (action === 'decide') {
       validateReview(page.key); if (fail()) return;
       const key = page.key;
-      modal('Confirmar decisão?', '<p>' + escape({ approve: 'Registrar a conclusão desta análise.', return: 'Devolver a solicitação ao Encarregado / Gestor.', reject: 'Encerrar a solicitação como reprovada.' }[decision(key).value]) + '</p>', () => approveReview(key), 'Registrar', 'paper-plane');
+      modal('Confirmar Decisão?', '<p>' + escape({ approve: 'Registrar a conclusão desta análise.', return: 'Devolver a solicitação ao Encarregado / Gestor.', reject: 'Encerrar a solicitação como reprovada.' }[decision(key).value]) + '</p>', () => approveReview(key), 'Registrar', 'paper-plane');
     }
     if (action === 'send-signatures') {
       if (!state.files.documento?.length) { feedback('O documento de desligamento deve estar anexado.', true); return; }
@@ -1023,7 +1027,7 @@
     if (action === 'sign') openSignature(node.dataset.sign);
     if (action === 'finish-signatures') {
       if (state.form.modalidade === 'Eletrônica') {
-        modal('Gerar e enviar para assinatura?', '<p>O documento será gerado automaticamente e enviado à plataforma digital para assinatura do Colaborador e do Gestor. A próxima etapa permitirá acompanhar e validar as assinaturas.</p>', () => {
+        modal('Gerar e Enviar para Assinatura?', '<p>O documento será gerado automaticamente e enviado à plataforma digital para assinatura do Colaborador e do Gestor. A próxima etapa permitirá acompanhar e validar as assinaturas.</p>', () => {
           const timestamp = now();
           const signing = electronicSigningExample('partial');
           signing.sentAt = timestamp; signing.updatedAt = timestamp;
@@ -1036,7 +1040,7 @@
           state.files.assinado = [];
           state.current = 'validacao_assinaturas';
           log('assinaturas', 'Documento enviado para assinatura eletrônica', 'Documento gerado automaticamente e enviado à plataforma digital.', historyEvidence()); go('validacao_assinaturas');
-        }, 'Gerar e enviar', 'paper-plane'); return;
+        }, 'Gerar e Enviar', 'paper-plane'); return;
       }
       if (!state.files.assinado?.some(file => (file.revision || 1) === state.revision)) invalid('files.assinado', 'Anexe o documento assinado pelo Colaborador e pelo Gestor.');
       if (fail()) return;
@@ -1050,12 +1054,23 @@
       const signing = state.electronicSigning;
       if (!electronicDocumentReady(signing)) invalid('electronicSigning', 'Aguarde a assinatura do Colaborador e do Gestor e o retorno do documento assinado pela plataforma digital.');
       if (fail()) return;
-      modal('Validar assinaturas e encaminhar ao DP?', '<p>As assinaturas do Colaborador e do Gestor foram concluídas. Confirme a validação para encaminhar o documento assinado ao DP.</p>', () => {
+      modal('Validar Assinaturas e Encaminhar ao DP?', '<p>As assinaturas do Colaborador e do Gestor foram concluídas. Confirme a validação para encaminhar o documento assinado ao DP.</p>', () => {
         signing.validatedAt = now();
         state.current = 'dp'; log('validacao_assinaturas', 'Assinaturas validadas', 'Assinaturas eletrônicas conferidas e documento assinado encaminhado ao DP.', historyEvidence()); go('dp');
-      }, 'Validar e encaminhar', 'file-circle-check');
+      }, 'Validar e Encaminhar', 'file-circle-check');
     }
     if (action === 'finish') {
+      if (state.form.checklistConcluido === 'Não') {
+        if (!state.form.finais?.trim()) invalid('finais', 'Informe os ajustes necessários para a correção.');
+        if (fail()) return;
+        modal('Enviar para Correção?', '<p>A solicitação retornará para Correção da Solicitação. Os itens do checklist e a observação do Departamento Pessoal serão preservados no histórico.</p>', () => {
+          const evidence = historyEvidence();
+          state.correction = { origin: 'dp', note: state.form.finais, before: evidence.snapshot, files: evidence.files, date: now() };
+          state.form.resumeArea = 'rh';
+          log('dp', 'Devolução para correção', state.form.finais, Object.assign(evidence, { snapshot: { referencia: evidence.snapshot, checklist: JSON.parse(JSON.stringify(state.checks)) } }));
+          state.current = 'correcao'; go('correcao');
+        }, 'Enviar para Correção', 'rotate-left'); return;
+      }
       const pending = allCheckIds().filter(id => !checkDone(id));
       const unjustified = allCheckIds().filter(id => state.checks[id]?.status === 'na' && !state.checks[id].note?.trim());
       if (pending.length) invalid('checklist', 'Há ' + pending.length + ' item(ns) pendente(s) no checklist. Confira os aplicáveis e indique os que não se aplicam.');
@@ -1063,7 +1078,7 @@
       if (state.form.checklistConcluido !== 'Sim') invalid('checklistConcluido', 'Selecione Concluir checklist para encerrar o processo.');
       if (state.current !== 'solicitacao' && !signaturesReady()) invalid('checklistConcluido', state.form.modalidade === 'Presencial' ? 'Anexe o documento assinado presencialmente pelos dois signatários.' : 'As assinaturas eletrônicas e o documento assinado devem ser validados antes da conclusão pelo DP.');
       if (fail()) return;
-      modal('Encerrar processo de desligamento?', '<p>O DP confirma a conferência manual dos itens aplicáveis e conclui o Checklist da Rescisão. Esta é a última atividade do workflow.</p>', () => {
+      modal('Encerrar Processo de Desligamento?', '<p>O DP confirma a conferência manual dos itens aplicáveis e conclui o Checklist da Rescisão. Esta é a última atividade do workflow.</p>', () => {
         if (state.current === 'solicitacao') {
           const signatures = exampleHistoryRecord('assinaturas');
           state.form.assinaturaColaborador = signatures.snapshot.assinaturaColaborador; state.form.assinaturaGestor = signatures.snapshot.assinaturaGestor;
@@ -1071,7 +1086,7 @@
         }
         state.current = 'finalizada'; state.endedAt = now(); state.endedBy = owners.dp; state.endNote = state.form.finais;
         log('dp', 'Checklist concluído e processo encerrado', state.form.finais, Object.assign(historyEvidence(), { snapshot: JSON.parse(JSON.stringify({ referencia: state.form, checklist: state.checks })) })); go('finalizada');
-      }, 'Concluir e encerrar', 'clipboard-check');
+      }, 'Concluir e Encerrar', 'clipboard-check');
     }
   }
   function update(event) {

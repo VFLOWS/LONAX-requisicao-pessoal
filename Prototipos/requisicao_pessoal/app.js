@@ -355,8 +355,8 @@
           renderAttachmentsEditor("anexos", "Upload de Arquivos", "paperclip") +
           formFieldset("Justificativa", "comment-dots", textarea("Justificativa", "justificativa", f.justificativa, true)) +
           '<div class="lx-actions">' +
-            '<button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar rascunho</button>' +
-            '<button class="lx-btn lx-btn-primary" type="button" data-action="submit"><i class="fa-solid fa-paper-plane"></i> Enviar solicitação</button>' +
+            '<button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar Rascunho</button>' +
+            '<button class="lx-btn lx-btn-primary" type="button" data-action="submit"><i class="fa-solid fa-paper-plane"></i> Enviar Solicitação</button>' +
           '</div>' +
         '</div>' +
       '</div>' +
@@ -517,9 +517,9 @@
     var f = state.form;
     if (f.tipo !== "Substituto") return "";
     return formFieldset("Colaborador Substituído", "user-minus", grid([
-        singleSelect("Colaborador substituído", "substituido", f.substituido, rm.colaboradores.map(function (item) { return item.nome; }), true),
+        singleSelect("Colaborador Substituído", "substituido", f.substituido, rm.colaboradores.map(function (item) { return item.nome; }), true),
         field("Matrícula / Chapa", "chapa", f.chapa, true),
-        field("Cargo atual", "cargoAtual", f.cargoAtual, true),
+        field("Cargo Atual", "cargoAtual", f.cargoAtual, true),
         field("Setor / Seção", "secaoAtual", f.secaoAtual, true),
         field("Centro de Custo", "centroAtual", f.centroAtual, true),
         field("Data Prevista de Saída", "saidaPrevista", f.saidaPrevista, true, true, "", "", "date")
@@ -528,13 +528,13 @@
 
   function renderEquipmentsEditor() {
     return '<div class="lx-child-table">' +
-      '<button class="lx-btn lx-btn-primary" type="button" data-action="add-equipment"><i class="fa-solid fa-plus"></i> Adicionar equipamento</button>' +
+      '<button class="lx-btn lx-btn-primary" type="button" data-action="add-equipment"><i class="fa-solid fa-plus"></i> Adicionar Equipamento</button>' +
       state.form.equipamentos.map(function (item, index) {
         return '<div class="lx-child-row" data-equipment-index="' + index + '">' +
           field("Equipamento", "equipamento", item.equipamento, false, true, "equipment", index) +
           field("Quantidade", "quantidade", item.quantidade, false, true, "equipment", index, "number") +
           field("Observação", "observacao", item.observacao, false, true, "equipment", index) +
-          '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-equipment" data-index="' + index + '" aria-label="Excluir equipamento"><i class="fa-solid fa-trash"></i></button>' +
+          '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-equipment" data-index="' + index + '" aria-label="Excluir Equipamento"><i class="fa-solid fa-trash"></i></button>' +
         '</div>';
       }).join("") +
     '</div>';
@@ -547,7 +547,7 @@
         '<i class="fa-solid fa-cloud-arrow-up"></i>' +
         '<p>Arraste e solte seus arquivos aqui</p>' +
         '<span>ou</span>' +
-        '<button type="button" class="lx-btn-outline" data-upload-trigger="' + fieldName + '">Escolher arquivo</button>' +
+        '<button type="button" class="lx-btn-outline" data-upload-trigger="' + fieldName + '">Escolher Arquivo</button>' +
         '<input type="file" class="lx-file-input" data-file-upload="' + fieldName + '" multiple />' +
       '</div>' +
       renderAttachmentsList(files, fieldName, true)
@@ -561,9 +561,9 @@
       return '<div class="lx-attachment-row">' +
         '<div class="lx-attachment-info"><i class="fa-solid fa-file-lines"></i><div><strong>' + escapeHtml(file.nome) + '</strong><span>' + escapeHtml(file.tamanho || "-") + ' - ' + escapeHtml(file.origem || "Anexo") + '</span></div></div>' +
         '<div class="lx-attachment-actions">' +
-          '<button class="lx-btn-icon lx-btn-secondary" type="button" data-action="view-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Visualizar anexo"><i class="fa-solid fa-eye"></i></button>' +
-          '<button class="lx-btn-icon lx-btn-secondary" type="button" data-action="download-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Baixar anexo"><i class="fa-solid fa-download"></i></button>' +
-          (editable ? '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Excluir anexo"><i class="fa-solid fa-trash"></i></button>' : "") +
+          '<button class="lx-btn-icon lx-btn-secondary" type="button" data-action="view-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Visualizar Anexo"><i class="fa-solid fa-eye"></i></button>' +
+          '<button class="lx-btn-icon lx-btn-secondary" type="button" data-action="download-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Baixar Anexo"><i class="fa-solid fa-download"></i></button>' +
+          (editable ? '<button class="lx-btn-icon lx-btn-danger" type="button" data-action="delete-attachment" data-attachment-field="' + fieldName + '" data-index="' + index + '" aria-label="Excluir Anexo"><i class="fa-solid fa-trash"></i></button>' : "") +
         '</div>' +
       '</div>';
     }).join("") + '</div>';
@@ -585,14 +585,14 @@
     return previousComponents +
       viewComponent(title, getStage(key).desc, state.status,
         '<div class="lx-current-decision" data-approval="' + key + '">' +
-          decisionOption("approve", "Aprovar solicitação", approveText, decision.value) +
-          decisionOption("return", "Devolver para correção", "A solicitação retornará ao solicitante para ajustes.", decision.value) +
-          decisionOption("reject", "Reprovar solicitação", "A requisição será encerrada como reprovada.", decision.value) +
+          decisionOption("approve", "Aprovar Solicitação", approveText, decision.value) +
+          decisionOption("return", "Devolver para Correção", "A solicitação retornará ao solicitante para ajustes.", decision.value) +
+          decisionOption("reject", "Reprovar Solicitação", "A requisição será encerrada como reprovada.", decision.value) +
           '<label class="lx-field' + (decision.value === "approve" ? " lx-hidden" : "") + '" data-approval-justification><span>Justificativa <b>*</b></span><textarea data-decision-field="justification" placeholder="Informe o motivo da devolução ou reprovação...">' + escapeHtml(decision.justification) + '</textarea></label>' +
           (key === "rh" ? renderAttachmentsEditor("anexosRh", "Upload de Arquivos - RH", "paperclip") : "") +
           '<div class="lx-actions">' +
-            '<button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar rascunho</button>' +
-            '<button class="lx-btn lx-btn-primary" type="button" data-action="send-approval" data-approval-key="' + key + '"><i class="fa-solid fa-paper-plane"></i> Enviar decisão</button>' +
+            '<button class="lx-btn lx-btn-secondary" type="button" data-action="draft"><i class="fa-solid fa-save"></i> Salvar Rascunho</button>' +
+            '<button class="lx-btn lx-btn-primary" type="button" data-action="send-approval" data-approval-key="' + key + '"><i class="fa-solid fa-paper-plane"></i> Enviar Decisão</button>' +
           '</div>' +
         '</div>', "", getStage(key).icon, getStage(key).tone) +
       "";
@@ -772,7 +772,7 @@
         justification: "Etapa aprovada sem ressalvas."
       }) +
       viewComponent(
-        "Prévia do e-mail para TI",
+        "Prévia do E-mail para TI",
         "E-mail automático quando houver equipamentos.",
         "",
         '<div class="lx-history-stage lx-history-stage-blue">' +
@@ -1052,7 +1052,7 @@
     if (name === "dataDesejada" && value && isPastDate(value)) {
       state.errors.dataDesejada = "A data desejada de início não pode ser menor que a data atual.";
       showModal({
-        title: "Data inválida",
+        title: "Data Inválida",
         message: "A Data Desejada de Início não pode ser menor que a data atual.",
         icon: "fa-triangle-exclamation",
         confirmText: "Entendi",
@@ -1154,7 +1154,7 @@
 
     if (action === "draft") {
       showModal({
-        title: "Salvar rascunho",
+        title: "Salvar Rascunho",
         message: "Deseja salvar os dados preenchidos até o momento?",
         icon: "fa-save",
         confirmText: "Salvar",
@@ -1173,7 +1173,7 @@
         return;
       }
       showModal({
-        title: "Enviar solicitação",
+        title: "Enviar Solicitação",
         message: "Deseja enviar a requisição para aprovação do Gestor Imediato?",
         icon: "fa-paper-plane",
         confirmText: "Enviar",
@@ -1194,7 +1194,7 @@
     if (action === "delete-equipment") {
       var index = Number(event.currentTarget.getAttribute("data-index"));
       showModal({
-        title: "Excluir equipamento",
+        title: "Excluir Equipamento",
         message: "Deseja remover este equipamento da requisição?",
         icon: "fa-trash",
         confirmText: "Excluir",
@@ -1209,7 +1209,7 @@
     if (action === "view-attachment") {
       var attachment = getAttachmentFromButton(event.currentTarget);
       showModal({
-        title: attachment ? attachment.nome : "Visualizar anexo",
+        title: attachment ? attachment.nome : "Visualizar Anexo",
         html: renderAttachmentPreview(attachment),
         icon: "fa-eye",
         confirmText: "Fechar",
@@ -1226,7 +1226,7 @@
         return;
       }
       showModal({
-        title: "Baixar anexo",
+        title: "Baixar Anexo",
         message: downloadAttachment ? downloadAttachment.nome + " - " + downloadAttachment.tamanho : "Anexo não encontrado.",
         icon: "fa-download",
         confirmText: "Ok",
@@ -1240,7 +1240,7 @@
       var fieldName = button.getAttribute("data-attachment-field");
       var attachmentIndex = Number(button.getAttribute("data-index"));
       showModal({
-        title: "Excluir anexo",
+        title: "Excluir Anexo",
         message: "Deseja remover este arquivo anexado?",
         icon: "fa-trash",
         confirmText: "Excluir",
@@ -1256,7 +1256,7 @@
       var key = event.currentTarget.getAttribute("data-approval-key");
       if (!validateApproval(key)) return render();
       showModal({
-        title: "Enviar decisão",
+        title: "Enviar Decisão",
         message: "Deseja registrar a decisão desta etapa?",
         icon: "fa-paper-plane",
         confirmText: "Enviar",
@@ -1350,7 +1350,7 @@
     state.errors = {};
     if (decision.value !== "approve" && !String(decision.justification || "").trim()) {
       showModal({
-        title: "Justificativa obrigatória",
+        title: "Justificativa Obrigatória",
         message: "Informe a justificativa para devolver ou reprovar a solicitação.",
         icon: "fa-triangle-exclamation",
         confirmText: "Entendi",

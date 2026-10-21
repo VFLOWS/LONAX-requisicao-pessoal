@@ -129,38 +129,38 @@
     ].join("");
 
     document.getElementById("dashboardApp").innerHTML = SL.pageSection({
-      title: "Painel de vagas",
+      title: "Painel de Vagas",
       description: "Acompanhamento gerencial das vagas aprovadas, candidatos e admissões.",
       icon: "fa-table-list",
       iconClass: "sl-section-icon-candidates",
       actionsHtml: actions,
       bodyHtml: [
         SL.kpiGrid([
-          { className: "sl-vagas-kpi-blue", icon: "fa-briefcase", label: "Vagas abertas", value: String(12 + registered.length) },
-          { className: "sl-vagas-kpi-green", icon: "fa-list-check", label: "Em seleção", value: "5" },
-          { className: "sl-vagas-kpi-orange", icon: "fa-users", label: "Candidatos em processo", value: "38" },
+          { className: "sl-vagas-kpi-blue", icon: "fa-briefcase", label: "Vagas Abertas", value: String(12 + registered.length) },
+          { className: "sl-vagas-kpi-green", icon: "fa-list-check", label: "Em Seleção", value: "5" },
+          { className: "sl-vagas-kpi-orange", icon: "fa-users", label: "Candidatos em Processo", value: "38" },
           { className: "sl-vagas-kpi-red", icon: "fa-triangle-exclamation", label: "Fora do SLA", value: "4" }
         ]),
         SL.filters({
-          label: "Filtros de vagas",
+          label: "Filtros de Vagas",
           fields: [
-            { type: "search", label: "Buscar vaga", placeholder: "Código, cargo, requisição ou gestor" },
+            { type: "search", label: "Buscar Vaga", placeholder: "Código, cargo, requisição ou gestor" },
             { type: "select", label: "Status", options: ["Todos"].concat(window.SLVagas.statuses) },
             { label: "Área / Gerência", placeholder: "Área ou gerência" },
-            { type: "select", label: "Situação da admissão", options: ["Todas", "Não iniciada", "Em andamento"] }
+            { type: "select", label: "Situação da Admissão", options: ["Todas", "Não iniciada", "Em andamento"] }
           ]
         }),
         '<div class="sl-vagas-viewbar">' + SL.tabs({
-          label: "Visualização das vagas",
+          label: "Visualização das Vagas",
           items: [
             { label: "Lista", icon: "fa-list", active: true, attrs: { "data-dashboard-view": "list" } },
             { label: "Kanban", icon: "fa-table-columns", attrs: { "data-dashboard-view": "kanban" } }
           ]
-        }) + '<a class="sl-primary-button sl-vagas-create-button" href="cadastro-vaga.html"><i class="fa-solid fa-plus"></i> Cadastrar vaga</a></div>',
+        }) + '<a class="sl-primary-button sl-vagas-create-button" href="cadastro-vaga.html"><i class="fa-solid fa-plus"></i> Cadastrar Vaga</a></div>',
         SL.table({
           id: "dashboardList",
           className: "sl-vagas-table", search: false, recordLabel: "vagas",
-          columns: ["Código", "Requisição", "Vaga", "Área e gestor", "Unidade", "Posições", "Abertura", "Status", "Admissão", "Sólides"],
+          columns: ["Código", "Requisição", "Vaga", "Área e Gestor", "Unidade", "Posições", "Abertura", "Status", "Admissão", "Sólides"],
           rows: renderRows()
         }),
         '<div class="sl-dashboard-kanban' + (kanbanStatuses.length === 4 ? ' sl-dashboard-kanban-four' : '') + ' sl-hidden" id="dashboardKanban">' + kanbanStatuses.map(renderKanbanColumn).join("") + "</div>"
