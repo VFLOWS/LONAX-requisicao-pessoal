@@ -91,19 +91,19 @@
     ['ti', 'Análise da TI', 'laptop', 'blue', 'Infraestrutura, itens a devolver e termo de responsabilidade. Em paralelo ao SESMT.'],
     ['documento', 'Documento de Desligamento', 'file-lines', 'purple', 'Consultar o documento de desligamento e encaminhar para assinaturas.'],
     ['assinaturas', 'Encaminhar para Assinatura', 'file-signature', 'teal', 'Gerar e enviar para assinatura eletrônica ou anexar o documento assinado presencialmente.'],
-    ['validacao_assinaturas', 'Validação das Assinaturas', 'file-circle-check', 'teal', 'Acompanhar as assinaturas na plataforma digital e validar o documento assinado.'],
+    ['validacao_assinaturas', 'Acompanhar Assinaturas', 'file-signature', 'teal', 'Acompanhar o status das assinaturas. Após o recebimento do documento assinado, o processo segue automaticamente para o DP.'],
     ['dp', 'DP — Checklist da Rescisão', 'list-check', 'orange', 'Dados da rescisão e conferência manual dos itens aplicáveis.'],
     ['correcao', 'Correção da Solicitação', 'rotate-left', 'slate', 'Dados preservados, parecer da devolução e registro dos ajustes.'],
     ['reprovada', 'Desligamento Reprovado', 'ban', 'red', 'Decisão e histórico do encerramento por reprovação.'],
     ['finalizada', 'Desligamento Finalizado', 'circle-check', 'green', 'Desligamento aprovado e concluído pelo Departamento Pessoal.']
   ].map(([key, title, icon, tone, desc]) => ({ key, title, icon, tone, desc }));
-  const owners = { solicitacao: 'Eduardo Martins', diretoria: 'Roberto Siqueira', rh: 'Ricardo Nunes', paralelo: 'Ricardo Nunes', sesmt: 'Marcos Oliveira', ti: 'Patrícia Almeida', documento: 'Ricardo Nunes', assinaturas: 'Ricardo Nunes', validacao_assinaturas: 'Ricardo Nunes', dp: 'Juliana Costa' };
+  const owners = { solicitacao: 'Eduardo Martins', diretoria: 'Roberto Siqueira', rh: 'Ricardo Nunes', paralelo: 'Ricardo Nunes', sesmt: 'Marcos Oliveira', ti: 'Patrícia Almeida', documento: 'Ricardo Nunes', assinaturas: 'Ricardo Nunes', validacao_assinaturas: 'Sistema', dp: 'Juliana Costa' };
   const checklistGroups = [
     ['proventos', 'Descontos / Proventos', ['Plano de Saúde', 'Coparticipação', 'Odontológico', 'Alimentação', 'Adicional Noturno', 'Art. 73 — Hora Ficta', 'Faltas', 'Atrasos', 'Comissões', 'Periculosidade / Insalubridade', 'Desconto Vale-Transporte', 'Desconto Combustível', 'Pensão', 'FGTS do Mês Anterior', 'Farmácia', 'Bazar / Feira da Família', 'Uniforme', 'Banco de Horas', 'Cesta Básica', 'Fretado', 'EPI', 'E-Consignado', 'Insuficiência de Saldo do Mês Anterior', 'Conferência de Gozo de Férias']],
     ['cancelamentos', 'Cancelamentos', ['Plano de Saúde', 'Odontológico', 'Farmácia', 'Tangerino', 'CTRL ID']],
     ['documentos', 'Documentos / Providências', ['PPP', 'TRCT', 'Folha de Ponto', 'Extrato FGTS', 'GRRF', 'Ficha de Registro', 'Seguro', 'ASO Demissional', 'Aviso Assinado', 'Lançamento Financeiro', 'Arquivo Bancário', 'Lançamento do Líquido', 'Total TRCT', 'Total GRRF', 'Envio do Evento S-2299 ao eSocial']]
   ];
-  const labels = { solicitacao: 'Em preenchimento', diretoria: 'Aguardando Diretoria', rh: 'Aguardando RH', paralelo: 'Aguardando SESMT e TI', documento: 'Aguardando documento', assinaturas: 'Aguardando encaminhamento para assinatura', validacao_assinaturas: 'Aguardando validação das assinaturas', dp: 'Checklist do DP', correcao: 'Em correção', retomada: 'Aguardando regra de retomada', reprovada: 'Reprovado', finalizada: 'Finalizado' };
+  const labels = { solicitacao: 'Em preenchimento', diretoria: 'Aguardando Diretoria', rh: 'Aguardando RH', paralelo: 'Aguardando SESMT e TI', documento: 'Aguardando documento', assinaturas: 'Aguardando encaminhamento para assinatura', validacao_assinaturas: 'Aguardando Assinaturas', dp: 'Checklist do DP', correcao: 'Em correção', retomada: 'Aguardando regra de retomada', reprovada: 'Reprovado', finalizada: 'Finalizado' };
 
   function exampleAttachments() {
     return [1, 2, 3].map(index => ({ id: 'exemplo-solicitacao-' + index, name: 'teste ' + index + '.pdf', url: 'anexos/teste ' + index + '.pdf', type: 'application/pdf', size: 25834, origin: 'Solicitante', by: owners.solicitacao, date: '16/10/2026 10:00', revision: 1 }));
@@ -278,7 +278,7 @@
   }
   function canInteract(key) {
     if (key === 'correcao' && !isCurrentCorrection()) return true;
-    if (key === 'validacao_assinaturas') return true;
+    if (key === 'validacao_assinaturas') return false;
     // Permite apresentar as assinaturas mesmo quando outra etapa anterior está aberta.
     if (key === 'assinaturas' && ['solicitacao', 'diretoria', 'rh', 'paralelo', 'documento', 'assinaturas'].includes(state.current)) return true;
     // As atividades abertas diretamente também podem ser demonstradas no rascunho.
@@ -346,6 +346,7 @@
     document.getElementById('statusLabel').textContent = document.getElementById('stageNav') ? labels[state.current] || state.current : displayStatus();
   }
   function render() {
+    if (advanceSignatureTracking() && view && page.key === 'validacao_assinaturas') { go('dp'); return; }
     displayedFiles.length = 0;
     renderStatus();
     const nav = document.getElementById('stageNav');
@@ -359,7 +360,7 @@
     if (page.key === 'paralelo') body = renderParallelWait();
     if (page.key === 'documento') body = renderDocument();
     if (page.key === 'assinaturas') body = renderSignatures();
-    if (page.key === 'validacao_assinaturas') body = renderSignatureValidation();
+    if (page.key === 'validacao_assinaturas') body = renderSignatureTracking();
     if (page.key === 'dp') body = renderDP();
     if (['finalizada', 'reprovada'].includes(page.key)) body = renderEnding();
     const errorHtml = errors.length && !Object.keys(fieldErrors).length ? '<div class="lx-validation" role="alert" tabindex="-1"><strong>Revise os campos antes de continuar:</strong><ul>' + errors.map(e => '<li>' + escape(e) + '</li>').join('') + '</ul></div>' : '';
@@ -642,7 +643,7 @@
           (returned ? historySection('Decisão sobre a Solicitação', 'clipboard-check', 'orange', [['Decisão', 'Solicitação devolvida para correção'], ['Responsável', record.responsible], ['Data da Análise', record.date], ['Observações Finais', record.note]], 'lx-dp-conclusion-history-grid') :
             historySection('Conclusão pelo Departamento Pessoal', 'clipboard-check', 'teal', [['Checklist Concluído?', f.checklistConcluido], ['Responsável', record.responsible], ['Data da Conclusão', record.date], ['Observações Finais', f.finais]], 'lx-dp-conclusion-history-grid'));
       }
-      const department = { diretoria: 'Diretoria Industrial', rh: 'Recursos Humanos', paralelo: 'Recursos Humanos', sesmt: 'Segurança do Trabalho', ti: 'Tecnologia da Informação', documento: 'Recursos Humanos', assinaturas: 'Recursos Humanos', validacao_assinaturas: 'Recursos Humanos', dp: 'Departamento Pessoal', correcao: 'Gerência Industrial' }[record.area];
+      const department = { diretoria: 'Diretoria Industrial', rh: 'Recursos Humanos', paralelo: 'Recursos Humanos', sesmt: 'Segurança do Trabalho', ti: 'Tecnologia da Informação', documento: 'Recursos Humanos', assinaturas: 'Recursos Humanos', validacao_assinaturas: 'Sistema', dp: 'Departamento Pessoal', correcao: 'Gerência Industrial' }[record.area];
       return historyPanel(stage.title, record.date + ' - ' + record.responsible + ' - ' + department, body, key, stage.icon, tone);
     }).join('');
   }
@@ -712,6 +713,14 @@
     return electronicSignaturesComplete(signing) && signing.signedDocument?.revision === state.revision &&
       state.files.assinado?.some(file => file.id === signing.signedDocument.id && file.revision === state.revision);
   }
+  function advanceSignatureTracking() {
+    if (state.current !== 'validacao_assinaturas' || state.form.modalidade !== 'Eletrônica' || !electronicDocumentReady(state.electronicSigning)) return false;
+    state.electronicSigning.validatedAt = now();
+    state.current = 'dp';
+    log('validacao_assinaturas', 'Assinaturas validadas', 'Assinaturas eletrônicas concluídas e documento assinado recebido. Encaminhamento automático ao DP.', historyEvidence());
+    save();
+    return true;
+  }
   function signingSummary(signing) {
     const signed = signing.signers.length > 0 && signing.signers.every(signer => signer.status === 'Assinado');
     return readGrid([['Documento', signing.document?.name || 'documento-de-desligamento.pdf'], ['Plataforma', signing.provider], ['Protocolo do Documento', signing.protocol], ['Data do Envio', signing.sentAt], ['Última Atualização', signing.updatedAt], ['Status do Documento', signed ? 'Assinado' : 'Pendente']], 'lx-signing-summary-grid');
@@ -721,14 +730,13 @@
       '<article class="lx-signing-person" data-signer="' + escape(signer.role) + '"><div class="lx-stability-record-head"><h3>' + escape(signer.role) + '</h3><span class="lx-signing-status' + (signer.status === 'Assinado' ? ' is-signed' : '') + '"><i class="fa-solid fa-' + (signer.status === 'Assinado' ? 'circle-check' : 'clock') + '"></i> ' + escape(signer.status) + '</span></div>' + readGrid([['Nome', signer.name], ['E-mail', signer.email], ['Assinou o Documento?', signer.status === 'Assinado' ? 'Sim' : 'Não'], ['Data da Assinatura', signer.signedAt || 'Aguardando assinatura']], 'lx-signing-person-grid') + '</article>'
     ).join('') + '</div>';
   }
-  function renderSignatureValidation() {
+  function renderSignatureTracking() {
     const signing = state.electronicSigning || electronicSigningExample();
     const signed = !!signing.signedDocument;
     const document = signing.signedDocument || signing.document || automaticDocument('paraAssinatura', signing.revision || state.revision, signing.sentAt || state.created);
     return fieldset('Envio para Assinatura Eletrônica', 'paper-plane', signingSummary(signing)) +
       fieldset('Acompanhamento das Assinaturas', 'file-signature', signingStatus(signing, true)) +
-      fieldset(signed ? 'Documento Assinado' : 'Documento para Assinatura', signed ? 'file-circle-check' : 'file-lines', attachments(signed ? 'assinado' : 'paraAssinatura', '', false, [document])) +
-      actions('validate-signatures', 'Validar Assinaturas e Encaminhar ao DP');
+      fieldset(signed ? 'Documento Assinado' : 'Documento para Assinatura', signed ? 'file-circle-check' : 'file-lines', attachments(signed ? 'assinado' : 'paraAssinatura', '', false, [document]));
   }
   function signatureCard(role, name, key, form = state.form, readonly = false) {
     const image = form[key + 'Imagem'];
@@ -952,7 +960,7 @@
   }
   function handleAction(node) {
     const action = node.dataset.action;
-    if (['submit', 'correct', 'decide', 'finish', 'finish-signatures', 'validate-signatures', 'add-item', 'delete-item'].includes(action)) { errors = []; fieldErrors = {}; }
+    if (['submit', 'correct', 'decide', 'finish', 'finish-signatures', 'add-item', 'delete-item'].includes(action)) { errors = []; fieldErrors = {}; }
     if (action === 'draft') {
       modal('Salvar Rascunho', '<p>Deseja salvar os dados preenchidos até o momento?</p>', () => { if (save()) feedback('Rascunho salvo neste navegador.'); }, 'Salvar', 'save'); return;
     }
@@ -1049,15 +1057,6 @@
         state.electronicSigning = null;
         state.current = 'dp'; log('assinaturas', 'Documento assinado conferido', 'Modalidade ' + state.form.modalidade + '; Colaborador e Gestor.', historyEvidence()); go('dp');
       }, 'Encaminhar', 'file-signature');
-    }
-    if (action === 'validate-signatures' && page.key === 'validacao_assinaturas') {
-      const signing = state.electronicSigning;
-      if (!electronicDocumentReady(signing)) invalid('electronicSigning', 'Aguarde a assinatura do Colaborador e do Gestor e o retorno do documento assinado pela plataforma digital.');
-      if (fail()) return;
-      modal('Validar Assinaturas e Encaminhar ao DP?', '<p>As assinaturas do Colaborador e do Gestor foram concluídas. Confirme a validação para encaminhar o documento assinado ao DP.</p>', () => {
-        signing.validatedAt = now();
-        state.current = 'dp'; log('validacao_assinaturas', 'Assinaturas validadas', 'Assinaturas eletrônicas conferidas e documento assinado encaminhado ao DP.', historyEvidence()); go('dp');
-      }, 'Validar e Encaminhar', 'file-circle-check');
     }
     if (action === 'finish') {
       if (state.form.checklistConcluido === 'Não') {

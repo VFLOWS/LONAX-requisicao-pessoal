@@ -168,20 +168,14 @@ test('fluxo completo: TI primeiro, SESMT, anexos, assinaturas e 44 checks manuai
   assert.equal((await state(page)).files.assinado.length, 0);
   assert.deepEqual(await page.locator('[data-signature-tracking] [data-signer] .lx-signing-status').allTextContents(), [' Assinado', ' Pendente']);
   assert.equal(await page.locator('.lx-view-shell:not(.lx-view-shell-history) .lx-readonly-item-status-do-documento strong').innerText(), 'Pendente');
-  await click(page, 'validate-signatures');
-  assert.match(await validationText(page), /Aguarde a assinatura/);
-  assert.equal(await page.locator('[data-signature-tracking].lx-error').count(), 1);
-  assert.equal(await page.locator('.lx-view-shell:not(.lx-view-shell-history) .lx-readonly-item-status-do-documento strong').innerText(), 'Pendente');
+  assert.equal(await page.locator('.lx-view-shell:not(.lx-view-shell-history) [data-action="draft"], [data-action="validate-signatures"]').count(), 0);
   await page.reload();
-  await click(page, 'validate-signatures');
-  assert.match(await validationText(page), /Aguarde a assinatura/);
-  await receiveSignatures(page);
-  assert.equal(await page.locator('.lx-view-shell:not(.lx-view-shell-history) .lx-readonly-item-status-do-documento strong').innerText(), 'Assinado');
-  assert.equal((await state(page)).electronicSigning.validatedAt, '');
   assert.equal((await state(page)).current, 'validacao_assinaturas');
-  await click(page, 'validate-signatures'); await confirm(page);
+  await receiveSignatures(page);
   assert.equal((await state(page)).current, 'dp');
-  assert.deepEqual((await historyTitles(page)).slice(-3), ['Documento de Desligamento', 'Encaminhar para Assinatura', 'Validação das Assinaturas']);
+  assert.equal(stageOf(page), 'dp');
+  assert.equal(await page.locator('#modalBackdrop').isVisible(), false, 'O retorno completo avança sem confirmação do usuário');
+  assert.deepEqual((await historyTitles(page)).slice(-3), ['Documento de Desligamento', 'Encaminhar para Assinatura', 'Acompanhar Assinaturas']);
   const signedRecord = (await state(page)).history.find(row => row.action === 'Assinaturas validadas');
   assert.equal(signedRecord.files.assinado[0].name, 'documento-de-desligamento-assinado.pdf');
   assert.ok(signedRecord.electronicSigning.validatedAt);
@@ -204,7 +198,7 @@ test('fluxo completo: TI primeiro, SESMT, anexos, assinaturas e 44 checks manuai
   assert.equal((await state(page)).endedBy, 'Juliana Costa');
   assert.equal((await historyTitles(page)).at(-1), 'DP — Checklist da Rescisão');
   await page.reload(); assert.match(await page.locator('#statusLabel').innerText(), /Finalizado/);
-  await page.getByRole('button', { name: 'Validação das Assinaturas', exact: true }).click();
+  await page.getByRole('button', { name: 'Acompanhar Assinaturas', exact: true }).click();
   await page.locator('[data-action="file"]:visible').first().click();
   await page.locator('#modalMessage iframe').waitFor(); await confirm(page);
   await page.setViewportSize({ width: 390, height: 844 });
@@ -541,8 +535,8 @@ test('todas as telas mostram seus predecessores e exemplos de histórico sem ava
     ['documento', technical],
     ['assinaturas', technical.concat('Documento de Desligamento')],
     ['validacao_assinaturas', technical.concat('Documento de Desligamento', 'Encaminhar para Assinatura')],
-    ['dp', technical.concat('Documento de Desligamento', 'Encaminhar para Assinatura', 'Validação das Assinaturas')],
-    ['finalizada', technical.concat('Documento de Desligamento', 'Encaminhar para Assinatura', 'Validação das Assinaturas', 'DP — Checklist da Rescisão')]
+    ['dp', technical.concat('Documento de Desligamento', 'Encaminhar para Assinatura', 'Acompanhar Assinaturas')],
+    ['finalizada', technical.concat('Documento de Desligamento', 'Encaminhar para Assinatura', 'Acompanhar Assinaturas', 'DP — Checklist da Rescisão')]
   ];
   for (const [stage, expected] of cases) {
     await load(page, stage);
@@ -570,10 +564,10 @@ test('todas as telas mostram seus predecessores e exemplos de histórico sem ava
   assert.equal(await page.getByRole('button', { name: 'Análise da TI', exact: true }).count(), 0, 'A atividade paralela pendente não aparece como etapa anterior concluída');
 
   await load(page, 'dp');
-  const toggle = page.getByRole('button', { name: 'Validação das Assinaturas', exact: true });
+  const toggle = page.getByRole('button', { name: 'Acompanhar Assinaturas', exact: true });
   await toggle.click();
   const record = toggle.locator('xpath=ancestor::section[1]');
-  await record.getByRole('button', { name: 'Visualizar anexo', exact: true }).click();
+  await record.getByRole('button', { name: 'Visualizar Anexo', exact: true }).click();
   assert.equal(await page.locator('#modalTitle').innerText(), 'documento-de-desligamento-assinado.pdf');
   assert.equal(await page.locator('#modalIcon .fa-eye').count(), 1);
   await confirm(page);
@@ -608,7 +602,7 @@ test('histórico do SESMT preserva itens, parecer e arquivo após correção e r
   assert.ok((await record.innerText()).includes(description));
   assert.doesNotMatch(await record.innerText(), /Descrição alterada na correção/);
   assert.equal(await record.locator('input, textarea, select').count(), 0, 'Registro anterior somente leitura');
-  await record.getByRole('button', { name: 'Visualizar anexo', exact: true }).click();
+  await record.getByRole('button', { name: 'Visualizar Anexo', exact: true }).click();
   await page.locator('.lx-file-image').waitFor();
   assert.equal(await page.locator('#modalTitle').innerText(), 'evidencia.png');
   await confirm(page);
@@ -630,7 +624,7 @@ test('análises abrem preenchidas, com observações em textarea e PDFs fixos di
       assert.ok(file.url.endsWith('.pdf'));
       const component = page.locator('[data-file-group="' + group + '"]');
       assert.equal(await component.locator('.lx-attachment-row').count(), 1);
-      await component.getByRole('button', { name: 'Visualizar anexo', exact: true }).click();
+      await component.getByRole('button', { name: 'Visualizar Anexo', exact: true }).click();
       assert.equal(await page.locator('#modalTitle').innerText(), file.name);
       assert.equal(await page.locator('#modalIcon .fa-eye').count(), 1);
       await confirm(page);
@@ -826,104 +820,70 @@ test('encaminhamento eletrônico dispensa upload e presencial exige documento as
   await click(page,'finish-signatures'); await confirm(page);
   assert.equal((await state(page)).current,'dp');
   assert.equal((await state(page)).electronicSigning,null);
-  assert.equal((await historyTitles(page)).includes('Validação das Assinaturas'),false);
+  assert.equal((await historyTitles(page)).includes('Acompanhar Assinaturas'),false);
   const snapshot=(await state(page)).history.find(record=>record.action==='Documento assinado conferido').snapshot;
   assert.equal(snapshot.modalidade,'Presencial');
   assert.equal(snapshot.assinaturaColaborador,'');
 }));
 
-test('validar assinaturas apresenta o retorno digital e abre sempre com o cenário eletrônico ativo', { skip }, async () => session(async page => {
+test('acompanhamento de assinaturas é somente consulta, com documento disponível e sem ações de validação', { skip }, async () => session(async page => {
   await load(page, 'validacao_assinaturas');
   const current = page.locator('.lx-view-shell:not(.lx-view-shell-history)');
-  assert.equal(await page.locator('[data-upload], [data-sign]').count(), 0);
-  assert.match(await current.innerText(), /DESL-000731-R1/);
-  assert.doesNotMatch(await current.innerText(), /assinaturas recebidas|Assinado por|Aguardando assinatura de/);
+  assert.equal(await current.locator('.lx-view-head h2').innerText(), 'Acompanhar Assinaturas');
+  assert.equal(await current.locator('[data-upload], [data-sign], [data-action="draft"], [data-action="validate-signatures"], [data-action="refresh-signatures"], .lx-actions').count(), 0);
   assert.equal(await current.locator('.lx-readonly-item-status-do-documento strong').innerText(), 'Pendente');
-  const sending=current.locator('fieldset').filter({has:page.locator('legend').filter({hasText:'Envio para Assinatura Eletrônica'})});
-  assert.equal(await sending.locator('.lx-readonly-item-status-do-documento strong').count(),1);
-  assert.equal(await current.locator('[data-signature-tracking] .lx-readonly-item-status-do-documento strong').count(),0);
-  assert.equal(await current.locator('.lx-signing-person').count(),2);
-  assert.equal(await current.locator('.lx-signing-overview').count(), 0);
-  assert.equal(await sending.locator('.lx-history-stage-item').count(), 6);
-  const metadataTops = await sending.locator('.lx-history-stage-item').evaluateAll(nodes => nodes.map(node => node.getBoundingClientRect().top));
-  assert.equal(new Set(metadataTops).size, 1, 'O status e os dados de envio aparecem na mesma linha');
-  const collaborator = current.locator('[data-signer="Colaborador"]');
-  const manager = current.locator('[data-signer="Gestor"]');
-  assert.equal(await collaborator.locator('.lx-signing-status').innerText(), 'Assinado');
-  assert.equal(await collaborator.locator('.lx-readonly-item-assinou-o-documento strong').innerText(), 'Sim');
-  assert.match(await collaborator.locator('.lx-readonly-item-data-da-assinatura strong').innerText(), /\d{2}\/\d{2}\/\d{4}/);
-  assert.equal(await manager.locator('.lx-signing-status').innerText(), 'Pendente');
-  assert.equal(await manager.locator('.lx-readonly-item-assinou-o-documento strong').innerText(), 'Não');
-  assert.equal(await manager.locator('.lx-readonly-item-data-da-assinatura strong').innerText(), 'Aguardando assinatura');
-  assert.equal(await current.locator('.lx-readonly-item-documento strong').innerText(), 'documento-de-desligamento.pdf');
-  const pendingDocument = current.locator('[data-file-group="paraAssinatura"]');
-  assert.equal(await pendingDocument.locator('.lx-attachment-row').count(), 1, 'O documento enviado pode ser consultado enquanto há assinatura pendente');
-  assert.equal(await pendingDocument.locator('[data-upload], [data-drop], [data-action="delete-file"]').count(), 0);
-  await pendingDocument.getByRole('button', { name: 'Visualizar anexo', exact: true }).click();
-  assert.equal(await page.locator('#modalTitle').innerText(), 'documento-de-desligamento.pdf');
+  assert.deepEqual(await current.locator('.lx-signing-status').allTextContents(), [' Assinado', ' Pendente']);
+  const pending = current.locator('[data-file-group="paraAssinatura"]');
+  assert.equal(await pending.locator('.lx-attachment-row').count(), 1);
+  await pending.getByRole('button', { name: 'Visualizar Anexo', exact: true }).click();
+  await page.locator('#modalMessage iframe').waitFor();
   assert.equal(await page.locator('#modalIcon .fa-eye').count(), 1);
-  assert.match(await page.locator('#modalMessage iframe').getAttribute('src'), /anexos\/documento-de-desligamento\.pdf$/);
   await confirm(page);
-  await current.screenshot({ path: '/tmp/desligamento-acompanhamento-assinaturas.png' });
   await page.setViewportSize({ width: 390, height: 844 });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
-  await current.screenshot({ path: '/tmp/desligamento-acompanhamento-assinaturas-mobile.png' });
+  await current.screenshot({ path: '/tmp/desligamento-acompanhar-assinaturas-mobile.png' });
   await page.setViewportSize({ width: 1280, height: 720 });
-  assert.equal((await state(page)).electronicSigning, null, 'A apresentação direta não registra um envio nem uma conclusão');
-  await click(page, 'validate-signatures');
-  assert.match(await validationText(page), /Aguarde a assinatura/);
-  await receiveSignatures(page);
   assert.equal((await state(page)).current, 'solicitacao');
+  assert.equal((await state(page)).electronicSigning, null, 'A consulta de exemplo não registra envio nem conclusão');
+  await receiveSignatures(page);
+  assert.equal((await state(page)).current, 'solicitacao', 'Consultar um retorno completo fora da atividade não avança o processo');
   assert.equal((await state(page)).electronicSigning.validatedAt, '');
-  assert.doesNotMatch(await current.innerText(), /assinaturas recebidas|Assinado por|Aguardando assinatura de/);
   assert.equal(await current.locator('.lx-readonly-item-status-do-documento strong').innerText(), 'Assinado');
-  assert.equal(await manager.locator('.lx-readonly-item-assinou-o-documento strong').innerText(), 'Sim');
   assert.equal(await current.locator('[data-file-group="assinado"] .lx-attachment-row').count(), 1);
-  assert.equal(await current.locator('[data-file-group="paraAssinatura"]').count(), 0, 'A versão concluída substitui o documento enviado na visualização');
+  assert.equal(await current.locator('[data-file-group="paraAssinatura"]').count(), 0);
   await page.reload();
-  assert.doesNotMatch(await current.innerText(), /assinaturas recebidas|Assinado por|Aguardando assinatura de/);
-  assert.equal(await current.locator('[data-upload]').count(), 0);
-  await page.screenshot({ path: '/tmp/desligamento-validar-assinaturas.png', fullPage: true });
-  await page.setViewportSize({ width: 390, height: 844 });
-  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
-  await page.screenshot({ path: '/tmp/desligamento-validar-assinaturas-mobile.png', fullPage: true });
-  await click(page, 'validate-signatures'); await page.locator('#modalCancel').click();
   assert.equal((await state(page)).current, 'solicitacao');
-  await click(page, 'validate-signatures'); await confirm(page);
-  assert.equal((await state(page)).current, 'dp');
-  await page.getByRole('button', { name: 'Validação das Assinaturas', exact: true }).click();
-  const historical = page.locator('.lx-view-shell-history').filter({ has: page.getByRole('button', { name: 'Validação das Assinaturas', exact: true }) });
-  assert.equal(await historical.locator('[data-action="refresh-signatures"], [data-action="validate-signatures"], [data-upload]').count(), 0);
-  assert.doesNotMatch(await historical.innerText(), /Situação|Data da validação/);
-  assert.equal(await historical.locator('.lx-readonly-item-responsavel').count(), 0);
-  assert.equal(await historical.locator('.lx-readonly-item-status-do-documento strong').innerText(), 'Assinado');
-  assert.equal(await historical.locator('.lx-signing-overview, .lx-readonly-item-assinado-por, .lx-readonly-item-aguardando-assinatura-de').count(), 0);
-
-  const recordedHistory = (await state(page)).history;
-  await page.evaluate(key => {
-    const saved = JSON.parse(localStorage.getItem(key)); saved.form.modalidade = 'Presencial'; saved.current = 'dp'; delete saved.signatureDemoVersion; localStorage.setItem(key, JSON.stringify(saved));
-  }, storageKey);
-  await load(page, 'validacao_assinaturas');
-  assert.equal((await state(page)).form.modalidade, 'Eletrônica');
-  assert.equal((await state(page)).current, 'dp', 'Abrir o cenário eletrônico não movimenta o processo');
-  assert.equal(await current.locator('[data-signature-tracking]').count(), 1);
-  assert.equal(await current.locator('.lx-readonly-item-status-do-documento strong').innerText(), 'Pendente');
-  assert.deepEqual((await state(page)).electronicSigning.signers.map(signer => signer.status), ['Assinado', 'Pendente']);
-  assert.equal(await current.locator('[data-file-group="paraAssinatura"] .lx-attachment-row').count(), 1);
-  assert.deepEqual((await state(page)).history, recordedHistory, 'O ajuste do exemplo mantém os registros anteriores preservados');
-  assert.equal(await page.getByRole('button', { name: 'Atualizar status das assinaturas', exact: true }).count(), 0);
-  assert.equal(await current.locator('[data-action="validate-signatures"]').isEnabled(), true);
-  assert.doesNotMatch(await current.innerText(), /O documento foi assinado presencialmente/);
-  await click(page, 'validate-signatures');
-  assert.match(await validationText(page), /Aguarde a assinatura/);
-  await receiveSignatures(page);
-  assert.equal(await current.locator('.lx-readonly-item-status-do-documento strong').innerText(), 'Assinado');
-  await page.reload();
-  assert.equal((await state(page)).form.modalidade, 'Eletrônica');
   assert.equal(await current.locator('.lx-readonly-item-status-do-documento strong').innerText(), 'Assinado');
 }));
 
-test('arquivo avulso, assinatura pendente ou de outra revisão não liberam a validação digital nem a conclusão do DP', { skip }, async () => session(async page => {
+test('retorno completo das assinaturas avança automaticamente ao DP e registra o Sistema uma única vez', { skip }, async () => session(async page => {
+  await load(page, 'assinaturas');
+  await click(page, 'finish-signatures'); await confirm(page);
+  assert.equal((await state(page)).current, 'validacao_assinaturas');
+  await receiveSignatures(page, ['Colaborador']);
+  assert.equal((await state(page)).current, 'validacao_assinaturas');
+  assert.equal((await state(page)).history.filter(row => row.area === 'validacao_assinaturas').length, 0);
+  await receiveSignatures(page);
+  const completed = await state(page);
+  assert.equal(completed.current, 'dp');
+  assert.equal(stageOf(page), 'dp');
+  assert.equal(await page.locator('#modalBackdrop').isVisible(), false);
+  const records = completed.history.filter(row => row.area === 'validacao_assinaturas');
+  assert.equal(records.length, 1);
+  assert.equal(records[0].responsible, 'Sistema');
+  assert.ok(records[0].electronicSigning.validatedAt);
+  assert.equal(records[0].files.assinado[0].id, completed.electronicSigning.signedDocument.id);
+  const sent = completed.history.find(row => row.action === 'Documento enviado para assinatura eletrônica');
+  assert.deepEqual(sent.electronicSigning.signers.map(signer => signer.status), ['Assinado', 'Pendente']);
+  await page.reload(); await receiveSignatures(page);
+  assert.equal((await state(page)).history.filter(row => row.area === 'validacao_assinaturas').length, 1);
+  await page.getByRole('button', { name: 'Acompanhar Assinaturas', exact: true }).click();
+  const historical = page.locator('.lx-view-shell-history').filter({ has: page.getByRole('button', { name: 'Acompanhar Assinaturas', exact: true }) });
+  assert.equal(await historical.locator('[data-action="draft"], [data-action="validate-signatures"], [data-upload]').count(), 0);
+  assert.equal(await historical.locator('.lx-readonly-item-status-do-documento strong').innerText(), 'Assinado');
+}));
+
+test('arquivo avulso, documento ausente ou assinatura de outra revisão não liberam o avanço automático', { skip }, async () => session(async page => {
   await load(page, 'assinaturas');
   await click(page, 'finish-signatures'); await confirm(page);
   await page.evaluate(key => {
@@ -931,24 +891,47 @@ test('arquivo avulso, assinatura pendente ou de outra revisão não liberam a va
     saved.files.assinado = [Object.assign({}, saved.files.paraAssinatura[0], { id: 'arquivo-avulso', name: 'arquivo-avulso.pdf' })];
     localStorage.setItem(key, JSON.stringify(saved));
   }, storageKey);
-  await page.reload(); // Um arquivo isolado não comprova o retorno das assinaturas.
-  await click(page, 'validate-signatures');
-  assert.match(await validationText(page), /Aguarde a assinatura/);
-  await receiveSignatures(page);
-  const completed = await state(page);
+  await page.reload();
+  assert.equal((await state(page)).current, 'validacao_assinaturas');
   await page.evaluate(key => {
-    const saved = JSON.parse(localStorage.getItem(key)); saved.electronicSigning.revision = saved.revision - 1; localStorage.setItem(key, JSON.stringify(saved));
+    const saved = JSON.parse(localStorage.getItem(key));
+    saved.electronicSigning.signers.forEach(signer => { signer.status = 'Assinado'; signer.signedAt = saved.created; });
+    localStorage.setItem(key, JSON.stringify(saved));
   }, storageKey);
   await page.reload();
-  await click(page, 'validate-signatures');
-  assert.match(await validationText(page), /Aguarde a assinatura/);
-  await page.evaluate(({ key, completed }) => {
-    completed.current = 'dp'; localStorage.setItem(key, JSON.stringify(completed));
-  }, { key: storageKey, completed });
-  await load(page, 'dp');
-  await click(page, 'finish');
+  assert.equal((await state(page)).current, 'validacao_assinaturas', 'Duas assinaturas sem o documento retornado não liberam o DP');
+  await page.evaluate(key => {
+    const saved = JSON.parse(localStorage.getItem(key)), signing = saved.electronicSigning;
+    signing.signedDocument = { ...saved.files.assinado[0], revision: saved.revision };
+    signing.revision = saved.revision - 1;
+    localStorage.setItem(key, JSON.stringify(saved));
+  }, storageKey);
+  await page.reload();
+  assert.equal((await state(page)).current, 'validacao_assinaturas');
+  assert.equal((await state(page)).electronicSigning.validatedAt, '');
+  await page.evaluate(key => {
+    const saved = JSON.parse(localStorage.getItem(key));
+    saved.current = 'dp';
+    localStorage.setItem(key, JSON.stringify(saved));
+  }, storageKey);
+  await load(page, 'dp'); await click(page, 'finish');
   assert.match(await validationText(page), /devem ser validados/);
   assert.equal((await state(page)).current, 'dp');
+}));
+
+test('reabrir o acompanhamento processa o retorno completo salvo sem confirmação manual', { skip }, async () => session(async page => {
+  await load(page, 'validacao_assinaturas');
+  await receiveSignatures(page);
+  assert.equal((await state(page)).current, 'solicitacao');
+  await page.evaluate(key => {
+    const saved = JSON.parse(localStorage.getItem(key)); saved.current = 'validacao_assinaturas';
+    localStorage.setItem(key, JSON.stringify(saved));
+  }, storageKey);
+  await page.reload();
+  assert.equal((await state(page)).current, 'dp');
+  assert.equal(stageOf(page), 'dp');
+  assert.equal(await page.locator('#modalBackdrop').isVisible(), false);
+  assert.equal((await state(page)).history.filter(row => row.area === 'validacao_assinaturas').length, 1);
 }));
 
 test('correção aberta diretamente traz devolução do RH, formulário completo e resumo original preservado', { skip }, async () => session(async page => {
