@@ -227,6 +227,14 @@
       } else return;
       self.refresh();
     });
+    this.bindActions();
+    this.api.draw();
+  };
+
+  Selection.prototype.bindActions = function () {
+    if (this.actionsBound) return;
+    this.actionsBound = true;
+    var self = this;
     document.addEventListener('click', function (event) {
       var trigger = event.target.closest('[data-candidate-actions], #selectedCandidateActions');
       if (trigger && !trigger.disabled) self.openMenu(trigger);
@@ -253,7 +261,6 @@
       var rect = self.menuTrigger.getBoundingClientRect();
       if (Math.abs(rect.top - self.menuAnchor.top) > .5 || Math.abs(rect.left - self.menuAnchor.left) > .5) self.closeMenu(false);
     }, true);
-    this.api.draw();
   };
 
   global.SLSelection = Selection;

@@ -1,6 +1,6 @@
 /* DataTables uses the prototype's existing Lonax typography and palette. */
 .sl-table-wrap:has(> .dt-container) { overflow: visible; }
-.sl-page .dt-container { min-width: 0; width: 100%; color: var(--sl-ink); font-family: var(--sl-font-body); font-size: 11px; }
+.sl-page .dt-container { min-width: 0; width: 100%; color: var(--sl-ink); font-family: var(--sl-font-body); font-size: 0.6875rem; }
 .sl-page .dt-container .dt-layout-row { gap: 12px; margin: 0; }
 .sl-page .dt-container .dt-layout-row:not(.dt-layout-table):first-child { justify-content: flex-end; margin-bottom: 10px; }
 .sl-page .dt-container .dt-layout-row:not(.dt-layout-table):last-child { margin-top: 12px; padding: 8px 10px; border: 1px solid var(--sl-line); border-radius: var(--sl-radius); background: var(--sl-surface); }
@@ -12,26 +12,26 @@
 .sl-page .dt-container .dt-layout-row:not(.dt-layout-table):last-child > .dt-layout-end { display: flex; flex: 1; align-items: center; gap: 12px; }
 .sl-page .dt-container .dt-layout-row:not(.dt-layout-table):last-child .dt-paging { flex: 1; }
 .sl-page .dt-container .dt-search,
-.sl-page .dt-container .dt-length { display: flex; align-items: center; gap: 8px; color: var(--sl-muted); font-size: 10px; }
+.sl-page .dt-container .dt-length { display: flex; align-items: center; gap: 8px; color: var(--sl-muted); font-size: 0.625rem; }
 .sl-page .dt-container .dt-search label,
 .sl-page .dt-container .dt-length label { margin: 0; font-weight: 600; }
-.sl-page .dt-container .dt-input { min-height: 30px; margin: 0; border: 1px solid #cdd6e2; border-radius: 7px; background: #fff; color: var(--sl-ink); font: inherit; font-size: 11px; }
+.sl-page .dt-container .dt-input { min-height: 30px; margin: 0; border: 1px solid #cdd6e2; border-radius: 7px; background: #fff; color: var(--sl-ink); font: inherit; font-size: 0.6875rem; }
 .sl-page .dt-container .dt-search input { width: 230px; max-width: 100%; padding: 7px 10px; }
 .sl-page .dt-container .dt-length select { padding: 5px 26px 5px 8px; }
 .sl-page .dt-container .dt-input:focus-visible,
 .sl-page .dt-container .dt-paging-button:focus-visible { outline: 2px solid var(--sl-accent); outline-offset: 2px; }
-.sl-page .dt-container .dt-info { padding: 0; color: var(--sl-muted); font-size: 10px; }
+.sl-page .dt-container .dt-info { padding: 0; color: var(--sl-muted); font-size: 0.625rem; }
 .sl-page .dt-container .dt-paging { padding: 0; }
 .sl-page .dt-container .dt-paging nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; }
-.sl-page .dt-container .dt-paging .dt-paging-button { display: grid; place-items: center; min-width: 30px; height: 30px; padding: 0 6px; margin: 0; border: 1px solid #cdd6e2; border-radius: 7px; background: var(--sl-surface); color: var(--sl-primary) !important; box-shadow: none; font-size: 10px; }
+.sl-page .dt-container .dt-paging .dt-paging-button { display: grid; place-items: center; min-width: 30px; height: 30px; padding: 0 6px; margin: 0; border: 1px solid #cdd6e2; border-radius: 7px; background: var(--sl-surface); color: var(--sl-primary) !important; box-shadow: none; font-size: 0.625rem; }
 .sl-page .dt-container .dt-paging .dt-paging-button.current,
 .sl-page .dt-container .dt-paging .dt-paging-button.current:hover { border-color: var(--sl-primary); background: var(--sl-primary); color: #fff !important; }
 .sl-page .dt-container .dt-paging .dt-paging-button:hover:not(.disabled):not(.current) { border-color: var(--sl-primary); background: var(--sl-blue-soft); color: var(--sl-primary) !important; }
 .sl-page .dt-container .dt-paging .dt-paging-button.disabled { opacity: .4; cursor: default; }
 .sl-page .dt-container .dt-paging .ellipsis { padding: 0 2px; color: var(--sl-muted); }
 .sl-page .sl-table.dataTable { margin: 0; border-spacing: 0; border: 1px solid var(--sl-line); border-collapse: collapse; }
-.sl-page .sl-table.dataTable th { padding: 9px 10px; border-bottom: 1px solid var(--sl-line); background: #eef2f7; color: var(--sl-primary); font: 600 10px var(--sl-font-body); text-align: left; vertical-align: middle; }
-.sl-page .sl-table.dataTable td { padding: 9px 10px; border-bottom: 1px solid #edf0f4; background: #fff; color: #344256; box-shadow: none; font: 11px var(--sl-font-body); text-align: left; vertical-align: middle; }
+.sl-page .sl-table.dataTable th { padding: 9px 10px; border-bottom: 1px solid var(--sl-line); background: #eef2f7; color: var(--sl-primary); font: 600 0.625rem var(--sl-font-body); text-align: left; vertical-align: middle; }
+.sl-page .sl-table.dataTable td { padding: 9px 10px; border-bottom: 1px solid #edf0f4; background: #fff; color: #344256; box-shadow: none; font: 0.6875rem var(--sl-font-body); text-align: left; vertical-align: middle; }
 .sl-page .sl-table.dataTable tbody tr:hover > td { background: #f8fbff; }
 .sl-page .sl-table.dataTable .dt-column-header { gap: 4px; }
 .sl-page .sl-table.dataTable .dt-column-order { color: var(--sl-primary); }
@@ -66,11 +66,11 @@
   --dtcc-list-buttons_max-height: 220px;
   --dtcc-spacer_border: 1px solid var(--sl-line);
 }
-.sl-column-filter-menu.dtcc-dropdown { position: fixed; z-index: 200; width: min(280px, calc(100vw - 16px)); overflow-y: auto; overscroll-behavior: contain; color: var(--sl-ink); font: 11px/1.5 var(--sl-font-body); }
+.sl-column-filter-menu.dtcc-dropdown { position: fixed; z-index: 200; width: min(280px, calc(100vw - 16px)); overflow-y: auto; overscroll-behavior: contain; color: var(--sl-ink); font: 0.6875rem/1.5 var(--sl-font-body); }
 .sl-column-filter-menu .dtcc-list button.dtcc-button { white-space: normal; }
 .sl-column-filter-menu .dtcc-list .dtcc-button-text { white-space: normal; overflow-wrap: anywhere; }
 .sl-column-filter-menu .dtcc-list button.dtcc-button_active { color: var(--sl-primary); background: var(--sl-blue-soft); }
-.sl-column-filter-menu .dtcc-list-controls input { min-height: 30px; font: 11px/1.5 var(--sl-font-body); color: var(--sl-ink); }
+.sl-column-filter-menu .dtcc-list-controls input { min-height: 30px; font: 0.6875rem/1.5 var(--sl-font-body); color: var(--sl-ink); }
 .sl-column-filter-menu .dtcc-list-controls input:focus { outline: 2px solid var(--sl-accent); outline-offset: -1px; }
 .sl-page .sl-table.dataTable { overflow: visible; }
 .sl-page .sl-table.dataTable th { position: sticky; top: 0; z-index: 2; }
