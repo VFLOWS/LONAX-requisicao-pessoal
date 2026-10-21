@@ -4,7 +4,7 @@
   const RM_STORE = 'lonax.admissao.rm.v1';
   const TAE_STORE = 'lonax.admissao.tae.v1';
   const TI_STORE = 'lonax.admissao.notificacoes.v1';
-  const owners = { solicitacao: 'Juliana Costa', preparacao: 'Juliana Costa', coleta: 'Juliana Costa', validacao: 'Ricardo Nunes', complementacao: 'Juliana Costa', sesmt: 'Marcos Oliveira', validacao_final: 'Ricardo Nunes', integracao: 'Juliana Costa', tratamento: 'Juliana Costa', assinaturas: 'Juliana Costa', finalizada: 'Juliana Costa', cancelada: 'Juliana Costa' };
+  const owners = { solicitacao: 'Juliana Costa', preparacao: 'Juliana Costa', coleta: 'Juliana Costa', validacao: 'Ricardo Nunes', complementacao: 'Juliana Costa', sesmt: 'Marcos Oliveira', validacao_final: 'Ricardo Nunes', integracao: 'Juliana Costa', tratamento: 'Juliana Costa', assinaturas: 'Sistema', finalizada: 'Juliana Costa', cancelada: 'Juliana Costa' };
   const stages = [
     ['solicitacao', 'Solicitação de Admissão', 'file-pen', 'blue', 'Selecionar a vaga e encaminhar a admissão manual para coleta e preenchimento.'],
     ['preparacao', 'Preparação da Admissão', 'user-plus', 'blue', 'Identificar a origem e confirmar os dados da contratação.'],
@@ -15,7 +15,7 @@
     ['validacao_final', 'Validação Final do RH / DP', 'user-check', 'teal', 'Conferir a admissão e os documentos que seguirão para assinatura.'],
     ['enviar_assinatura', 'Enviar Documentos para Assinatura', 'paper-plane', 'blue', 'Gerar os documentos e encaminhar do Fluig ao TAE.'],
     ['tratamento_tae', 'Tratamento do Envio ao TAE', 'triangle-exclamation', 'orange', 'Conferir o erro e reprocessar o envio dos documentos para assinatura.'],
-    ['assinaturas', 'Acompanhamento das Assinaturas', 'file-signature', 'teal', 'Acompanhar os documentos enviados pelo Fluig para assinatura no TAE.'],
+    ['assinaturas', 'Acompanhar Assinaturas', 'file-signature', 'teal', 'Acompanhar o status dos documentos e dos signatários na plataforma digital.'],
     ['integracao', 'Integrar Colaborador — TOTVS RM', 'arrows-rotate', 'blue', 'Incluir ou atualizar o colaborador e os documentos assinados no TOTVS RM.'],
     ['tratamento', 'Tratamento da Integração TOTVS RM', 'triangle-exclamation', 'orange', 'Analisar o retorno, solicitar correção e decidir sobre o reprocessamento.'],
     ['validacao_rm', 'Validar Inclusão / Atualização no TOTVS RM', 'user-check', 'teal', 'Conferir o cadastro integrado e registrar a validação do RH / DP.'],

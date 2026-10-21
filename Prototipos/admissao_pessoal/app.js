@@ -23,7 +23,7 @@
   function set(path, value) { const parts = path.split('.'); const last = parts.pop(); const parent = parts.reduce((object, part) => object[part] ??= {}, state); parent[last] = value; }
   const meta = key => A.stages.find(item => item.key === key) || A.stages[0];
   const preview = () => !state.started && !['solicitacao', 'preparacao'].includes(stage);
-  const editable = () => !state.started || state.current === stage;
+  const editable = () => stage !== 'assinaturas' && (!state.started || state.current === stage);
   const href = (key, extra = '') => 'etapa.html?etapa=' + key + '&id=' + encodeURIComponent(state.id) + extra;
   function completeDefaults() {
     const defaults = A.fresh(state.id, state.origin);
@@ -126,7 +126,7 @@
   }
   function panel(key, body, historic = false, description = '', unique = key) {
     const m = meta(key); const open = !historic || !!expanded[unique];
-    const badge = key === 'coleta' ? (tabs.length + (correctionContext() ? 1 : 0)) + ' Blocos de Informações' : key === 'finalizada' ? 'Concluída' : key === 'cancelada' ? 'Cancelada' : key === 'sesmt' ? 'SESMT' : ['enviar_assinatura', 'notificacao_ti'].includes(key) ? 'Automática' : 'RH / DP';
+    const badge = key === 'coleta' ? (tabs.length + (correctionContext() ? 1 : 0)) + ' Blocos de Informações' : key === 'finalizada' ? 'Concluída' : key === 'cancelada' ? 'Cancelada' : key === 'sesmt' ? 'SESMT' : ['enviar_assinatura', 'assinaturas', 'notificacao_ti'].includes(key) ? 'Automática' : 'RH / DP';
     return '<div class="lx-view-frame"><div class="lx-view-rail"></div><div class="lx-timeline-dot lx-dot-' + (historic ? 'green' : m.tone) + '">' + icon(m.icon) + '</div><section class="lx-view-shell' + (historic ? ' lx-view-shell-history' : '') + (open ? '' : ' lx-view-shell-collapsed') + '" data-stage="' + key + '"><div class="lx-view-head"><div><h2>' + (historic ? '<button type="button" class="lx-collapse-title" data-collapse="' + unique + '" aria-expanded="' + open + '"><span>' + esc(m.title) + '</span>' + icon('chevron-down') + '</button>' : esc(m.title)) + '</h2><p>' + esc(description || m.description) + '</p></div>' + (historic ? '' : '<span class="lx-pill"' + (key === 'coleta' ? ' data-step-count' : '') + '>' + esc(badge) + '</span>') + '</div><div class="lx-view-body">' + body + '</div></section></div>';
   }
   function attachmentButton(action, name, label, source, index) { return button(action, icon(name), name === 'trash' ? 'danger' : 'secondary', 'data-source="' + source + '" data-index="' + index + '" aria-label="' + label + '"').replace('class="lx-btn ', 'class="lx-btn-icon '); }
@@ -329,11 +329,10 @@
       coleta: [approved('Encaminhar para Validação de Dados e Documentos.'), rejected, ...(state.form.origem === 'Manual' ? [] : [correction('return', 'Enviar para Preparação da Admissão para corrigir os dados da contratação.')]), withdrawal],
       validacao: [approved('Encaminhar para Exame Admissional — SESMT.'), rejected, correction('return', 'Enviar para Coleta e Preenchimento para corrigir os dados e documentos; depois, validar novamente.'), withdrawal],
       validacao_final: [approved(signaturesCurrent() ? 'Integrar automaticamente os dados atualizados no RM e encaminhar para conferência do cadastro.' : 'Encaminhar os documentos para assinatura eletrônica; após as assinaturas, integrar no RM.'), rejected, correction('return_sesmt', 'Enviar para Exame Admissional — SESMT para corrigir o exame, o ASO ou os EPIs.'), correction('return_coleta', 'Enviar para Coleta e Preenchimento para corrigir os dados e documentos.'), withdrawal],
-      assinaturas: [approved('Assinaturas conferidas. Integrar automaticamente no RM e encaminhar para conferência do cadastro.'), rejected, correction('return_final', 'Enviar para Validação Final do RH / DP para revisar os dados e os documentos de assinatura.'), withdrawal],
       validacao_rm: [approved('Prosseguir com a admissão; notificar automaticamente a TI quando houver equipamentos e concluir o processo.'), correction('return_final', 'Enviar para Validação Final do RH / DP para corrigir os dados e documentos da admissão.')],
       tratamento: [reintegration('Executar novamente a integração com o TOTVS RM, preservando o cadastro e a Chapa já retornados.'), correction('return_coleta', 'Enviar para Coleta e Preenchimento para ajustar os dados e documentos.'), correction('return_sesmt', 'Enviar para Exame Admissional — SESMT para corrigir o exame, o ASO ou os EPIs.'), cancellation],
       tratamento_tae: [reintegration('Reenviar os documentos para assinatura eletrônica ao TAE.'), correction('return_final', 'Enviar para Validação Final do RH / DP para conferir os dados e documentos antes do reenvio.'), correction('return_sesmt', 'Enviar para Exame Admissional — SESMT para corrigir o exame, o ASO ou os EPIs; depois, encaminhar para Validação Final do RH / DP.'), correction('return_validacao', 'Enviar para Validação de Dados e Documentos para conferir as informações e os anexos antes de prosseguir com a admissão.'), cancellation],
-      tratamento_ti: [reintegration('Reenviar a notificação à TI com os equipamentos previstos.'), correction('return_rm', 'Enviar para Validar Inclusão / Atualização no TOTVS RM para conferir o cadastro antes da notificação.'), correction('return_assinaturas', 'Enviar para Acompanhamento das Assinaturas para conferir os documentos assinados.'), correction('return_final', 'Enviar para Validação Final do RH / DP para revisar os dados da admissão e a infraestrutura.'), cancellation]
+      tratamento_ti: [reintegration('Reenviar a notificação à TI com os equipamentos previstos.'), correction('return_rm', 'Enviar para Validar Inclusão / Atualização no TOTVS RM para conferir o cadastro antes da notificação.'), correction('return_assinaturas', 'Enviar para Acompanhar Assinaturas para aguardar o retorno dos documentos assinados.'), correction('return_final', 'Enviar para Validação Final do RH / DP para revisar os dados da admissão e a infraestrutura.'), cancellation]
     })[key] || [];
   }
   function decisionData(key, record = null) {
@@ -351,8 +350,8 @@
     const options = decisionOptions(key);
     if (readonly) return fieldset('Decisão sobre a Solicitação', 'list-check', readGrid([['Decisão', d.value === 'retry' ? 'Reintegração solicitada' : d.value === 'approve' ? 'Solicitação aprovada' : d.value === 'withdraw' ? 'Desistência registrada' : d.value === 'reject' ? key === 'validacao_rm' ? 'Cadastro reprovado — retorno à Validação Final' : 'Solicitação reprovada' : d.value === 'cancel' ? 'Solicitação cancelada' : 'Solicitação devolvida para correção'], ['Responsável', responsible], ['Observação', d.note || 'Etapa aprovada sem ressalvas.']]), true, ['approve', 'retry'].includes(d.value) ? 'green' : ['reject', 'withdraw', 'cancel'].includes(d.value) && key !== 'validacao_rm' ? 'red' : 'orange');
     const correction = d.value.startsWith('return') || d.value === 'correction';
-    const label = d.value === 'retry' ? 'Reintegrar' : d.value === 'cancel' ? 'Cancelar Admissão' : d.value === 'withdraw' ? 'Registrar Desistência' : d.value === 'reject' ? key === 'validacao_rm' ? 'Enviar para Nova Validação' : 'Reprovar Admissão' : correction ? 'Retornar para Correção' : ({ preparacao: 'Encaminhar para Coleta', coleta: 'Enviar para Validação de Dados e Documentos', validacao: 'Enviar Decisão', validacao_final: 'Enviar Decisão', assinaturas: 'Encaminhar para Integração', validacao_rm: 'Enviar Decisão' })[key];
-    const action = ({ preparacao: 'prepare', coleta: 'collect', tratamento: 'retry', assinaturas: 'finish', tratamento_tae: 'retry-tae', validacao_rm: 'review-rm', tratamento_ti: 'retry-ti' })[key] || 'review';
+    const label = d.value === 'retry' ? 'Reintegrar' : d.value === 'cancel' ? 'Cancelar Admissão' : d.value === 'withdraw' ? 'Registrar Desistência' : d.value === 'reject' ? key === 'validacao_rm' ? 'Enviar para Nova Validação' : 'Reprovar Admissão' : correction ? 'Retornar para Correção' : ({ preparacao: 'Encaminhar para Coleta', coleta: 'Enviar para Validação de Dados e Documentos', validacao: 'Enviar Decisão', validacao_final: 'Enviar Decisão', validacao_rm: 'Enviar Decisão' })[key];
+    const action = ({ preparacao: 'prepare', coleta: 'collect', tratamento: 'retry', tratamento_tae: 'retry-tae', validacao_rm: 'review-rm', tratamento_ti: 'retry-ti' })[key] || 'review';
     return fieldset(isTreatment(key) ? 'Decisão do Tratamento' : 'Decisão de Aprovação', 'clipboard-check', approvalChoices(options, d.value, 'decision.' + key, key) + field({ key: 'note', label: key === 'preparacao' ? 'Observação da Preparação' : 'Observação', type: 'textarea', required: !['approve', 'retry'].includes(d.value), wide: true }, 'decisions.' + key, d)) + actions(action, label);
   }
   function validation(key) {
@@ -374,10 +373,10 @@
   function signatureContent(tae, readonly = false) {
     const complete = signed(tae);
     const status = complete ? 'Assinado' : tae.documents.find(doc => ['Rejeitado', 'Cancelado', 'Erro'].includes(doc.status))?.status || (['Erro', 'Rejeitado', 'Cancelado', 'Não enviado', 'Em processamento'].includes(tae.status) ? tae.status : 'Pendente');
-    return fieldset('Envio para Assinatura Fluig / TAE', 'paper-plane', readGrid([['Origem dos Documentos', 'Fluig'], ['Plataforma de Assinatura', 'TAE'], ['Data de Envio', tae.sentAt], ['Responsável pelo Acompanhamento', 'Juliana Costa'], ['Status dos Documentos', status]], 'lx-signing-summary-grid lx-signing-overview-grid'), readonly) + tae.documents.map(doc => fieldset(doc.name, 'file-signature', readGrid([['Documento', doc.file.name], ['Plataforma', 'TAE'], ['Protocolo do Documento', doc.protocol], ['Data do Envio', doc.sentAt], ['Última Atualização', doc.updatedAt || doc.completedAt || doc.sentAt], ['Status do Documento', doc.status === 'Assinado' ? 'Assinado' : ['Rejeitado', 'Cancelado', 'Erro', 'Não enviado'].includes(doc.status) ? doc.status : 'Pendente']], 'lx-signing-summary-grid') + '<div class="lx-signature-tracking">' + doc.signers.map(signer => '<article class="lx-signing-person"><div class="lx-admission-child-head"><strong>' + esc(signer.role) + '</strong><span class="lx-signing-status' + (signer.status === 'Assinado' ? ' is-signed' : '') + '">' + icon(signer.status === 'Assinado' ? 'circle-check' : 'clock') + ' ' + esc(signer.status) + '</span></div>' + readGrid([['Nome', signer.name], ['E-mail', signer.email], ['Assinou o Documento?', signer.status === 'Assinado' ? 'Sim' : 'Não'], ['Data da Assinatura', signer.date || 'Aguardando assinatura']], 'lx-signing-person-grid') + '</article>').join('') + '</div>' + attachments('tae-' + doc.id, false, [doc.file]), readonly)).join('') + fieldset('Observações do Acompanhamento', 'comment-dots', readonly ? readGrid([['Observações', tae.observation, true]]) : field({ key: 'observation', label: 'Observações', type: 'textarea', wide: true }, 'tae'), readonly);
+    return fieldset('Envio para Assinatura Fluig / TAE', 'paper-plane', readGrid([['Origem dos Documentos', 'Fluig'], ['Plataforma de Assinatura', 'TAE'], ['Data de Envio', tae.sentAt], ['Responsável pelo Acompanhamento', A.owners.assinaturas], ['Status dos Documentos', status]], 'lx-signing-summary-grid lx-signing-overview-grid'), readonly) + tae.documents.map(doc => fieldset(doc.name, 'file-signature', readGrid([['Documento', doc.file.name], ['Plataforma', 'TAE'], ['Protocolo do Documento', doc.protocol], ['Data do Envio', doc.sentAt], ['Última Atualização', doc.updatedAt || doc.completedAt || doc.sentAt], ['Status do Documento', doc.status === 'Assinado' ? 'Assinado' : ['Rejeitado', 'Cancelado', 'Erro', 'Não enviado'].includes(doc.status) ? doc.status : 'Pendente']], 'lx-signing-summary-grid') + '<div class="lx-signature-tracking">' + doc.signers.map(signer => '<article class="lx-signing-person"><div class="lx-admission-child-head"><strong>' + esc(signer.role) + '</strong><span class="lx-signing-status' + (signer.status === 'Assinado' ? ' is-signed' : '') + '">' + icon(signer.status === 'Assinado' ? 'circle-check' : 'clock') + ' ' + esc(signer.status) + '</span></div>' + readGrid([['Nome', signer.name], ['E-mail', signer.email], ['Assinou o Documento?', signer.status === 'Assinado' ? 'Sim' : 'Não'], ['Data da Assinatura', signer.date || 'Aguardando assinatura']], 'lx-signing-person-grid') + '</article>').join('') + '</div>' + attachments('tae-' + doc.id, false, [doc.file]), readonly)).join('') + fieldset('Observações do Acompanhamento', 'comment-dots', readGrid([['Observações', tae.observation, true]]), readonly);
   }
   function effectiveTAE() { return preview() ? { ...clone(state.tae), status: 'Enviado', sentAt: '16/10/2026, 10:00:00', documents: A.documentSignatures(state.form, state.files, params.get('cenario') === 'assinado' || ['integracao', 'tratamento', 'validacao_rm', 'notificacao_ti', 'tratamento_ti', 'finalizada'].includes(stage)) } : state.tae; }
-  function signatures() { return signatureContent(effectiveTAE()) + decision('assinaturas'); }
+  function signatures() { return signatureContent(effectiveTAE()); }
   function taeSummary(tae = state.tae, readonly = false) { return fieldset('Envio de Documentos — Fluig / TAE', 'paper-plane', readGrid([['Origem dos Documentos', 'Fluig'], ['Plataforma de Assinatura', 'TAE'], ['Status do Envio', tae.status], ['Data / Hora', tae.attemptedAt || tae.sentAt || state.created], ['Mensagem do Envio', tae.message || 'Não foi possível concluir o envio dos documentos para assinatura no TAE.', true], ...(tae.error ? [['Detalhes do Erro', tae.error, true]] : [])]), readonly); }
   function sendSignatures() {
     const tae = preview() && stage === 'tratamento_tae' ? { ...state.tae, status: 'Erro', attemptedAt: state.tae.attemptedAt || '16/10/2026, 10:00:00', message: 'Não foi possível concluir o envio dos documentos para assinatura no TAE.', error: 'A plataforma TAE não confirmou o recebimento dos documentos.' } : state.tae;
@@ -448,7 +447,7 @@
       case 'sesmt': return exam(true, d.medical, d.files);
       case 'integracao': return rmSummary(d.rm, true);
       case 'tratamento': return rmSummary(d.rm, true) + decision(record.area, true, evidence, record.responsible);
-      case 'assinaturas': return signatureContent(d.tae, true) + decision('assinaturas', true, evidence, record.responsible);
+      case 'assinaturas': return signatureContent(d.tae, true);
       case 'enviar_assinatura': return taeSummary(d.tae, true);
       case 'tratamento_tae': return taeSummary(d.tae, true) + decision(record.area, true, evidence, record.responsible);
       case 'validacao_rm': return rmEmployee(d.form, d.rm, true) + decision(record.area, true, evidence, record.responsible);
@@ -460,7 +459,7 @@
     if (stage === 'solicitacao' && !state.started) return '';
     const previous = previousStages(stage);
     const records = state.started ? state.history.filter(record => stage === state.current || ['finalizada', 'cancelada'].includes(stage) || previous.includes(record.area)) : previous.map(key => exampleRecord(key));
-    return records.filter(record => record.area !== 'nova_validacao' && !record.area.startsWith('tratamento') && (!meta(record.area).automatic || record.area === 'notificacao_ti') && !(record.area === 'solicitacao' && state.form.origem !== 'Manual') && !(record.area === 'preparacao' && state.form.origem === 'Manual')).map(record => panel(record.area, recordBody(record), true, record.date + ' - ' + record.responsible + ' - ' + (record.area === 'sesmt' ? 'SESMT' : meta(record.area).automatic ? 'Automática' : 'RH / DP') + ' · ' + record.action, 'history-' + record.id)).join('');
+    return records.filter(record => record.area !== 'nova_validacao' && !record.area.startsWith('tratamento') && (!meta(record.area).automatic || record.area === 'notificacao_ti') && !(record.area === 'solicitacao' && state.form.origem !== 'Manual') && !(record.area === 'preparacao' && state.form.origem === 'Manual')).map(record => panel(record.area, recordBody(record), true, record.date + ' - ' + record.responsible + ' - ' + (record.area === 'sesmt' ? 'SESMT' : meta(record.area).automatic || record.area === 'assinaturas' ? 'Automática' : 'RH / DP') + ' · ' + record.action, 'history-' + record.id)).join('');
   }
   function render() {
     views.length = 0;
@@ -667,7 +666,7 @@
         localStorage.setItem(A.TAE_STORE, JSON.stringify(ledger));
         Object.assign(state.tae, { status: 'Enviado', sentAt: A.now(), message: 'Documentos encaminhados diretamente do Fluig para assinatura no TAE.', error: '' });
         log('enviar_assinatura', 'Documentos enviados ao TAE', state.tae.message);
-        state.current = 'assinaturas'; state.decisions.assinaturas = { value: 'approve', note: 'Acompanhar o retorno dos signatários no TAE.' }; save(); go(state.current);
+        state.current = 'assinaturas'; save(); go(state.current);
       } catch (error) {
         Object.assign(state.tae, { status: 'Erro', authorized: false, message: 'Não foi possível concluir o envio dos documentos para assinatura no TAE.', error: error.message || 'Não foi possível registrar o retorno do TAE.' });
         log('enviar_assinatura', 'Erro no Envio ao TAE', state.tae.error); state.current = 'tratamento_tae'; save(); go(state.current);
@@ -820,7 +819,7 @@
         save(); go(state.current);
       }, 'Enviar Análise', 'paper-plane'); return;
     }
-    if (!['prepare', 'collect', 'review', 'review-rm', 'retry-tae', 'retry-ti', 'retry', 'finish'].includes(key)) return;
+    if (!['prepare', 'collect', 'review', 'review-rm', 'retry-tae', 'retry-ti', 'retry'].includes(key)) return;
     const source = stage, d = clone(decisionData(source));
     if (!decisionOptions(source).some(option => option[0] === d.value)) errors['decision.' + source] = 'Selecione uma decisão.';
     if (!['approve', 'retry'].includes(d.value) && !d.note?.trim()) errors['decisions.' + source + '.note'] = 'Informe a observação.';
@@ -856,10 +855,6 @@
     }
     if (['retry-tae', 'retry'].includes(key) && !preview() && !admissionReady()) errors['decision.' + source] = 'Confira as validações e o ASO Apto antes do reprocessamento.';
     if (key === 'retry' && !preview() && !signaturesCurrent()) errors['decision.' + source] = 'Conclua as assinaturas dos documentos atualizados antes da integração com o RM.';
-    if (key === 'finish') {
-      if (!signed(effectiveTAE())) errors['tae.observation'] = 'Aguarde a conclusão das assinaturas de todos os documentos no TAE.';
-      else if (!preview() && (!admissionReady() || !signaturesCurrent())) errors['tae.observation'] = 'Confira as validações, o ASO Apto e as assinaturas dos documentos atualizados.';
-    }
     if (key === 'review-rm' && !preview() && (state.rm.status !== 'Integrada com sucesso' || !state.rm.employeeId || state.rm.payloadFingerprint !== JSON.stringify(integrationPayload()) || !signaturesCurrent())) errors['decision.' + source] = 'Confira a integração dos dados atuais e as assinaturas antes de aprovar o cadastro.';
     if (key === 'retry-ti' && !preview() && (!state.validation.rm || !signaturesCurrent() || state.rm.payloadFingerprint !== JSON.stringify(integrationPayload()))) errors['decision.' + source] = 'Valide o cadastro atual no RM antes de notificar a TI.';
     if (fail()) return;
@@ -869,7 +864,7 @@
       const correctingCollection = key === 'collect' && !!correctionContext();
       adoptPreview();
       if (correctingCollection) state.revision++;
-      log(source, correctingCollection ? 'Correção registrada' : d.value === 'retry' ? 'Reintegração solicitada' : key === 'finish' ? 'Assinaturas conferidas' : 'Solicitação aprovada', correctingCollection ? state.correction.adjustments : d.note, d);
+      log(source, correctingCollection ? 'Correção registrada' : d.value === 'retry' ? 'Reintegração solicitada' : 'Solicitação aprovada', correctingCollection ? state.correction.adjustments : d.note, d);
       state.returnRequest = null; state.correction = null;
       if (key === 'prepare') state.current = 'coleta';
       if (key === 'collect') { state.validation.dados = false; state.validation.final = false; state.validation.rm = false; state.rm.authorized = false; state.current = 'validacao'; }
@@ -882,7 +877,7 @@
           else Object.assign(state.tae, { status: 'Não enviado', authorized: true });
         }
       }
-      if (key === 'finish' || key === 'retry') { state.current = 'integracao'; state.validation.rm = false; Object.assign(state.rm, { status: 'Não iniciada', authorized: true }); }
+      if (key === 'retry') { state.current = 'integracao'; state.validation.rm = false; Object.assign(state.rm, { status: 'Não iniciada', authorized: true }); }
       if (key === 'retry-tae') { state.current = 'enviar_assinatura'; Object.assign(state.tae, { status: 'Não enviado', authorized: true }); }
       if (key === 'review-rm') {
         state.validation.rm = true; state.functional.active = false;
