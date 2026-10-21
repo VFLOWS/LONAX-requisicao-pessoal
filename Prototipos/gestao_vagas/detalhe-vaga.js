@@ -316,7 +316,7 @@
     document.getElementById("detailApp").innerHTML = SL.pageSection({
       title: "Detalhe da Vaga", description: "Resumo, dados, histórico e acompanhamento da posição.",
       icon: "fa-briefcase", iconClass: "sl-section-icon-candidates",
-      actionsHtml: '<a class="sl-secondary-button" href="cadastro-vaga.html?vaga=' + encodeURIComponent(record.code) + '"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Editar cadastro</a>',
+      actionsHtml: '<a class="sl-secondary-button" href="cadastro-vaga.html?vaga=' + encodeURIComponent(record.code) + '"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Editar Cadastro</a><a class="sl-secondary-button" href="index.html?vaga=' + encodeURIComponent(record.code) + '"><i class="fa-solid fa-users" aria-hidden="true"></i> Processo Seletivo</a>',
       bodyHtml: [
         SL.jobSummary({ title: record.title, period: "Abertura " + date(record.openingDate), status: record.status, statusClass: "sl-status-neutral", meta: [
           { icon: "fa-location-dot", text: record.address || origin.unit }, { icon: "fa-building", text: record.modality },

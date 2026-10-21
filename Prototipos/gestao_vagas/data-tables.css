@@ -89,7 +89,7 @@
 .sl-page .sl-dt-cell-text, .sl-page .sl-vaga-cell > strong, .sl-page .sl-vaga-cell > span, .sl-page .sl-modal-candidate-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .sl-page .sl-candidate-name > .sl-dt-cell-text { flex: 1; min-width: 0; }
 .sl-page .sl-candidate-name > .sl-avatar-sm { flex-shrink: 0; }
-.sl-page .sl-table-horizontal-scroll { position: sticky; bottom: 0; z-index: 5; max-width: 100%; height: 8px; overflow: hidden; background: var(--sl-surface); touch-action: none; user-select: none; }
+.sl-page .sl-table-horizontal-scroll { position: fixed; z-index: 5; max-width: 100%; height: 8px; overflow: hidden; background: var(--sl-surface); touch-action: none; user-select: none; }
 .sl-page .sl-table-horizontal-scroll-thumb { position: absolute; inset: 0 auto 0 0; border: 2px solid var(--sl-surface); border-radius: 8px; background: #a8b3c4; cursor: grab; }
 .sl-page .sl-table-horizontal-scroll-thumb:hover, .sl-page .sl-table-horizontal-scroll.is-dragging .sl-table-horizontal-scroll-thumb { background: #8595ad; }
 .sl-page .sl-table-horizontal-scroll.is-dragging, .sl-page .sl-table-horizontal-scroll.is-dragging .sl-table-horizontal-scroll-thumb { cursor: grabbing; }

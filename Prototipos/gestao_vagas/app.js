@@ -33,6 +33,70 @@ var existingCandidates = [
   }
 ];
 
+existingCandidates = existingCandidates.concat([
+  { name: 'Lucas Santos', email: 'lucas.santos@email.com', selectionStage: 'triagem' },
+  { name: 'Fernanda Lima', email: 'fernanda.lima@email.com', selectionStage: 'triagem' },
+  { name: 'Bruno Almeida', email: 'bruno.almeida@email.com', selectionStage: 'triagem' },
+  { name: 'Juliana Rocha', email: 'juliana.rocha@email.com', selectionStage: 'avaliacao' },
+  { name: 'Pedro Martins', email: 'pedro.martins@email.com', selectionStage: 'avaliacao' },
+  { name: 'Camila Ferreira', email: 'camila.ferreira@email.com', selectionStage: 'avaliacao' },
+  { name: 'Rafael Souza', email: 'rafael.souza@email.com', selectionStage: 'entrevistaGestor' },
+  { name: 'Beatriz Costa', email: 'beatriz.costa@email.com', selectionStage: 'entrevistaGestor' },
+  { name: 'Gabriel Ribeiro', email: 'gabriel.ribeiro@email.com', selectionStage: 'entrevistaGestor' },
+  { name: 'Patrícia Gomes', email: 'patricia.gomes@email.com', selectionStage: 'entrevistaGestor' },
+  { name: 'Thiago Barbosa', email: 'thiago.barbosa@email.com', selectionStage: 'teste' },
+  { name: 'Amanda Carvalho', email: 'amanda.carvalho@email.com', selectionStage: 'teste' },
+  { name: 'Renata Teixeira', email: 'renata.teixeira@email.com', selectionStage: 'teste' },
+  { name: 'Gustavo Melo', email: 'gustavo.melo@email.com', selectionStage: 'parecer' },
+  { name: 'Isabela Mendes', email: 'isabela.mendes@email.com', selectionStage: 'parecer' },
+  { name: 'Diego Araújo', email: 'diego.araujo@email.com', selectionStage: 'avaliacao', selectionDisqualified: true },
+  { name: 'André Carvalho', email: 'andre.carvalho@email.com', selectionStage: 'triagem' },
+  { name: 'Aline Batista', email: 'aline.batista@email.com', selectionStage: 'triagem' },
+  { name: 'Anderson Lopes', email: 'anderson.lopes@email.com', selectionStage: 'triagem' },
+  { name: 'Bárbara Moreira', email: 'barbara.moreira@email.com', selectionStage: 'triagem' },
+  { name: 'Carolina Dias', email: 'carolina.dias@email.com', selectionStage: 'triagem' },
+  { name: 'Daniel Freitas', email: 'daniel.freitas@email.com', selectionStage: 'triagem' },
+  { name: 'Débora Nascimento', email: 'debora.nascimento@email.com', selectionStage: 'triagem' },
+  { name: 'Eduardo Castro', email: 'eduardo.castro@email.com', selectionStage: 'triagem' },
+  { name: 'Elisa Fernandes', email: 'elisa.fernandes@email.com', selectionStage: 'triagem' },
+  { name: 'Felipe Cardoso', email: 'felipe.cardoso@email.com', selectionStage: 'triagem' },
+  { name: 'Gabriela Almeida', email: 'gabriela.almeida@email.com', selectionStage: 'triagem' },
+  { name: 'Henrique Duarte', email: 'henrique.duarte@email.com', selectionStage: 'triagem' },
+  { name: 'Ingrid Lopes', email: 'ingrid.lopes@email.com', selectionStage: 'triagem' },
+  { name: 'João Vitor Silva', email: 'joao.vitor.silva@email.com', selectionStage: 'triagem' },
+  { name: 'Karina Fonseca', email: 'karina.fonseca@email.com', selectionStage: 'triagem' },
+  { name: 'Leonardo Moura', email: 'leonardo.moura@email.com', selectionStage: 'triagem' },
+  { name: 'Letícia Andrade', email: 'leticia.andrade@email.com', selectionStage: 'triagem' },
+  { name: 'Luana Oliveira', email: 'luana.oliveira@email.com', selectionStage: 'triagem' },
+  { name: 'Marcelo Vieira', email: 'marcelo.vieira@email.com', selectionStage: 'triagem' },
+  { name: 'Mariana Monteiro', email: 'mariana.monteiro@email.com', selectionStage: 'triagem' },
+  { name: 'Mateus Pires', email: 'mateus.pires@email.com', selectionStage: 'triagem' },
+  { name: 'Natália Farias', email: 'natalia.farias@email.com', selectionStage: 'triagem' },
+  { name: 'Otávio Correia', email: 'otavio.correia@email.com', selectionStage: 'triagem' },
+  { name: 'Paula Rezende', email: 'paula.rezende@email.com', selectionStage: 'triagem' },
+  { name: 'Priscila Ramos', email: 'priscila.ramos@email.com', selectionStage: 'triagem' },
+  { name: 'Renan Tavares', email: 'renan.tavares@email.com', selectionStage: 'triagem' },
+  { name: 'Rodrigo Nogueira', email: 'rodrigo.nogueira@email.com', selectionStage: 'triagem' },
+  { name: 'Sabrina Azevedo', email: 'sabrina.azevedo@email.com', selectionStage: 'triagem' },
+  { name: 'Vinícius Moreira', email: 'vinicius.moreira@email.com', selectionStage: 'triagem' },
+  { name: 'Vitória Campos', email: 'vitoria.campos@email.com', selectionStage: 'triagem' }
+].map(function (candidate, index) {
+  return Object.assign({
+    cpf: '410.285.' + String(310 + index) + '-' + String(40 + index),
+    phone: '(31) 99120-' + String(4100 + index),
+    profile: [['Executor', 'Analista'], ['Comunicador', 'Planejador'], ['Planejador', 'Executor']][index % 3],
+    workflow: String(5003 + index),
+    activity: 'Seleção de Candidatos',
+    status: candidate.selectionDisqualified ? 'Encerrado' : 'Em processo',
+    sla: 'No prazo',
+    birthDate: String(10 + index % 19) + '/05/1998',
+    gender: 'Não informado',
+    address: 'Sarzedo - MG',
+    origin: 'Sólides',
+    salary: 'R$ 2.450,00'
+  }, candidate);
+}));
+
 var importedCandidates = [];
 var selectedIds = [];
 var workflowSeed = 5100;
@@ -105,6 +169,27 @@ var vacancy = {
   linkText: "lonax.vagas.solides.com.br/vaga/895022"
 };
 
+var vacancyCode = new URLSearchParams(location.search).get('vaga') || 'VG-001';
+var vacancyRecord = window.SLVagas.find(vacancyCode);
+var selection = new window.SLSelection(existingCandidates, vacancyCode, vacancyRecord);
+workflowSeed = existingCandidates.reduce(function (seed, candidate) { return Math.max(seed, Number(candidate.workflow) || 0); }, workflowSeed);
+if (vacancyRecord) {
+  var origin = vacancyRecord.requisition;
+  vacancy.title = vacancyRecord.title || origin.role;
+  vacancy.period = vacancyRecord.code + ' • ' + origin.number;
+  vacancy.status = vacancyRecord.status;
+  vacancy.statusClass = 'sl-status-neutral';
+  vacancy.meta = [{ icon: 'fa-location-dot', text: origin.unit }, { icon: 'fa-building', text: origin.area }, { icon: 'fa-dollar-sign', text: origin.salary }];
+  vacancy.metrics = [
+    { icon: 'fa-file-signature', className: 'sl-vagas-kpi-blue', label: 'Requisição de Origem', value: origin.number },
+    { icon: 'fa-id-badge', className: 'sl-vagas-kpi-green', label: 'Tipo de Contratação', value: origin.contract },
+    { icon: 'fa-users-gear', className: 'sl-vagas-kpi-orange', label: 'Quantidade de Posições', value: origin.positions }
+  ];
+  vacancy.responsibles = [vacancyRecord.recruiter, vacancyRecord.admissionOwner].filter(Boolean).map(function (name) { return { name: name, initials: initials(name) }; });
+  vacancy.linkHref = vacancyRecord.published ? vacancyRecord.url || '' : '';
+  vacancy.linkText = vacancyRecord.url || '';
+}
+
 function renderProcessPage() {
   var actions = [
     '<input id="candidateFile" type="file" accept=".csv,.xls,.xlsx" hidden />',
@@ -120,21 +205,28 @@ function renderProcessPage() {
       iconClass: "sl-section-icon-candidates",
       bodyHtml: [
         SL.jobSummary(vacancy),
+        selection.html(),
         '<div class="sl-candidate-list-head"><div><h3>Lista de Candidatos</h3><p>Candidatos vinculados a esta vaga e suas solicitações individuais no Fluig.</p></div><div class="sl-panel-actions">' + actions + "</div></div>",
-        '<div class="sl-vagas-viewbar">' + SL.tabs({
+        '<div class="sl-candidates-workspace">',
+        selection.toolbar(SL.tabs({
           label: "Visualização dos Candidatos",
           items: [
             { label: "Lista", icon: "fa-list", active: true, attrs: { "data-view": "list" } },
             { label: "Kanban", icon: "fa-table-columns", attrs: { "data-view": "kanban" } }
           ]
-        }) + "</div>",
+        })),
+        '<div class="sl-candidate-results">',
+        selection.bulkToolbar(),
         SL.table({
           id: "listView",
-          className: "sl-candidates-table",
+          className: "sl-candidates-table sl-process-candidates-table",
           bodyId: "candidateTable",
-          columns: ["Candidato", "E-mail", "CPF", "Perfil", "Solicitação Fluig", "Atividade Atual", "Status", "SLA"]
+          search: false,
+          recordLabel: "candidatos",
+          columns: ["", "Candidato", "E-mail", "CPF", "Perfil", "Solicitação Fluig", "Atividade no Fluig", "Status no Fluig", "SLA", "Ações"]
         }),
-        '<div class="sl-kanban sl-candidate-kanban sl-hidden" id="kanbanView"></div>'
+        '<div class="sl-kanban sl-candidate-kanban sl-hidden" id="kanbanView"></div>',
+        '</div></div>'
       ].join("")
     }),
     SL.modalShell()
@@ -232,14 +324,16 @@ function profileInitial(profile) {
 }
 
 function candidateHref(candidate) {
-  return "detalhe-candidato.html?candidato=" + encodeURIComponent(window.SLCandidatos.remember(candidate));
+  return "detalhe-candidato.html?candidato=" + encodeURIComponent(window.SLCandidatos.remember(candidate)) + '&vaga=' + encodeURIComponent(vacancyCode);
 }
 
 function renderCandidateTable() {
+  selection.save();
   SLTables.replace(els.candidateTable, existingCandidates.map(function (candidate) {
     return [
       "<tr>",
-      '<td><a class="sl-candidate-name sl-candidate-link" href="' + candidateHref(candidate) + '"><span class="sl-avatar-sm">' + initials(candidate.name) + "</span>" + escapeHtml(candidate.name) + "</a></td>",
+      '<td>' + selection.checkbox(candidate) + '</td>',
+      '<td><div class="sl-process-candidate-identity"><span class="sl-avatar-sm" aria-hidden="true">' + initials(candidate.name) + '</span><div><a class="sl-candidate-link sl-process-candidate-name" href="' + candidateHref(candidate) + '">' + escapeHtml(candidate.name) + '</a><span class="sl-candidate-selection-stage' + (candidate.selectionDisqualified ? ' is-disqualified' : '') + '">' + escapeHtml(selection.stageTitle(candidate)) + '</span></div></div></td>',
       "<td>" + escapeHtml(candidate.email) + "</td>",
       "<td>" + escapeHtml(candidate.cpf || "-") + "</td>",
       "<td>" + profileTags(candidate.profile || []) + "</td>",
@@ -247,6 +341,7 @@ function renderCandidateTable() {
       "<td>" + escapeHtml(candidate.activity || "-") + "</td>",
       '<td><span class="sl-status-pill ' + (candidate.status === "Solicitação iniciada" ? "sl-status-success" : "sl-status-neutral") + '">' + escapeHtml(candidate.status) + "</span></td>",
       "<td>" + escapeHtml(candidate.sla || "-") + "</td>",
+      '<td>' + selection.actionButton(candidate) + '</td>',
       "</tr>"
     ].join("");
   }).join(""));
@@ -254,19 +349,12 @@ function renderCandidateTable() {
 }
 
 function renderKanban() {
-  var columns = [
-    { title: "Triagem RH", match: function (candidate) { return candidate.activity === "Triagem RH" && candidate.status !== "Solicitação iniciada"; } },
-    { title: "Avaliação do Gestor", match: function (candidate) { return candidate.activity === "Avaliação do Gestor" && candidate.status !== "Solicitação iniciada"; } },
-    { title: "Aguardando Início", match: function (candidate) { return candidate.activity === "Aguardando início" && candidate.status !== "Solicitação iniciada"; } },
-    { title: "Solicitação Iniciada", match: function (candidate) { return candidate.status === "Solicitação iniciada"; } }
-  ];
-
-  var table = els.candidateTable.closest('table');
-  var visible = jQuery.fn.dataTable.isDataTable(table) ? new Set(jQuery(table).DataTable().rows({ search: 'applied' }).indexes().toArray().map(function (index) { return existingCandidates[index]; })) : new Set(existingCandidates);
+  var columns = selection.steps.concat([{ id: 'disqualified', title: 'Desqualificados' }]).filter(function (column) { return selection.filter === 'all' || selection.filter === column.id; });
+  var visible = new Set(selection.api ? selection.visibleCandidates() : existingCandidates);
   els.kanbanView.innerHTML = columns.map(function (column) {
-    var candidates = existingCandidates.filter(function (candidate) { return visible.has(candidate) && column.match(candidate); });
+    var candidates = existingCandidates.filter(function (candidate) { return visible.has(candidate) && (column.id === 'disqualified' ? candidate.selectionDisqualified : !candidate.selectionDisqualified && candidate.selectionStage === column.id); });
     return [
-      '<article class="sl-kanban-column">',
+      '<article class="sl-kanban-column' + (column.id === 'disqualified' ? ' sl-kanban-disqualified' : '') + '">',
       '<div class="sl-kanban-head"><span>' + escapeHtml(column.title) + '</span><span class="sl-kanban-count">' + candidates.length + "</span></div>",
       '<div class="sl-kanban-list">',
       candidates.length ? candidates.map(renderKanbanCard).join("") : '<div class="sl-kanban-empty">Nenhum candidato</div>',
@@ -278,12 +366,13 @@ function renderKanban() {
 
 function renderKanbanCard(candidate) {
   return [
-    '<a class="sl-kanban-card" href="' + candidateHref(candidate) + '">',
-    '<strong>' + escapeHtml(candidate.name) + "</strong>",
+    '<article class="sl-process-kanban-card' + (selection.selected.has(candidate.selectionId) ? ' is-selected' : '') + '">',
+    '<div class="sl-process-kanban-actions">' + selection.checkbox(candidate) + selection.actionButton(candidate) + '</div>',
+    '<a class="sl-candidate-link" href="' + candidateHref(candidate) + '"><strong>' + escapeHtml(candidate.name) + '</strong></a>',
     '<small>Solicitação: ' + escapeHtml(candidate.workflow || "-") + "</small>",
     profileTags(candidate.profile || []),
-    '<span class="sl-status-pill ' + (candidate.status === "Solicitação iniciada" ? "sl-status-success" : "sl-status-neutral") + '">' + escapeHtml(candidate.status) + "</span>",
-    "</a>"
+    '<span class="sl-status-pill ' + (candidate.selectionDisqualified ? 'sl-status-danger' : 'sl-status-neutral') + '">' + escapeHtml(selection.stageTitle(candidate)) + '</span>',
+    "</article>"
   ].join("");
 }
 
@@ -883,13 +972,7 @@ document.querySelectorAll("[data-step-back]").forEach(function (button) {
 
 document.querySelectorAll("[data-view]").forEach(function (button) {
   button.addEventListener("click", function () {
-    var view = button.getAttribute("data-view");
-    document.querySelectorAll("[data-view]").forEach(function (item) {
-      item.classList.toggle("sl-tab-active", item === button);
-    });
-    els.listView.classList.toggle("sl-hidden", view !== "list");
-    els.kanbanView.classList.toggle("sl-hidden", view !== "kanban");
-    if (view === "list") SLTables.adjust(els.listView);
+    selection.setView(button.getAttribute("data-view"));
   });
 });
 
@@ -944,4 +1027,4 @@ document.addEventListener("keydown", function (event) {
 });
 
 renderCandidateTable();
-jQuery(els.candidateTable.closest('table')).on('draw.dt.slCandidates', renderKanban);
+selection.mount(els.candidateTable.closest('table'), els.kanbanView, renderCandidateTable, renderKanban);

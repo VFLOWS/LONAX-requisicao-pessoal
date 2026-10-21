@@ -253,7 +253,9 @@
             this.thumb.style.width = this.thumbWidth + 'px';
             this.rail.setAttribute('aria-valuemax', String(this.maximum));
             this.rail.style.width = width + 'px';
-            this.rail.style.marginLeft = viewport.clientLeft + 'px';
+            this.rail.style.left = bounds.left + viewport.clientLeft + 'px';
+            const railHeight = parseFloat(getComputedStyle(this.rail).height) || 8;
+            this.rail.style.top = Math.min(bounds.bottom, bottom) - railHeight + 'px';
             this.rail.hidden = !show;
             this.positionThumb();
         }

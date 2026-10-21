@@ -51,7 +51,9 @@
         const content = SL.infoSection({ title: 'Resultado da Admissão', icon: 'fa-user-check', tone: 'green', bodyHtml: SL.infoGrid([{ label: 'Candidato', value: process.form.nome }, { label: 'Situação da Admissão', value: status }, { label: 'Situação da Posição', value: admitted ? 'Preenchida' : cancelled ? 'Disponível para seleção' : 'Aguardando conclusão da admissão' }]) + '<a class="sl-secondary-button" href="' + link + '">Consultar Admissão</a>' });
         if (target.innerHTML !== content) target.innerHTML = content;
       }
-      tableRows(document.querySelector('.sl-candidates-table'), row => /candidato=ana-beatriz|Ana Beatriz/.test(row[0] || ''), row => { row[4] = '<a class="sl-table-link" href="' + link + '">' + escape(process.id) + '</a>'; row[5] = escape(current); row[6] = pill; return row; });
+      const candidateTable = document.querySelector('.sl-candidates-table');
+      const candidateOffset = candidateTable?.classList.contains('sl-process-candidates-table') ? 1 : 0;
+      tableRows(candidateTable, row => /candidato=ana-beatriz|Ana Beatriz/.test(row[candidateOffset] || ''), row => { row[candidateOffset + 4] = '<a class="sl-table-link" href="' + link + '">' + escape(process.id) + '</a>'; row[candidateOffset + 5] = escape(current); row[candidateOffset + 6] = pill; return row; });
       document.querySelectorAll('#kanbanView a[href*="candidato=ana-beatriz"] .sl-status-pill').forEach(node => { node.textContent = status; });
       document.querySelectorAll('#dashboardApp table').forEach(table => tableRows(table, row => /VG-001/.test(row[0] || '') && row.length === 10, row => { row[8] = escape(status); if (admitted) row[7] = '<span class="sl-status-pill sl-status-success">Preenchida</span>'; return row; }));
       document.querySelectorAll('#dashboardApp .sl-kanban-card').forEach(node => { if (node.querySelector('strong')?.textContent.trim() === 'VG-001' && node.querySelector('span')) node.querySelector('span').textContent = status + (admitted ? ' · Posição preenchida' : cancelled ? ' · Posição disponível para seleção' : ''); });
